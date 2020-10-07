@@ -8,28 +8,43 @@
    1. Topic evolution over: time, space, industry
    2. Where are there more or less notices than expected?
    3. Sentiment analysis [HARD]
-2. What do social media posting say about exposure/response?
+2. What do social media posting say about exposure/response? Perform for 2 subsets of data: one region and one industry
    1. How often are social media posts updated?
    2. Longevity - when do accounts start and stop posting?
    3. Sentiment analysis [HARD]
 3. What are the levels of adoption of technologies/strategies such as e-commerce?
    1. Are there changes in the glass e-commerce flag [DQ ISSUES]
-   2. Detect a change of strategy using NLP on notices or social media activity[HARD]
+   2. Detect a change of strategy using NLP on notices or social media activity [HARD]
 4. Sectoral and geographic distribution of exposure
-   1. Based on trends
-5. What are the diversification opportunities
-   1. Sector co-occurrence
+   1. Aggregate company descriptions by sector and extract salient terms
+   2. Query Google trends for terms
+   3. Measure change compared to pre-pandemic
+   4. Generate sector exposure indicator
+   5. Generate regional exposure indicator
+5. What are the diversification opportunities?
+   1. Train model to predict (multiple) sector probabilities based on business descriptions
+   2. Construct measure of sector similarity based on frequency of sector co-occurrence
+   3. Use sector co-occurence as a proxy for diversification options
+   4. Construct "sector-space"
+   5. Aggregate geographically to create geographical measure of diversification options
 6. What is the exposure to Covid of innovative companies
-   1. Compare the effect of prescence in datasets
-7. Relationship between exposure and business failure?
-8. Can we identify businesses at risk of failure?
-   1. Industry + place exposed
-   2. Innovative flag
-   3. e-commerce / new strategy or technology (Point 3)
+   1. Compare the effect of presence in datasets (GtR and PATSTAT) on various exposure indicators.
+     
+   Note: could be skipped if not deemed important by SG - it adds significant complexity by introducing datasets not used elsewhere (PATSTAT and Gateway to Research)
+7. Relationship between exposure and business failure? What effect do the following exposure indicators have on the levels of business failures?
+   1. High industry / place exposure
+   2. 'Is innovative?' flag - (if innovative companies were found to be more/less likely to fail)
+   3. Presence of e-commerce / new strategy or technology adopted
    4. Covid notice containing "negative" information/outcome
+   5. Social media update patterns
+   6. Poor diversification opportunities
+8. Can we identify businesses at risk of failure? Combine measures of exposure to predict failure.
 9. Indirect impacts - OUT OF SCOPE
-10. Can we detect and measure business failures in a timely manner?
+
+   Placed out of scope due to data quality issues with the Glass network data, and a weak rationale for this task purely based on I/O tables data.
+10. Detect business failures. Can we do it in a timely manner?
     1. Explore the lag and accuracy of companies house [DATA ACCESS ISSUES]
+       - **We now know this is likely to be >3 months**
     2. Explore alternate datasets such as:
        - https://www.gov.uk/government/statistics/incorporated-companies-in-the-uk-april-to-june-2020
        - https://www.gov.uk/government/statistics/monthly-insolvency-statistics-june-2020
@@ -48,7 +63,8 @@ No steps are explicitly dependent on these points, but time invested into these 
 14. [@14] Data modelling of Glass datasets, including the consistent merging of multiple snapshots
 15. Fuzzy-matching
     1. Develop reusable pipeline
-    2. How to validate accuracy of fuzzy-matching?
+    2. Consider how to validate accuracy of fuzzy-matching
+    3. Choose precision-recall trade-off
 16. Finding social media links - requires Nesta to scrape websites of organisations. NOTE: legal ramifications of scraping facebook data limit us to using Twitter only.
     1. Do two small pilots:
        1. Scrape and retrieve twitter handles from business websites in location X - e.g. one local authority
@@ -59,53 +75,31 @@ No steps are explicitly dependent on these points, but time invested into these 
          - Limitation: you can retrieve the last 3,200 tweets from a user timeline, therefore if they tweet frequently then we may not be able to far back enough in time.
        - There is the potential to apply for an academic research account which would give better access for free: https://developer.twitter.com/en/solutions/academic-research
        - The "Enterprise" pricing of paid access to the Twitter API (which allows full historical access rather than the last 30 days or last 3,200 tweets) is unclear but costs at least $99/month
-    2. Building on previous point:
-       1. Fetch and store data from Twitter API
-       2. Generate simple update statistics for each profile - i.e. ignore textual content - and assess utility of data initially based on coverage and frequency
-       3. Analyse textual content of twitter data [SCALE-UP]
+    2. Fetch and store data from Twitter API
+    3. Generate update statistics for each profile - i.e. ignore textual content
+    4. Assess utility of data initially based on coverage and frequency
+    5. Analyse textual content of twitter data [OUT OF SCOPE]
 
-** Dependencies
-1. [14]
-2. [16, 17]
-3. [14, 1]
-4. [15, ]
-5. [15, ]
-6. [15, 1, 2, 4, 10, 5] (Relies on some measure of exposure)
-7. [15, 1, 2, 4, 10, 3, 5] (Relies on some measure of exposure)
-8. [6, 7]
-9. OUT OF SCOPE
-10. None
-
-11. [14, 15]
-12. [14]
-13. [14, 15]
-
-14. None
-15. None
-16. [14, 15]
-17. [16]
-
-** Task graph
-** Proposed task order
-Point 8 is the end-goal in the sense that it combines all the previous components of the analysis. Achieving a first iteration of 8 could be seen as our MVP.
-
-Not all of the components are required to yield a MVP of 8.
+** Task graph and proposed schedule
 
 #+ATTR_ORG: :width 800
+#+CAPTION: Task graph showing dependencies between steps, organised according to a phased delivery plan.
 [[file:./images/task_graph.png]]
 
-Note: 6 could be skipped if not deemed important by SG - it adds significant complexity by introducing datasets not used elsewhere (PATSTAT and Gateway to Research)
+It is structured into 4 separate phases (explained further below).
+Task 8 (identify businesses at risk of failure) builds on almost every component and could therefore be seen as an 'end-goal'; however an MVP of 8 does not require all components to be complete, only some. The 4 phases are structured such that we can deliver 8 (and thus many of the components it depends upon) in an agile way. Achieving a first iteration of 8 could be seen as our MVP.
+
+The order that phases 2, 3, and 4 are performed in is interchangeable; however performing phase 4 last is preferable.
+
+Should 6, 7, and 8 be de-prioritised by SG or should we be unable to obtain business failure data of sufficient quality then the phases still work; however more time could be invested in other tasks.
 
 *** Phase 0 - Groundwork
-Exploratory analysis: [14, 15, 12]
+This phase lays the groundwork for the rest of the project by providing exploratory analysis and the fuzzy-matching tool that is used in many tasks.
 *** Phase 1 - MVP
-Fastest path to 8: [4, 6, 10, 7]
+This phase achieves a MVP of tasks 6, 7, and ultimately 8.
 *** Phase 2 - Iteration
-Enhance 8 with 1 and 3 (via. 6 and 7)
+6, 7, and 8 are enhanced by adding new indicators of exposure/adoption.
 *** Phase 3 - Iteration
-Enhance 8 with 5 (Diversification opportunities)
-*** Phase 4 - Social media pilot
-16 and 17 (allow 2 to be performed)
-*** Phase 5 - Iteration
-Enhance 8 with 2 (via. 6 and 7)
-
+6, 7, and 8 are enhanced by adding indicators of exposure based on the diversification opportunities available to a company.
+*** Phase 4 - Iteration
+6, 7, and 8 are enhanced with an exposure indicator derived from tweet frequency.
