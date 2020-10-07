@@ -1,0 +1,111 @@
+#+title: Pipeline plan
+
+* Pipeline planning
+
+** Policy questions
+
+1. What do business website notices say about exposure/response?
+   1. Topic evolution over: time, space, industry
+   2. Where are there more or less notices than expected?
+   3. Sentiment analysis [HARD]
+2. What do social media posting say about exposure/response?
+   1. How often are social media posts updated?
+   2. Longevity - when do accounts start and stop posting?
+   3. Sentiment analysis [HARD]
+3. What are the levels of adoption of technologies/strategies such as e-commerce?
+   1. Are there changes in the glass e-commerce flag [DQ ISSUES]
+   2. Detect a change of strategy using NLP on notices or social media activity[HARD]
+4. Sectoral and geographic distribution of exposure
+   1. Based on trends
+5. What are the diversification opportunities
+   1. Sector co-occurrence
+6. What is the exposure to Covid of innovative companies
+   1. Compare the effect of prescence in datasets
+7. Relationship between exposure and business failure?
+8. Can we identify businesses at risk of failure?
+   1. Industry + place exposed
+   2. Innovative flag
+   3. e-commerce / new strategy or technology (Point 3)
+   4. Covid notice containing "negative" information/outcome
+9. Indirect impacts - OUT OF SCOPE
+10. Can we detect and measure business failures in a timely manner?
+    1. Explore the lag and accuracy of companies house [DATA ACCESS ISSUES]
+    2. Explore alternate datasets such as:
+       - https://www.gov.uk/government/statistics/incorporated-companies-in-the-uk-april-to-june-2020
+       - https://www.gov.uk/government/statistics/monthly-insolvency-statistics-june-2020
+
+** Data issues
+No steps are explicitly dependent on these points, but time invested into these will correspond to an increase in data quality.
+
+11. [@11] How to deal with multi-site firms
+    1. How to resolve conflicting information between trading address (Companies House) and the addresses (up to 5) found by Glass AI.
+    2. How to discern a true multi-site firm from a false one (e.g. a second address is detected that corresponds to e.g. the address where an event is to be held)
+    3. What if there are more than 5 sites?
+12. What is the coverage and bias of the business website data?
+13. What is the most reliable way to match industrial taxonomies? Glass AI uses [[https://developer.linkedin.com/docs/reference/industry-codes][Linkedin's industry list]], Companies House uses SIC codes, and we wish to report SIC codes.
+
+** Engineering "tasks"
+14. [@14] Data modelling of Glass datasets, including the consistent merging of multiple snapshots
+15. Fuzzy-matching
+    1. Develop reusable pipeline
+    2. How to validate accuracy of fuzzy-matching?
+16. Finding social media links - requires Nesta to scrape websites of organisations. NOTE: legal ramifications of scraping facebook data limit us to using Twitter only.
+    1. Do two small pilots:
+       1. Scrape and retrieve twitter handles from business websites in location X - e.g. one local authority
+       2. Scrape and retrieve twitter handles from business websites in industry Y - e.g. one SIC code
+17. Fetch twitter data for organisations with social media links.
+    1. Explore Twitter API costs and rate-limits
+       - Every 24 hours we can fetch ~100,000 tweets which is sufficient for a pilot stage but would be insufficient to collect historic tweets (there are likely >100,000 new tweets being generated a day across the organisations within Glass)
+         - Limitation: you can retrieve the last 3,200 tweets from a user timeline, therefore if they tweet frequently then we may not be able to far back enough in time.
+       - There is the potential to apply for an academic research account which would give better access for free: https://developer.twitter.com/en/solutions/academic-research
+       - The "Enterprise" pricing of paid access to the Twitter API (which allows full historical access rather than the last 30 days or last 3,200 tweets) is unclear but costs at least $99/month
+    2. Building on previous point:
+       1. Fetch and store data from Twitter API
+       2. Generate simple update statistics for each profile - i.e. ignore textual content - and assess utility of data initially based on coverage and frequency
+       3. Analyse textual content of twitter data [SCALE-UP]
+
+** Dependencies
+1. [14]
+2. [16, 17]
+3. [14, 1]
+4. [15, ]
+5. [15, ]
+6. [15, 1, 2, 4, 10] (Relies on some measure of exposure)
+7. [1, 2, 4, 10, 3] (Relies on some measure of exposure)
+8. [5, 6, 7]
+9. OUT OF SCOPE
+10. None
+
+11. [14, 15]
+12. [14]
+13. [14, 15]
+
+14. None
+15. None
+16. [14]
+17. [16]
+
+** Task graph
+** Proposed task order
+Point 8 is the end-goal in the sense that it combines all the previous components of the analysis. Achieving a first iteration of 8 could be seen as our MVP.
+
+Not all of the components are required to yield a MVP of 8.
+
+#+ATTR_ORG: :width 800
+[[file:./images/task_graph.jpg]]
+
+Note: 6 could be skipped if not deemed important by SG - it adds significant complexity by introducing datasets not used elsewhere (PATSTAT and Gateway to Research)
+
+*** Phase 0 - Groundwork
+Exploratory analysis: [14, 15, 12]
+*** Phase 1 - MVP
+Fastest path to 8: [4, 6, 10, 7]
+*** Phase 2 - Iteration
+Enhance 8 with 1 and 3 (via. 6 and 7)
+*** Phase 3 - Iteration
+Enhance 8 with 5 (Diversification opportunities)
+*** Phase 4 - Social media pilot
+16 and 17 (allow 2 to be performed)
+*** Phase 5 - Iteration
+Enhance 8 with 2 (via. 6 and 7)
+
