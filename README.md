@@ -1,5 +1,5 @@
 sg_covid_impact
-==============================
+===============
 
 Project with the Scottish Government to map the impact of Covid-19 in Scotland
 
@@ -17,8 +17,10 @@ Install the relevant git hooks by running `make git`.
 
 See ["Approach to notebooks"](Approach to notebooks) for information on these hooks.
 
-### Metaflow configuration
-TODO - where to get metaflow stack config
+### AWS + Metaflow configuration
+
+Much of the data pipeline is factored out of this repository and lives in Nesta's ["Research DAPS"](https://github.com/nestauk/research_daps).
+Fetching the outputs of these pipelines is done via. the metaflow client API, and requires metaflow to be configured to use our AWS cloud stack. Please follow instructions [here](https://github.com/nestauk/research_daps#configuration) to do so.
 
 ## Code-style
 
