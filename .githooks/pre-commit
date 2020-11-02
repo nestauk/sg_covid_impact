@@ -18,10 +18,14 @@ repopath=$(git rev-parse --show-toplevel)
 # Temporary path to store exported notebooks
 exportpath=$repopath/.ipynb_export/$(git branch --show-current)/latest
 
+echo "PRECOMMIT"
 # For each committed notebook or py file contained somewhere in `notebooks/`
 for f in $(git diff --name-status --cached |\
-    grep -v "^D" |\  # Ignore deleted files
-    cut -f 2 |\  # Extract name (ignore status)
+    # Ignore deleted files
+    grep -v "^D" |\
+    # Extract name (ignore status)
+    cut -f 2 |\
+    # Only in `notebooks/`
     grep 'notebooks/.*\.i\?pyn\?b\?$');
 do
     echo FILE $f

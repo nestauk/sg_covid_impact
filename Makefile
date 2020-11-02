@@ -33,11 +33,10 @@ endef
 # COMMANDS                                                                      #
 #################################################################################
 
-## Setup git filter for notebooks
+## Setup git for notebooks
 git:
 	chmod +x .githooks/{pre-push,pre-commit,post-merge,post-commit}
-	ln -s .githooks/{pre-push,pre-commit,post-merge,post-commit} .git/hooks/. || exit 1
-	# ln -s .githooks/pre-commit .git/hooks/pre-commit || exit 1
+	git config core.hooksPath .githooks/
 
 ## Delete all compiled Python files
 clean:
