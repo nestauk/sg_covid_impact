@@ -1,0 +1,53 @@
+name: sg_covid_impact
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - python=3.6.5
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - jupyter
+  - jupyterlab
+  - ipython
+  - clang_osx-64  # [not linux]
+  - gcc_linux-64  # [not darwin]
+  # Put any conda dependencies here
+  - metaflow==2.2.4
+  - altair
+  - xlrd
+  - geopandas
+  - nltk
+  - gensim
+  - cytoolz
+  - pandas-profiling
+  - statsmodels
+
+  - pip:
+    # Put any pip dependencies here (and no conda ones anywhere below)
+    - ratelim
+    # - git+ssh://git@github.com/nestauk/jacc-hammer.git@legacy
+    - pytrends
+
+  # Tooling requirements (don't edit)
+    - tornado>=5.0  # Stops luigi breaking jupyter
+  - tqdm
+  - pyyaml
+  - pytables
+  - black
+  - blackcellmagic
+  - pymysql
+  - sqlalchemy
+  - click
+  - Sphinx
+  - sphinxcontrib-napoleon
+  - coverage
+  - awscli
+  - flake8
+  - python-dotenv>=0.5.1
+  - jupyter_contrib_nbextensions
+  - jupyter_nbextensions_configurator
+  - pytest
+  - jupytext

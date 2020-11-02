@@ -1,0 +1,27 @@
+#!/bin/sh
+# Convert .py'ed notebooks back to ipynb, backing up already existing ipynb's
+set -euo pipefail
+
+# For each jupytext'ed notebook:
+for fpy in $(find notebooks/ -wholename *.py | grep .ipynb_checkpoints -v); do
+    # filename without path or extension
+    fnameonly=$(basename $fpy | cut -f 1 -d'.');
+
+    # path after notebooks/ and before <FILENAME>.py
+    subpath=$(echo $fpy | sed -n 's/.*notebooks\/\(.*\)\/.*py/\1/p')
+
+    # Notebook filename corresponding to $fpy
+    fnb=notebooks/$subpath/$fnameonly.ipynb
+
+    # Ensure .ipynb_checkpoints exists to backup notebook to
+    mkdir -p notebooks/$subpath/.ipynb_checkpoints
+
+    # Backup notebook if it already exists
+    [ -f $fnb ] && \
+        cp $fnb notebooks/$subpath/.ipynb_checkpoints/$(date +%s)_$fnameonly.ipynb;
+
+    # Convert python file back to notebook
+    # (could use sync but this could cause confusion, particularly across branches)
+    jupytext --to ipynb $fpy --output $fnb
+
+done

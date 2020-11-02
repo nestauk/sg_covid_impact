@@ -1,0 +1,16 @@
+#!/bin/sh
+# Sync HTML exported notebooks to S3 notebook store
+# NOTE: This is performed on pre-push commit because it is assumed that an
+# internet connection is guaranteed here whereas one might not be present
+# on pre-commit or post-commit
+set -euo pipefail
+
+# Absolute path of repo
+repopath=$(git rev-parse --show-toplevel)
+
+# Sync .ipynb_export to S3 notebook database and clean-up .ipynb_export on success
+if [ -d $repopath/.ipynb_export ];
+then
+    aws s3 sync $repopath/.ipynb_export/ s3://nesta-notebook-db/${repopath##*/}
+    rm $repopath/.ipynb_export -r
+fi
