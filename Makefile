@@ -35,7 +35,9 @@ endef
 
 ## Setup git filter for notebooks
 git:
-	echo -e "[filter \"nbstrip_full\"]\n clean = \"jq --indent 1 '(.cells[] | select(has(\\\"outputs\\\")) | .outputs) = []  | (.cells[] | select(has(\\\"execution_count\\\")) | .execution_count) = null  | .metadata = {\\\"language_info\\\": {\\\"name\\\": \\\"python\\\", \\\"pygments_lexer\\\": \\\"ipython3\\\"}} | .cells[].metadata = {} '\"\n smudge = cat\n required = true\n " >> .git/config
+	chmod +x .githooks/{pre-push,pre-commit,post-merge,post-commit}
+	ln -s .githooks/{pre-push,pre-commit,post-merge,post-commit} .git/hooks/. || exit 1
+	# ln -s .githooks/pre-commit .git/hooks/pre-commit || exit 1
 
 ## Delete all compiled Python files
 clean:

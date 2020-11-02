@@ -1,0 +1,73 @@
+#!/bin/sh
+# For every py:percent file in the git index
+# (which should include ipynb files via. pairing):
+# - apply black code formatter
+# - export notebook to html; store in reports by branch in .ipynb_export/
+# - remove noteboooks/*.ipynb from git index
+# NOTE: Notebooks are stored in .ipynb_export/ until a git push at which point
+# the pre-push hook will upload them to the notebook store
+# TODO : what if the commit is aborted? How to clean-up exports?
+set -euo pipefail
+
+# Code formatting
+jupytext --from py:percent --pipe black --pre-commit
+
+# Absolute path of repo
+repopath=$(git rev-parse --show-toplevel)
+
+# Temporary path to store exported notebooks
+exportpath=$repopath/.ipynb_export/$(git branch --show-current)/latest
+
+# For each committed notebook or py file contained somewhere in `notebooks/`
+for f in $(git diff --name-status --cached |\
+    grep -v "^D" |\  # Ignore deleted files
+    cut -f 2 |\  # Extract name (ignore status)
+    grep 'notebooks/.*\.i\?pyn\?b\?$');
+do
+    echo FILE $f
+    # Get part of path after `notebooks/` and before filename
+    subpath=$(echo $f | sed -n 's/.*notebooks\/\(.*\)\/.*\.i\?pyn\?b\?/\1/p')
+
+    # Filename
+    fname=$(basename $f)
+    # Filename with no extension
+    fnameonly=${fname%.*}
+    # Extension
+    extension=${fname##*.}
+
+    # If py file:
+    #     If no corresponding ipynb : continue
+    #     Else: set f to ipynb version
+    # Else: Warn
+    corresponding_nb=notebooks/$subpath/$fnameonly.ipynb
+    if [ $extension == "py" ];
+    then
+        if [ ! -f $corresponding_nb ] ;
+        then
+            echo No corresponding ipynb for $f ... skipping HTML export
+            continue
+        else
+            echo Updating input cells of $corresponding_nb using $f
+            jupytext --update --to notebook $f
+
+            # Start acting on ipynb rather than py:percent for export
+            f=$corresponding_nb
+        fi
+    else
+        # .ipynb should not be committed directly and are in .gitignore
+        echo "WARNING! Staged file $f with extension $extension will be \
+            exported but not committed. Commit its .py counterpart."
+    fi
+
+    # Convert notebook to html and store in temporary path
+    jupyter nbconvert --to html $f --output-dir=$exportpath/$subpath;
+
+    # Make reports directory with correct $subpath structure
+    mkdir -p $repopath/reports/$subpath/
+    # Copy exported html to reports folder
+    cp $exportpath/$subpath/$fnameonly.html\
+        $repopath/reports/$subpath/$fnameonly.html
+
+    # Unstage notebook (jupytext version is under VC)
+    git reset HEAD $f
+done;

@@ -1,0 +1,19 @@
+#!/bin/sh
+# Rename `.ipynb_export/<BRANCH_NAME>/latest/` to
+# `.ipynb_export/<BRANCH_NAME>/<COMMIT_HASH>` now it is known
+set -euo pipefail
+
+# Absolute path of repo
+repopath=$(git rev-parse --show-toplevel)
+
+# Temporary path exported notebooks are stored
+exportpath=$repopath/.ipynb_export/$(git branch --show-current)
+
+# Current git commit hash (short)
+commithash=$(git rev-parse HEAD | head -c 7)
+
+# Rename `latest` folder with git commit hash now it is known
+if [ -d $exportpath/latest ];
+then
+    mv $exportpath/latest $exportpath/$commithash
+fi

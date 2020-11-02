@@ -49,5 +49,5 @@ dependencies:
   - python-dotenv>=0.5.1
   - jupyter_contrib_nbextensions
   - jupyter_nbextensions_configurator
-  - jq
   - pytest
+  - jupytext
