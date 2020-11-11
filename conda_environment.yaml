@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
   - pip
-  - python=3.6.5
+  - python=3.8
   - numpy
   - scipy
   - pandas
@@ -51,3 +51,4 @@ dependencies:
   - jupyter_nbextensions_configurator
   - pytest
   - jupytext
+  - mypy
