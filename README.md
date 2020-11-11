@@ -9,6 +9,28 @@ This section provides an overview of where stakeholders from Scottish government
 
 # Contributors
 
+## Flow conventions
+
+For each flow defined in this repository create:
+
+- a subdirectory in `sg_covid_impact/flows`, containing:
+  - `<flowname>.py`: contains the MetaFlow class
+  - `run.py`: Runs the flow using parameters from `model_config.yaml` and updates the `run_id`.
+      `python run.py` will then take care of executing the flow correctly. See [sg_covid_impact/flows/nomis/run.py](nomis/run.py) for an example.
+  - Any utilities relating exclusively to the flow (try and keep `<flowname>.py` lightweight)
+
+For all flows (local and originating from e.g. Research DAPS), create:
+- a file `<flowname.py>` in `sg_covid_impact/getters/` which defines functions to fetch the data using the metaflow Client API
+  - If a different "view" of the data is required than the flow provides, e.g. because the Flow is a generic pipeline from Research DAPS, provide a function giving that "data view" here.
+
+## Caching flow outputs
+
+The results of flows are stored in S3, this means that each time we run a script, it will re-fetch the data from S3. 
+
+Using `sg_covid_impact.utils.metaflow.flow_getter` will cache the fetching *within* a python session, somewhat mitigating this.
+
+Using `sg_covid_impact.utils.metaflow.cache_getter_fn` as a function decorator will pickle the output in a sub-directory of `temp_dir` if it is defined in `.env`, and load from here if it already exists. You may wish to choose `/tmp/` or you may wish to choose a folder in the repositories `data/` folder.
+
 ## Setup
 
 ### Git hooks
