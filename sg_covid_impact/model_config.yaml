@@ -1,0 +1,7 @@
+flows:
+    nomis:
+        run_id: !!null
+        params:
+            years:
+                - 2018
+            test_mode: true
