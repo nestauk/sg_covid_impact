@@ -13,7 +13,7 @@ dependencies:
   - jupyterlab
   - ipython
   - clang_osx-64  # [not linux]
-  - gcc_linux-64  # [not darwin]
+  # - gcc_linux-64  # [not darwin]
   # Put any conda dependencies here
   - metaflow==2.2.4
   - altair
@@ -30,6 +30,7 @@ dependencies:
     - ratelim
     # - git+ssh://git@github.com/nestauk/jacc-hammer.git@legacy
     - pytrends
+    - gtab
 
   # Tooling requirements (don't edit)
     - tornado>=5.0  # Stops luigi breaking jupyter
