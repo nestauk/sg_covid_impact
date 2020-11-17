@@ -74,7 +74,7 @@ def flow_getter(flow: str, run_id=None) -> MetaflowData:
     return Run(f"{flow}/{run_id}").data
 
 
-def execute_flow(flow_file: Path, params: dict) -> int:
+def execute_flow(flow_file: Path, params: dict, metaflow_args: dict) -> int:
     """Execute flow in `flow_file` with `params`
 
     Args:
@@ -94,6 +94,7 @@ def execute_flow(flow_file: Path, params: dict) -> int:
             "python",
             str(flow_file),
             "--no-pylint",
+            *t.pipe(metaflow_args.items(), chain.from_iterable, t.map(quote)),
             "run",
             "--run-id-file",
             str(run_id_file),
