@@ -1,0 +1,4 @@
+pandas
+toolz
+gtab
+metaflow==2.2.4
