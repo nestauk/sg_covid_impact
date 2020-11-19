@@ -38,7 +38,7 @@ if __name__ == "__main__":
     anchor_periods = list(config["anchor_periods"].values())
 
     # Trends for each term over time
-    trends = get_trends(run_id_=538)
+    trends = get_trends()
 
     # Match trend terms to divisions
     division_trends = (
