@@ -20,12 +20,18 @@ if __name__ == "__main__":
         "--anchor_periods": dumps(anchor_periods),
         "--terms": dumps(terms),
         "--test_mode": str(params["test_mode"]),
-        # "--with": "batch:cpu=2",
-        "--max-workers": "1",  # "64"
+        "--with": "batch:queue=job-queue-many-nesta-metaflow",
+        # "--max-workers": "256"
     }
-    flow_file = Path(__file__).resolve().parents[0] / "gtab_flow.py"
+    flow_file = Path(__file__).resolve().parents[0] / "gtab_flow_linear.py"
     run_id = execute_flow(
-        flow_file, cmd_params, metaflow_args={"--package-suffixes": ".py,.txt"}
+        flow_file,
+        cmd_params,
+        metaflow_args={
+            "--package-suffixes": ".py,.txt",
+            # "--metadata": "local",
+            # "--datastore": "local"
+        },
     )
 
     google_config["run_id"] = run_id
