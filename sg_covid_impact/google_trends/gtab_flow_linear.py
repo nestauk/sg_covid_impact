@@ -214,17 +214,13 @@ class GoogleTrends(FlowSpec):
                     )
 
             completed_terms = results.variable.unique()
-            counter = 0
             for term in filter(lambda term: term not in completed_terms, term_chunk):
                 try:
-                    if counter >= 1 and current.origin_run_id is None:
-                        raise RetryError("FOOOO")
                     result = (
                         gtab_query(term, gtab)
                         .to_frame()
                         .pipe(format_results, anchor_period)
                     )
-                    counter += 1
                 except RetryError as e:
                     logging.error(e)
                     # Upload current results to s3
