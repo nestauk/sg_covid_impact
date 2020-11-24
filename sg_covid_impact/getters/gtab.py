@@ -30,4 +30,4 @@ def get_trends(run_id_: int = -1) -> pd.DataFrame:
         s3.get_many,
         t.map(t.compose(pd.DataFrame, json.loads, lambda x: x.text)),
         pd.concat,
-    )
+    ).drop("index", 1)
