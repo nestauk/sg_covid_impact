@@ -9,3 +9,7 @@ flows:
     run_id: 414
   companies_house:
     run_id: 413
+fetch_urls:
+  sic_taxonomy: https://www.ons.gov.uk/file?uri=/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007/sic2007summaryofstructurtcm6.xls
+
+  
