@@ -6,11 +6,10 @@ flows:
   google_search:
     params:
       anchor_periods:
-        y1: 2020-01-01 2020-11-01
-        y2: 2019-01-01 2019-11-01
+        jan2019_onward: 2019-01-01 2020-11-01
       term_salience_threshold: 0.1
       test_mode: false
-    run_id: 544
+    run_id: 573
   nomis:
     params:
       test_mode: false
