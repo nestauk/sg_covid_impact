@@ -12,7 +12,7 @@ import sg_covid_impact
 project_dir = sg_covid_impact.project_dir
 
 _SIC_OUTPUT_FILE = f"{project_dir}/data/raw/sic_2007.xls"
-_SIC_LOOKUP_FILE = f"{project_dir}/data/raw/lookup.json"
+_SIC_LOOKUP_FILE = f"{project_dir}/data/raw/div_name_lookup.json"
 
 
 def url():
@@ -44,7 +44,8 @@ def save_sic_taxonomy():
 
 
 def load_sic_taxonomy():  # Function to load taxonomy correctly
-    return pd.read_excel(_SIC_OUTPUT_FILE, skiprows=1)
+    return pd.read_excel(_SIC_OUTPUT_FILE, skiprows=1,
+                         dtype={'Division':str})
 
 
 if __name__ == "__main__":
