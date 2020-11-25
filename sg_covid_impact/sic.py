@@ -4,19 +4,13 @@ import logging
 import re
 import json
 import pandas as pd
-
-# from toolz.curried import pipe
-
 import sg_covid_impact
 
 project_dir = sg_covid_impact.project_dir
 
 _SIC_OUTPUT_FILE = f"{project_dir}/data/raw/sic_2007.xls"
-_SIC_LOOKUP_FILE = f"{project_dir}/data/raw/div_name_lookup.json"
-
-
-def url():
-    return sg_covid_impact.config["fetch_urls"]["sic_taxonomy"]
+_SIC_LOOKUP_FILE = f"{project_dir}/data/processed/div_name_lookup.json"
+_SIC_TAXONOMY_URL = "https://www.ons.gov.uk/file?uri=/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007/sic2007summaryofstructurtcm6.xls"
 
 
 def extract_sic_code_description(table, var_name):
@@ -32,20 +26,19 @@ def extract_sic_code_description(table, var_name):
     select.columns = [var_name, "description"]
 
     select[var_name] = [re.sub(r"\.", "", str(x)) for x in select[var_name]]
-    name_lookup = select.set_index(var_name)["description"].to_dict()
-    return name_lookup
+    return select.set_index(var_name)["description"].to_dict()
 
 
 def save_sic_taxonomy():
-    logging.info("Saving sic taxonomy structure")
-    response = requests.get(url())
+    """Fetch SIC taxonomy and save as excel file"""
+    response = requests.get(_SIC_TAXONOMY_URL)
     with open(_SIC_OUTPUT_FILE, "wb") as f:
         f.write(response.content)
 
 
-def load_sic_taxonomy():  # Function to load taxonomy correctly
-    return pd.read_excel(_SIC_OUTPUT_FILE, skiprows=1,
-                         dtype={'Division':str})
+def load_sic_taxonomy():
+    """Load SIC taxonomy into a dataframe"""
+    return pd.read_excel(_SIC_OUTPUT_FILE, skiprows=1, dtype={"Division": str})
 
 
 if __name__ == "__main__":
@@ -55,6 +48,7 @@ if __name__ == "__main__":
 
     if not os.path.exists(_SIC_LOOKUP_FILE):
         logging.info("Making code - name lookup")
-        name_lookup = load_sic_taxonomy().pipe(extract_sic_code_description, "Division")
+        name_lookup = load_sic_taxonomy().pipe(extract_sic_code_description, 
+                                               "Division")
         with open(_SIC_LOOKUP_FILE, "w") as outfile:
             json.dump(name_lookup, outfile)
