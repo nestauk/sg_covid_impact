@@ -40,7 +40,7 @@ def process_claimant_data(table):
 
 def get_month_delta():
     """Calculate month difference between latest available and beginning of
-    series (1st Jan 2019). We need this to construct a query going back
+    relevant series (1st Jan 2019). We need this to construct a query going back
     latestMINUSdelta months.
     """
     # Only collect the latest cut of the data
