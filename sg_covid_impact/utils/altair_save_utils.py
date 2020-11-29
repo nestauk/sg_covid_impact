@@ -24,7 +24,13 @@ def altair_visualisation_setup():
 
 
 def save_altair(fig, name, driver, path=FIG_PATH):
-    """Saves an altair figure as png and html"""
+    """Saves an altair figure as png and html
+    Args:
+        fig: altair chart
+        name: name to save the figure
+        driver: webdriver
+        path: path to save the figure
+    """
     print(path)
     save(
         fig,
