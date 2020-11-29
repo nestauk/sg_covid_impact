@@ -30,6 +30,9 @@ dependencies:
     - ratelim
     # - git+ssh://git@github.com/nestauk/jacc-hammer.git@legacy
     - pytrends
+    - altair-saver
+    - webdriver-manager
+    - selenium
 
   # Tooling requirements (don't edit)
     - tornado>=5.0  # Stops luigi breaking jupyter
