@@ -10,14 +10,11 @@ project_dir = sg_covid_impact.project_dir
 FIG_PATH = f"{project_dir}/figures"
 
 # Checks if the right paths exist and if not creates them when imported
-if not os.path.exists(f"{FIG_PATH}/png"):
-    os.mkdir(f"{FIG_PATH}/png")
-
-if not os.path.exists(f"{FIG_PATH}/html"):
-    os.mkdir(f"{FIG_PATH}/html")
+os.makedirs(f"{FIG_PATH}/png", exist_ok=True)
+os.makedirs(f"{FIG_PATH}/html", exist_ok=True)
 
 
-def altair_visualisation_setup():
+def google_chrome_driver_setup():
     # Set up the driver to save figures as png
     driver = webdriver.Chrome(ChromeDriverManager().install())
     return driver
@@ -43,4 +40,4 @@ def save_altair(fig, name, driver, path=FIG_PATH):
 
 
 if __name__ == "__main__":
-    altair_visualisation_setup()
+    google_chrome_driver_setup()
