@@ -25,10 +25,15 @@ def process_footfall_data(country_code):
     """Reads and processes country data for a country
     Args:
         country_code (str): country iso code
+        TODO: adapt to extract subregional data! 
     """
     logging.info(f"Processing Google footfall data for {country_code}")
     c = pd.read_csv(f"{_TARGET_DIR}/2020_{country_code}_Region_Mobility_Report.csv")
+    
+    # Only keep the rows with subregion field missing (ie the national data)
     c = c.loc[c["sub_region_1"].isna()]
+    
+    # Make tidy
     c_long = c.dropna(axis=1).melt(
         id_vars=["country_region", "country_region_code", "date"]
     )
