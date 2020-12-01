@@ -10,7 +10,8 @@ _BASE_URL = (
     "https://api.coronavirus.data.gov.uk/v2/data?areaType=_GEO_&_METRICS_&format=json"
 )
 _GEO = "overview"
-_METRICS = ["newCasesByPublishDate", "newDeaths28DaysByDeathDate"]
+_METRICS = ["newCasesByPublishDate", 
+"newDeaths28DaysByDeathDate","newVirusTests"]
 _COVID_FILE = f"{project_dir}/data/processed/covid_metrics.csv"
 
 
