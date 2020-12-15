@@ -1,3 +1,7 @@
+"""Script collecting secondary official data providing additional context
+about the situation of local economies in Scotland
+"""
+
 import pandas as pd
 import sg_covid_impact
 import logging
@@ -12,12 +16,20 @@ _DZ_LU = "http://statistics.gov.scot/downloads/file?id=2a2be2f0-bf5f-4e53-9726-7
 _SECOND = f"{project_dir}/data/processed/lad_secondary.csv"
 
 
-def fetch_process_nomis(
-    url, indicator_name, value_column, source, indicator_column="MEASURES_NAME"
+def fetch_nomis(url):
+    """Fetch Nomis data
+    Args:
+        url (str): nomis url
+    """
+    return pd.read_csv(url)
+
+
+def process_nomis(
+    df, indicator_name, value_column, source, indicator_column="MEASURES_NAME"
 ):
     """Fetch nomis data
     Args:
-        url (str): API url
+        df (df): nomis table
         indicator_name (str): name of indicator
         value_column (str): value column
         source (str): data source
@@ -25,41 +37,43 @@ def fetch_process_nomis(
     Returns:
         A clean table with secondary data
     """
-    logging.info(f"Fetching {source}")
-    df = pd.read_csv(url)
-    df_sel = df.query(f"{indicator_column}=='{indicator_name}'")[
-        ["DATE", "GEOGRAPHY_NAME", "GEOGRAPHY_CODE", value_column, "OBS_VALUE"]
-    ].reset_index(drop=True)
-    df_sel.rename(
-        columns={"OBS_VALUE": "VALUE", value_column: "VARIABLE"}, inplace=True
+    return (
+        df.query(f"{indicator_column}=='{indicator_name}'")[
+            ["DATE", "GEOGRAPHY_NAME", "GEOGRAPHY_CODE", value_column, "OBS_VALUE"]
+        ]
+        .reset_index(drop=True)
+        .rename(columns={"OBS_VALUE": "VALUE", value_column: "VARIABLE"})
+        .assign(source=source)
+        .rename(columns=str.lower)
     )
-    df_sel.columns = [x.lower() for x in df_sel.columns]
-
-    df_sel["source"] = source
-
-    return df_sel
 
 
-def process_simd(df, indices):
-    """Processes the Scottish Index of Multiple Deprivation data
-    Args:
-        df (df): A SIMD table
-        indices (list): indices we want to aggregate over
-    Returns:
-        Table with share of population living in high SIMD areas
-    """
+def fetch_datazone_lookup():
+    """Fetch datazone lookup"""
     logging.info("Fetching SIMD")
     dz_lu = pd.read_csv(_DZ_LU)
-    datazone_lad_code_lookup = dz_lu.set_index("DZ2011_Code")["LA_Code"].to_dict()
+    return dz_lu.set_index("DZ2011_Code")["LA_Code"].to_dict()
+
+
+def simd_population_share_quantiles(
+    df, q=np.arange(0, 1.1, 0.1), q_name="decile", high_depr=1
+):
+    """Calculates share of population in different deprivation deciles
+    Args:
+        df (df): table with LAD population and SIMD ranking data
+        q (q): quantiles to split LADs into (defaults to deciles)
+        q_name (str): name for quantile variable
+        high_depr (int): Threshold for high deprivation (lower is more deprived)
+    Returns a table with share of population in high depr deciles
+    """
 
     # Calculate deciles of deprivation
-    df["decile"] = pd.qcut(
+
+    df[q_name] = pd.qcut(
         df["SIMD2020v2_Rank"], q=np.arange(0, 1.1, 0.1), labels=False, duplicates="drop"
     )
 
-    df["geography_code"] = df["Data_Zone"].map(datazone_lad_code_lookup)
-
-    simd_agg = df.groupby(["Council_area", "decile", "geography_code"])[
+    simd_agg = df.groupby(["Council_area", "geography_code", q_name])[
         "Total_population"
     ].sum()
 
@@ -68,38 +82,59 @@ def process_simd(df, indices):
         simd_agg.reset_index(name="population")
         .pivot_table(
             index=["Council_area", "geography_code"],
-            columns="decile",
+            columns=q_name,
             values="population",
         )
         .apply(lambda x: x / x.sum(), axis=1)
     )
-
-    sim_high_depr_share = sim_pop_share[[0, 1]].sum(axis=1).reset_index(name="value")
-
-    # Change column names
-    sim_high_depr_share["variable"] = "smd_high_deprivation_share"
-    sim_high_depr_share.rename(columns={"Council_area": "geography_name"}, inplace=True)
-    sim_high_depr_share["source"] = "simd"
-    sim_high_depr_share["date"] = 2020
+    # Sums shares living in high deprivation areas
+    sim_high_depr_share = (
+        sim_pop_share.loc[:, :high_depr + 1].sum(axis=1).reset_index(name="value")
+    )
 
     return sim_high_depr_share
 
 
-def fetch_process_simd(indices=[0, 1]):
-    """Fetch and process Scottish Multiple deprivation index
+def fetch_simd():
+    """Fetch scottish multiple deprivation index data"""
+    return pd.read_excel(_SIMD_URL, sheet_name=1)
+
+
+def process_simd(df, indices):
+    """Processes the Scottish Index of Multiple Deprivation data
     Args:
-        indices (list): the SIMD indices we are interested in
+        df (df): A Scottish Index of Multiple Deprivation table
+        indices (list): indices we want to aggregate over
+    Returns:
+        Table with share of population living in high SIMD areas
     """
-    simd = pd.read_excel(_SIMD_URL, sheet_name=1)
-    return process_simd(simd, indices)
+
+    datazone_lad_code_lookup = fetch_datazone_lookup()
+
+    df["geography_code"] = df["Data_Zone"].map(datazone_lad_code_lookup)
+
+    high_depr_share = simd_population_share_quantiles(df)
+
+    # Add some column names etc so we can combine with other secondary data
+    high_depr_share = (
+        high_depr_share.assign(variable="smd_high_deprivation_share")
+        .assign(source="simd")
+        .assign(date=2020)
+        .rename(columns={"Council_area": "geography_name"})
+    )
+
+    return high_depr_share
 
 
 def read_secondary():
+    """REad secondary data"""
     return pd.read_csv(_SECOND)
 
 
 if __name__ == "__main__":
-    ashe = fetch_process_nomis(_ASHE_URL, "Value", "PAY_NAME", "ashe")
-    aps = fetch_process_nomis(_APS_URL, "Variable", "VARIABLE_NAME", "aps")
-    simd = fetch_process_simd()
+    ashe = process_nomis(fetch_nomis(_ASHE_URL), "Value", "PAY_NAME", "ashe")
+    aps = process_nomis(fetch_nomis(_APS_URL), "Variable", "VARIABLE_NAME", "aps")
+
+    simd = process_simd(fetch_simd(), indices=[0, 1])
+
     pd.concat([ashe, aps, simd], axis=0).to_csv(_SECOND, index=False)
