@@ -1,3 +1,5 @@
+"""Fetch, clean, and load google footfall data."""
+
 import requests
 import logging
 from zipfile import ZipFile
@@ -27,6 +29,7 @@ def process_footfall_data(country_code):
         country_code (str): country iso code
         TODO: adapt to extract subregional data! 
     """
+    print(country_code)
     logging.info(f"Processing Google footfall data for {country_code}")
     c = pd.read_csv(f"{_TARGET_DIR}/2020_{country_code}_Region_Mobility_Report.csv")
     
@@ -37,17 +40,21 @@ def process_footfall_data(country_code):
     c_long = c.dropna(axis=1).melt(
         id_vars=["country_region", "country_region_code", "date"]
     )
-    c_long.to_csv(
-        f"{project_dir}/data/processed/google_footfall_{country_code}.csv", index=False
-    )
+    return c_long
 
 
 def load_uk_footfall():
-    return pd.read_csv(f"{project_dir}/data/processed/google_footfall_gb.csv")
+    """Loads processed google footfall data for the uk
+    """
+    return pd.read_csv(f"{project_dir}/data/processed/google_footfall_GB.csv")
 
 
 if __name__ == "__main__":
     if not os.path.exists(_TARGET_DIR):
         os.makedirs(_TARGET_DIR, exist_ok=True)
-        fetch_footfall_data()
-        process_footfall_data("gb")
+    fetch_footfall_data()
+    c_long = process_footfall_data(country_code="GB")
+    c_long.to_csv(
+                  f"{project_dir}/data/processed/google_footfall_GB.csv", 
+                  index=False
+                  )
