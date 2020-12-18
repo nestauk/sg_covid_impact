@@ -24,6 +24,7 @@ dependencies:
   - cytoolz
   - pandas-profiling
   - statsmodels
+  - filelock
 
   - pip:
     # Put any pip dependencies here (and no conda ones anywhere below)
