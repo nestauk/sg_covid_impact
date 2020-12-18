@@ -1,9 +1,12 @@
 # %%
 """Data getter (Research DAPS) for National Statistics Postcode Lookup (NSPL)."""
 import pandas as pd
+from metaflow import namespace
 
 from sg_covid_impact.utils.metaflow import flow_getter, cache_getter_fn
 import sg_covid_impact
+
+namespace(None)
 
 
 def run_id() -> int:
