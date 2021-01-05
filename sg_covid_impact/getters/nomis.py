@@ -1,4 +1,7 @@
 # %%
+import pandas as pd
+from metaflow import namespace
+
 from sg_covid_impact.utils.metaflow import flow_getter, cache_getter_fn
 import sg_covid_impact
 import pandas as pd
