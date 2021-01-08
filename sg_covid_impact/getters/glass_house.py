@@ -1,11 +1,15 @@
 # %%
 import logging
+
 import pandas as pd
+from metaflow import namespace
+
 from sg_covid_impact.utils.metaflow import cache_getter_fn
 import sg_covid_impact
 
 
 logger = logging.getLogger(__name__)
+namespace(None)
 
 
 @cache_getter_fn

@@ -24,6 +24,7 @@ dependencies:
   - cytoolz
   - pandas-profiling
   - statsmodels
+  - filelock
 
   - pip:
     # Put any pip dependencies here (and no conda ones anywhere below)
@@ -31,6 +32,9 @@ dependencies:
     # - git+ssh://git@github.com/nestauk/jacc-hammer.git@legacy
     - pytrends
     - gtab
+    - altair-saver
+    - webdriver-manager
+    - selenium
 
   # Tooling requirements (don't edit)
     - tornado>=5.0  # Stops luigi breaking jupyter
