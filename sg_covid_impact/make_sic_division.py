@@ -4,6 +4,7 @@ import os
 import logging
 
 import pandas as pd
+import numpy as np
 
 import sg_covid_impact
 from sg_covid_impact.getters.nomis import get_BRES, get_IDBR
@@ -48,6 +49,35 @@ def aggregate_NOMIS_over_SIC(
         .sum()
         .reset_index(drop=False)
     )
+
+
+def make_section_division_lookup():
+    """Creates a lookup between SIC sections and divisions"""
+    sic = load_sic_taxonomy()
+
+    # Create a lookup between divisions and sections
+    sic["section"] = [
+        x.strip() if pd.isnull(x) == False else np.nan for x in sic["SECTION"]
+    ]
+
+    section_division_lu = (
+        sic[["section", "Division"]]
+        .fillna(method="ffill")
+        .dropna(axis=0)
+        .drop_duplicates(["Division"])
+        .set_index("Division")
+    ).to_dict()["section"]
+
+    section_name_lookup = (
+        sic[["section", "Unnamed: 1"]]
+        .dropna()
+        .set_index("section")
+        .to_dict()["Unnamed: 1"]
+    )
+
+    section_name_lookup_long = {k: k + ": " + v for k, v in section_name_lookup.items()}
+
+    return section_division_lu, section_name_lookup_long
 
 
 if __name__ == "__main__":
