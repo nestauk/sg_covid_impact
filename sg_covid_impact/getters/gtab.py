@@ -1,5 +1,6 @@
 # %%
 import json
+from typing import Optional
 
 import pandas as pd
 import metaflow as mf
@@ -7,6 +8,14 @@ import toolz.curried as t
 
 from sg_covid_impact.utils.metaflow import flow_getter, cache_getter_fn
 import sg_covid_impact
+
+
+def run_id_old() -> int:
+    """Get `run_id` for flow
+
+    NOTE: This is loaded from __init__.py not from file
+    """
+    return sg_covid_impact.config["flows"]["google_search"]["run_id_old"]
 
 
 def run_id() -> int:
@@ -17,17 +26,20 @@ def run_id() -> int:
     return sg_covid_impact.config["flows"]["google_search"]["run_id"]
 
 
-def get_trends(run_id_: int = -1) -> pd.DataFrame:
-    if run_id_ == -1:
-        run_id_ = run_id()
+def _get_trends(run_id: int) -> pd.DataFrame:
+    return mf.Run(f"GoogleTrends/{run_id}").data.output.drop("index", axis=1)
 
-    s3 = mf.S3(run=mf.Run(f"GoogleTrends/{run_id_}"))
 
-    return t.pipe(
-        s3.list_paths(),
-        t.map(lambda x: x.key),
-        t.filter(lambda x: "-completed" in x),
-        s3.get_many,
-        t.map(t.compose(pd.DataFrame, json.loads, lambda x: x.text)),
-        pd.concat,
-    ).drop("index", 1)
+def get_trends() -> pd.DataFrame:
+    """Merges latest `run_id`, and the older `run_id_old` with more salient terms."""
+
+    return (
+        _get_trends(run_id_old())
+        .append(_get_trends(run_id()))
+        .sort_values(["anchor_period", "date", "variable"])
+        # Some rows have NaT/nan date and a value of -1 because they couldn't
+        # have trends found, drop these:
+        .dropna()
+        # Drop duplicates (ignoring value column) due to merging two runs
+        .drop_duplicates(subset=["date", "anchor_period", "variable"])
+    )
