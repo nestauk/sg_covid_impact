@@ -261,6 +261,7 @@ def search_trend_norm(d):
     return pre_post_change
 
 
+<<<<<<< HEAD
 def make_weighted_trends(terms, trends):
     """Weights trend data by sector salience and volume"""
 
@@ -290,11 +291,18 @@ def make_weighted_trends(terms, trends):
 
 
 def rank_sector_exposures(trends, sector="division", weighted=True):
+=======
+def rank_sector_exposures(trends, sector="division", quantile=np.arange(0, 1.1, 0.1)):
+>>>>>>> Diversification pipeline
     """Ranks sector exposures to Covid-19
     Args:
         trends (df): normalised keyword trends
         sector (str): sector to calculate exposure for
+<<<<<<< HEAD
         approach (str): if we want to calculate a weighted org
+=======
+        quantile (list): number of segments
+>>>>>>> Diversification pipeline
     """
 
     if weighted == True:
@@ -317,7 +325,7 @@ def rank_sector_exposures(trends, sector="division", weighted=True):
                 x.assign(zscore=lambda x: zscore(-x["interest_mean"])).assign(
                     rank=lambda x: pd.qcut(
                         x["zscore"],
-                        q=np.arange(0, 1.1, 0.1),
+                        q=quantile,
                         labels=False,
                         duplicates="drop",
                     )
@@ -329,6 +337,7 @@ def rank_sector_exposures(trends, sector="division", weighted=True):
     return exposure_rank
 
 
+<<<<<<< HEAD
 def calculate_sector_exposure(weighted=True):
     """Calculates sector exposures after some weighting that takes into
     account a term's salience and its search volume
@@ -355,15 +364,19 @@ def calculate_sector_exposure(weighted=True):
 
 
 def make_exposure_shares(exposure_levels, geography="geo_nm"):
+=======
+def make_exposure_shares(exposure_levels, geography="geo_nm", variable="rank"):
+>>>>>>> Diversification pipeline
     """Aggregate shares of activity at different levels of exposure
     Args:
         exposure_levels (df): employment by lad and sector and exposure ranking
         geography (str): geography to aggregate over
+        variable (str): variable we want to calculate shares over
 
     """
 
     exp_distr = (
-        exposure_levels.groupby(["month", "rank", geography])["value"]
+        exposure_levels.groupby(["month", variable, geography])["value"]
         .sum()
         .reset_index(drop=False)
         .groupby([geography, "month"])
@@ -879,26 +892,32 @@ def plot_choro(
     return comb
 
 
-def plot_time_choro(sh, exposure_df, month, exposure=8, name="high",
-                    scale_type='linear'):
+
+def plot_time_choro(
+    sh, exposure_df, month, exposure=8, name="high exposure", exposure_var="rank",
+    scale_type='linear'
+):
     """Plots exposure choropleth
     Args:
         sh (geodf): shapefile
         exposure_df (df): exposure shares
         month (int): month to visualise
         exposure (int): threshold for high exposure
-        name (str): name for exposure variable
+        name (str): title for exposure variable
+        exposure_var (str): name for exposure variable
     """
 
-    selected = exposure_df.query(f"month == {month}").query(f"rank >= {exposure}")
+    selected = exposure_df.query(f"month == {month}").query(
+        f"{exposure_var} >= {exposure}"
+    )
 
     merged = sh.merge(selected, left_on="lad19cd", right_on="geo_cd")
 
     merged_json = json.loads(merged.to_json())
 
-    my_map = plot_choro(
-        merged_json, "share", ["Share of", f"{name} exposure"], "lad19nm",
-        scale_type=scale_type)
+
+    my_map = plot_choro(merged_json, "share", ["Share of", f"{name}"], "lad19nm",
+                        scale_type=scale_type)
 
     return my_map
 
