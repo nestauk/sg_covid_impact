@@ -1,5 +1,6 @@
 # %%
 import os
+import pickle
 import logging
 import datetime
 import requests
@@ -38,6 +39,11 @@ def make_grouped_share(df, variable, name="share"):
     return df
 
 
+def make_weighted_average(df, weight_var, value_var):
+    """Creates a weighted average"""
+    return np.sum([r[weight_var] * r[value_var] for _id, r in df.iterrows()])
+
+
 def make_section_division_lookup():
     """Creates a lookup between SIC sections and divisions"""
     sic = load_sic_taxonomy()
@@ -68,6 +74,20 @@ def make_section_division_lookup():
 
 
 # Reading functions
+def read_salience():
+    """Reads salience data"""
+    with open(f"{project_dir}/data/processed/salient_words_division.p", "rb") as infile:
+        sal = pickle.load(infile)
+
+    dfs = []
+    for k, v in sal.items():
+        v = v.assign(division=k)
+        v["freq"] = v[f"{k}_freq"]
+        v["salience"] = v[f"{k}_salience"]
+        v = v.drop(axis=1, labels=[f"{k}_freq", f"{k}_salience"])
+        dfs.append(v)
+
+    return pd.concat(dfs).reset_index(drop=False).rename(columns={"index": "keyword"})
 
 
 def read_lad_nuts1_lookup():
@@ -90,11 +110,11 @@ def read_claimant_counts():
     return cl
 
 
-def read_search_trends():
+def read_search_trends(stop_words=["love"]):
     """Read search trends"""
 
     d = pd.read_csv(
-        f"{project_dir}/data/division_search_trends.csv",
+        f"{project_dir}/data/processed/term_trends_v2.csv",
         dtype={"division": str},
         parse_dates=["date"],
     )
@@ -110,6 +130,7 @@ def read_search_trends():
     d["month"], d["year"] = [
         [getattr(x, p) for x in d["date"]] for p in ["month", "year"]
     ]
+    d = d.loc[~d["keyword"].isin(stop_words)]
 
     return d
 
@@ -240,17 +261,57 @@ def search_trend_norm(d):
     return pre_post_change
 
 
-def rank_sector_exposures(trends, sector="division"):
+def make_weighted_trends(terms, trends):
+    """Weights trend data by sector salience and volume"""
+
+    kw_merged = terms.merge(trends, on=["keyword", "division"])
+    kw_weighted = (
+        kw_merged.assign(value_salience=lambda x: x["salience"] * x["value"])
+        .groupby(["division", "month", "year"])
+        .apply(
+            lambda df: df.assign(
+                value_norm=lambda x: x["value_salience"] / x["value_salience"].sum()
+            )
+        )
+        .reset_index(drop=True)
+        .query("year==2020")[
+            [
+                "keyword",
+                "division",
+                "salience",
+                "value",
+                "value_salience",
+                "value_norm",
+                "month",
+            ]
+        ]
+    )
+    return kw_weighted
+
+
+def rank_sector_exposures(trends, sector="division", weighted=True):
     """Ranks sector exposures to Covid-19
     Args:
         trends (df): normalised keyword trends
         sector (str): sector to calculate exposure for
+        approach (str): if we want to calculate a weighted org
     """
+
+    if weighted == True:
+        mean_interest = (
+            trends.groupby([sector, "month"])
+            .apply(lambda x: make_weighted_average(x, "value_norm", "norm"))
+            .reset_index(name="interest_mean")
+        )
+    else:
+        mean_interest = (
+            trends.groupby([sector, "month"])["norm"]
+            .mean()
+            .reset_index(name="interest_mean")
+        )
+
     exposure_rank = (
-        trends.groupby([sector, "month"])["norm"]
-        .mean()
-        .reset_index(name="interest_mean")
-        .groupby("month")
+        mean_interest.groupby("month")
         .apply(
             lambda x: (
                 x.assign(zscore=lambda x: zscore(-x["interest_mean"])).assign(
@@ -266,6 +327,31 @@ def rank_sector_exposures(trends, sector="division"):
         .reset_index(drop=True)
     )
     return exposure_rank
+
+
+def calculate_sector_exposure(weighted=True):
+    """Calculates sector exposures after some weighting that takes into
+    account a term's salience and its search volume
+    """
+    logging.info("Reading data")
+    term_salience = read_salience()
+    trends_clean = (read_search_trends()
+                    .drop_duplicates(
+                        ["keyword", "division", "month", "year"],
+                         keep="first"))
+
+    logging.info("Calculating weighted trends")
+    kw_weighted = make_weighted_trends(term_salience, trends_clean)
+    kw_norm = search_trend_norm(trends_clean)
+    kw_weighted_norm = kw_norm.merge(kw_weighted, on=["keyword", "division", "month"])
+
+    logging.info("Calculating Sector exposure")
+    exposures_ranked = rank_sector_exposures(kw_weighted_norm, weighted=weighted)
+    exposures_ranked["division_name"] = exposures_ranked["division"].map(
+        _DIVISION_NAME_LOOKUP
+    )
+
+    return exposures_ranked
 
 
 def make_exposure_shares(exposure_levels, geography="geo_nm"):
@@ -504,7 +590,9 @@ def plot_keyword_tends_chart(trends, axis="months"):
     return bubbles
 
 
-def plot_ranked_exposures(ranked, sector="division", title="SIC division"):
+def plot_ranked_exposures(
+    ranked, sector="division", title="SIC division", scheme="spectral"
+):
     """Plots heatmap with exposure ranks by sector and month
     Args:
         ranked (df): sector exposure ranks by month
@@ -528,7 +616,7 @@ def plot_ranked_exposures(ranked, sector="division", title="SIC division"):
                 "rank:Q",
                 sort="descending",
                 title="Exposure rank",
-                scale=alt.Scale(scheme="redblue"),
+                scale=alt.Scale(scheme=scheme),
             ),
             tooltip=[sector, f"{sector}_name", "month", "rank"],
         )
@@ -750,8 +838,8 @@ def plot_area_composition(exposures, month, area=False, interactive=False):
 
 
 def plot_choro(
-    shapef, count_var, count_var_name, region_name="region", scheme="spectral"
-):
+    shapef, count_var, count_var_name, region_name="region", scheme="spectral",
+    scale_type='linear'):
     """This function plots an altair choropleth
 
     Args:
@@ -777,7 +865,7 @@ def plot_choro(
             color=alt.Color(
                 f"properties.{count_var}:Q",
                 title=count_var_name,
-                scale=alt.Scale(scheme="spectral"),
+                scale=alt.Scale(scheme="spectral",type=scale_type),
                 sort="descending",
             ),
             tooltip=[
@@ -791,7 +879,8 @@ def plot_choro(
     return comb
 
 
-def plot_time_choro(sh, exposure_df, month, exposure=8, name="high"):
+def plot_time_choro(sh, exposure_df, month, exposure=8, name="high",
+                    scale_type='linear'):
     """Plots exposure choropleth
     Args:
         sh (geodf): shapefile
@@ -808,8 +897,8 @@ def plot_time_choro(sh, exposure_df, month, exposure=8, name="high"):
     merged_json = json.loads(merged.to_json())
 
     my_map = plot_choro(
-        merged_json, "share", ["Share of", f"{name} exposure"], "lad19nm"
-    )
+        merged_json, "share", ["Share of", f"{name} exposure"], "lad19nm",
+        scale_type=scale_type)
 
     return my_map
 
@@ -827,4 +916,3 @@ _DIVISION_NAME_LOOKUP = extract_sic_code_description(load_sic_taxonomy(), "Divis
 if os.path.exists(_SHAPE_PATH) is False:
     logging.info("Fetching shapefiles")
     fetch_shape(_SHAPE_PATH)
-
