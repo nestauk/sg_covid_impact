@@ -109,7 +109,6 @@ def read_claimant_counts():
 
     return cl
 
-
 def read_search_trends(stop_words=["love"]):
     """Read search trends"""
 
@@ -118,6 +117,8 @@ def read_search_trends(stop_words=["love"]):
         dtype={"division": str},
         parse_dates=["date"],
     )
+
+
     d["division_name"] = d["division"].map(_DIVISION_NAME_LOOKUP)
     d["section"] = d["division"].map(_SECTION_DIVISION_LOOKUP)
     d["section_name"] = d["section"].map(_SECTION_NAME_LOOKUP)
@@ -132,6 +133,23 @@ def read_search_trends(stop_words=["love"]):
     ]
     d = d.loc[~d["keyword"].isin(stop_words)]
 
+    # Focus on top terms by division
+    if top!='all':
+        filtered_cont = []
+        for div in set(d['division']):
+            selected_df = d.loc[d['division']==div]
+            top_words = (d
+                         .groupby('keyword')['value']
+                         .mean()
+                         .sort_values(ascending=False)
+                         .index
+                         .tolist()[:top])
+            filtered_df = (selected_df.loc[
+                           selected_df['keyword'].isin(top_words)])
+            filtered_cont.append(filtered_df)
+
+        d = pd.concat(filtered_cont).reset_index(drop=True)
+    d = d .loc[~d['keyword'].isin(drop)]
     return d
 
 
@@ -844,12 +862,8 @@ def plot_area_composition(exposures, month, area=False, interactive=False,
 
 
 def plot_choro(
-    shapef,
-    count_var,
-    count_var_name,
-    region_name="region",
-    scheme="spectral",
-    scale_type="linear",
+    shapef, count_var, count_var_name, region_name="region", scheme="spectral",
+    scale_type='linear'
 ):
     """This function plots an altair choropleth
 
@@ -876,7 +890,7 @@ def plot_choro(
             color=alt.Color(
                 f"properties.{count_var}:Q",
                 title=count_var_name,
-                scale=alt.Scale(scheme="spectral", type=scale_type),
+                scale=alt.Scale(scheme="Spectral", type=scale_type),
                 sort="descending",
             ),
             tooltip=[
@@ -915,7 +929,7 @@ def plot_time_choro(
     merged = sh.merge(selected, left_on="lad19cd", right_on="geo_cd")
 
     merged_json = json.loads(merged.to_json())
-
+    
     my_map = plot_choro(
         merged_json, "share", ["Share of", f"{name}"], "lad19nm", scale_type=scale_type
     )

@@ -162,6 +162,7 @@ def plot_local_network(
     palette="Spectral_r",
     scale=1000,
     levels=10,
+    fs=(14,7),
 ):
     """Plots a local sector space network including exposure to Covid colors
     and shares of employment by sector (node)
@@ -186,7 +187,7 @@ def plot_local_network(
         .to_dict()
     )
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=fs)
 
     widths = [e[2]["weight"] / 5000 for e in graph.edges(data=True)]
 
@@ -209,8 +210,10 @@ def plot_local_network(
     cbar = plt.colorbar(sm, ticks=range(0, levels))
     cbar.set_label("Ranking in exposure to Covid-19", rotation=90, fontsize=12)
     plt.tight_layout()
+    ax.set_title(f"{area}, Month {str(month)}")
 
     ax.axis("off")
+    plt.tight_layout()
 
 
 # Diversification options based on network structure
@@ -302,7 +305,7 @@ def plot_exposure_neighbours(neighb_shares):
         )
     )
     ch = (
-        base.mark_bar().encode(
+        base.mark_bar(stroke='grey',strokeWidth=0.1).encode(
             x=alt.X("value", title="Share of neighbours"),
             tooltip=["division_name"],
             color=alt.Color(
