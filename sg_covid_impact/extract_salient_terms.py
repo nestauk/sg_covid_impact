@@ -198,3 +198,10 @@ if __name__ == "__main__":
         f"{project_dir}/data/processed/salient_words_selected.p", "wb"
     ) as outfile:
         pickle.dump(sector_keywords, outfile)
+
+    with open(
+        f"{project_dir}/data/processed/salient_words_division.p", "wb"
+    ) as outfile:
+        pickle.dump(division_salient_words, outfile)
+
+
