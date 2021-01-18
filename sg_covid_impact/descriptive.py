@@ -260,7 +260,6 @@ def search_trend_norm(d):
     ]
     return pre_post_change
 
-
 def make_weighted_trends(terms, trends):
     """Weights trend data by sector salience and volume"""
 
@@ -331,7 +330,6 @@ def rank_sector_exposures(
     )
     return exposure_rank
 
-
 def calculate_sector_exposure(weighted=True):
     """Calculates sector exposures after some weighting that takes into
     account a term's salience and its search volume
@@ -354,7 +352,6 @@ def calculate_sector_exposure(weighted=True):
     )
 
     return exposures_ranked,kw_weighted_norm
-
 
 def make_exposure_shares(exposure_levels, geography="geo_nm", variable="rank"):
     """Aggregate shares of activity at different levels of exposure
@@ -896,6 +893,7 @@ def plot_time_choro(
     name="high exposure",
     exposure_var="rank",
     scale_type="linear",
+    sh, exposure_df, month, exposure=8, name="high exposure", exposure_var="rank"
 ):
     """Plots exposure choropleth
     Args:
@@ -918,7 +916,7 @@ def plot_time_choro(
     my_map = plot_choro(
         merged_json, "share", ["Share of", f"{name}"], "lad19nm", scale_type=scale_type
     )
-
+    
     return my_map
 
 

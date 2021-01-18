@@ -326,7 +326,6 @@ def plot_exposure_neighbours(neighb_shares):
     out = alt.hconcat(ch, bar).resolve_scale(color="independent", y="shared")
     return out
 
-
 def make_national_network(p, exposures_ranked, bres, g, month=4,**kwargs):
     """Plot"""
     ranked_dict = (
