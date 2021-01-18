@@ -7,6 +7,7 @@ import networkx as nx
 import sg_covid_impact
 from sg_covid_impact.make_sic_division import extract_sic_code_description
 from sg_covid_impact.descriptive import load_sic_taxonomy
+from sg_covid_impact.altair_network import plot_altair_network
 
 project_dir = sg_covid_impact.project_dir
 
@@ -324,3 +325,65 @@ def plot_exposure_neighbours(neighb_shares):
 
     out = alt.hconcat(ch, bar).resolve_scale(color="independent", y="shared")
     return out
+
+
+def make_national_network(p, exposures_ranked, bres, g, month=4,**kwargs):
+    """Plot"""
+    ranked_dict = (
+        exposures_ranked.query(f"month=={month}")
+        .set_index("division")["rank"]
+        .to_dict()
+    )
+    size_dict = bres.groupby("division")["value"].sum().to_dict()
+    node_df = (
+        pd.DataFrame(p)
+        .T.reset_index()
+        .rename(columns={0: "x", 1: "y", "index": "node"})
+        .assign(node_name=lambda x: x["node"].map(_DIVISION_NAME_LOOKUP))
+        .assign(node_color=lambda x: x["node"].map(ranked_dict))
+        .assign(node_size=lambda x: x["node"].map(size_dict))
+    )
+    ch = plot_altair_network(
+        node_df,
+        g,
+        node_label="node_name",
+        node_size="node_size",
+        node_color="node_color",
+        **kwargs
+    )
+    return ch
+
+
+def make_local_network(p, place, exposures_ranked, bres, g, month=4,
+                       **kwargs):
+    ranked_dict = (
+        exposures_ranked.query(f"month=={month}")
+        .set_index("division")["rank"]
+        .to_dict()
+    )
+    size_dict = (
+        bres.query(f"geo_nm=='{place}'")
+        .groupby("division")["value"]
+        .sum()
+        .reset_index(drop=False)
+        .assign(share=lambda x: x["value"] / x["value"].sum())
+        .set_index("division")["share"]
+        .to_dict()
+    )
+    node_df = (
+        pd.DataFrame(p)
+        .T.reset_index()
+        .rename(columns={0: "x", 1: "y", "index": "node"})
+        .assign(node_name=lambda x: x["node"].map(_DIVISION_NAME_LOOKUP))
+        .assign(node_color=lambda x: x["node"].map(ranked_dict))
+        .assign(node_size=lambda x: x["node"].map(size_dict))
+    )
+    ch = plot_altair_network(
+        node_df,
+        g,
+        node_label="node_name",
+        node_size="node_size",
+        node_color="node_color",
+        **kwargs
+    )
+    return ch.properties(title=', '.join([place,'month '+str(month)]))

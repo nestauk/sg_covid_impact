@@ -261,7 +261,6 @@ def search_trend_norm(d):
     return pre_post_change
 
 
-<<<<<<< HEAD
 def make_weighted_trends(terms, trends):
     """Weights trend data by sector salience and volume"""
 
@@ -290,19 +289,15 @@ def make_weighted_trends(terms, trends):
     return kw_weighted
 
 
-def rank_sector_exposures(trends, sector="division", weighted=True):
-=======
-def rank_sector_exposures(trends, sector="division", quantile=np.arange(0, 1.1, 0.1)):
->>>>>>> Diversification pipeline
+def rank_sector_exposures(
+    trends, sector="division", weighted=True, quantile=np.arange(0, 1.1, 0.1)
+):
     """Ranks sector exposures to Covid-19
     Args:
         trends (df): normalised keyword trends
         sector (str): sector to calculate exposure for
-<<<<<<< HEAD
         approach (str): if we want to calculate a weighted org
-=======
         quantile (list): number of segments
->>>>>>> Diversification pipeline
     """
 
     if weighted == True:
@@ -337,17 +332,15 @@ def rank_sector_exposures(trends, sector="division", quantile=np.arange(0, 1.1, 
     return exposure_rank
 
 
-<<<<<<< HEAD
 def calculate_sector_exposure(weighted=True):
     """Calculates sector exposures after some weighting that takes into
     account a term's salience and its search volume
     """
     logging.info("Reading data")
     term_salience = read_salience()
-    trends_clean = (read_search_trends()
-                    .drop_duplicates(
-                        ["keyword", "division", "month", "year"],
-                         keep="first"))
+    trends_clean = read_search_trends().drop_duplicates(
+        ["keyword", "division", "month", "year"], keep="first"
+    )
 
     logging.info("Calculating weighted trends")
     kw_weighted = make_weighted_trends(term_salience, trends_clean)
@@ -360,13 +353,10 @@ def calculate_sector_exposure(weighted=True):
         _DIVISION_NAME_LOOKUP
     )
 
-    return exposures_ranked
+    return exposures_ranked,kw_weighted_norm
 
 
-def make_exposure_shares(exposure_levels, geography="geo_nm"):
-=======
 def make_exposure_shares(exposure_levels, geography="geo_nm", variable="rank"):
->>>>>>> Diversification pipeline
     """Aggregate shares of activity at different levels of exposure
     Args:
         exposure_levels (df): employment by lad and sector and exposure ranking
@@ -459,16 +449,16 @@ def plot_trend_point(
 
     base = alt.Chart(table).encode(
         x=f"{x_axis}:O",
-        y=alt.Y(y_axis, title="Claimant count normalised"),
+        y=alt.Y(y_axis, title=y_title),
         tooltip=[geo_var, y_axis],
     )
     point = base.mark_point(filled=True, size=45).encode(
         color=alt.condition(
             selector,
             alt.Color(
-                f"{color}:N",
-                scale=alt.Scale(scheme="redblue"),
-                legend=None,
+                f"{color}:Q",
+                scale=alt.Scale(scheme='Spectral'),
+                #legend=None,
                 sort="descending",
             ),
             alt.value("grey"),
@@ -478,9 +468,9 @@ def plot_trend_point(
         color=alt.condition(
             selector,
             alt.Color(
-                f"{color}:N",
-                scale=alt.Scale(scheme="redblue"),
-                legend=None,
+                f"{color}:Q",
+                scale=alt.Scale(scheme="Spectral"),
+                #legend=None,
                 sort="descending",
             ),
             alt.value("grey"),
@@ -753,7 +743,8 @@ def plot_exposure_comparison(exp_levels_comp, month="interactive"):
     return nat_comp
 
 
-def plot_area_composition(exposures, month, area=False, interactive=False):
+def plot_area_composition(exposures, month, area=False, interactive=False,
+                          legend_columns=1):
     """Plot the compositon of an area
     Args:
         exposures (df): exposure shares by sector
@@ -774,7 +765,7 @@ def plot_area_composition(exposures, month, area=False, interactive=False):
                 tooltip=["division_name"],
                 color=alt.Color(
                     "section",
-                    legend=alt.Legend(columns=1),
+                    legend=alt.Legend(columns=5,orient='bottom'),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
                 order=alt.Order("share", sort="descending"),
@@ -807,7 +798,7 @@ def plot_area_composition(exposures, month, area=False, interactive=False):
                 color=alt.Color(
                     "section",
                     title="Section",
-                    legend=alt.Legend(columns=1),
+                    legend=alt.Legend(columns=3,orient='bottom'),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
                 order=alt.Order("share", sort="descending"),
@@ -851,8 +842,13 @@ def plot_area_composition(exposures, month, area=False, interactive=False):
 
 
 def plot_choro(
-    shapef, count_var, count_var_name, region_name="region", scheme="spectral",
-    scale_type='linear'):
+    shapef,
+    count_var,
+    count_var_name,
+    region_name="region",
+    scheme="spectral",
+    scale_type="linear",
+):
     """This function plots an altair choropleth
 
     Args:
@@ -872,13 +868,13 @@ def plot_choro(
 
     choropleth = (  # Filled polygons and tooltip
         base_map.transform_calculate(region=f"datum.properties.{region_name}")
-        .mark_geoshape(filled=True, stroke="white", strokeWidth=0.1)
+        .mark_geoshape(filled=True, stroke="darkgrey", strokeWidth=0.2)
         .encode(
             size=f"properties.{count_var}:Q",
             color=alt.Color(
                 f"properties.{count_var}:Q",
                 title=count_var_name,
-                scale=alt.Scale(scheme="spectral",type=scale_type),
+                scale=alt.Scale(scheme="spectral", type=scale_type),
                 sort="descending",
             ),
             tooltip=[
@@ -892,10 +888,14 @@ def plot_choro(
     return comb
 
 
-
 def plot_time_choro(
-    sh, exposure_df, month, exposure=8, name="high exposure", exposure_var="rank",
-    scale_type='linear'
+    sh,
+    exposure_df,
+    month,
+    exposure,
+    name="high exposure",
+    exposure_var="rank",
+    scale_type="linear",
 ):
     """Plots exposure choropleth
     Args:
@@ -909,15 +909,15 @@ def plot_time_choro(
 
     selected = exposure_df.query(f"month == {month}").query(
         f"{exposure_var} >= {exposure}"
-    )
+    ).groupby('geo_cd')['share'].sum().reset_index(drop=False)
 
     merged = sh.merge(selected, left_on="lad19cd", right_on="geo_cd")
 
     merged_json = json.loads(merged.to_json())
 
-
-    my_map = plot_choro(merged_json, "share", ["Share of", f"{name}"], "lad19nm",
-                        scale_type=scale_type)
+    my_map = plot_choro(
+        merged_json, "share", ["Share of", f"{name}"], "lad19nm", scale_type=scale_type
+    )
 
     return my_map
 
