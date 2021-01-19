@@ -20,7 +20,7 @@ def run_id() -> int:
     return sg_covid_impact.config["flows"]["companies_house"]["run_id"]
 
 
-GETTER = flow_getter("CompaniesHouseDump", run_id=run_id())
+GETTER = flow_getter("CompaniesHouseMergeDumpFlow", run_id=run_id())
 
 
 @cache_getter_fn
@@ -35,9 +35,14 @@ def get_address() -> pd.DataFrame:
 
 @cache_getter_fn
 def get_sector() -> pd.DataFrame:
-    return GETTER.sectors
+    """Returns most up-to-date sector rankings."""
+    return (
+        GETTER.organisationsector.sort_values("date")
+        .drop_duplicates(["company_number", "rank"], keep="last")
+        .rename(columns={"date": "data_dump_date"})
+    )
 
 
 @cache_getter_fn
 def get_name() -> pd.DataFrame:
-    return GETTER.names
+    return GETTER.organisationname
