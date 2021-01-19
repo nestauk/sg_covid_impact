@@ -133,23 +133,23 @@ def read_search_trends(stop_words=["love"]):
     ]
     d = d.loc[~d["keyword"].isin(stop_words)]
 
-    # Focus on top terms by division
-    if top!='all':
-        filtered_cont = []
-        for div in set(d['division']):
-            selected_df = d.loc[d['division']==div]
-            top_words = (d
-                         .groupby('keyword')['value']
-                         .mean()
-                         .sort_values(ascending=False)
-                         .index
-                         .tolist()[:top])
-            filtered_df = (selected_df.loc[
-                           selected_df['keyword'].isin(top_words)])
-            filtered_cont.append(filtered_df)
+    # # Focus on top terms by division
+    # if top!='all':
+    #     filtered_cont = []
+    #     for div in set(d['division']):
+    #         selected_df = d.loc[d['division']==div]
+    #         top_words = (d
+    #                      .groupby('keyword')['value']
+    #                      .mean()
+    #                      .sort_values(ascending=False)
+    #                      .index
+    #                      .tolist()[:top])
+    #         filtered_df = (selected_df.loc[
+    #                        selected_df['keyword'].isin(top_words)])
+    #         filtered_cont.append(filtered_df)
 
-        d = pd.concat(filtered_cont).reset_index(drop=True)
-    d = d .loc[~d['keyword'].isin(drop)]
+    #     d = pd.concat(filtered_cont).reset_index(drop=True)
+    # d = d .loc[~d['keyword'].isin(drop)]
     return d
 
 
