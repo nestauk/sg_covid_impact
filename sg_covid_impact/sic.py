@@ -38,7 +38,11 @@ def save_sic_taxonomy():
 
 def load_sic_taxonomy():
     """Load SIC taxonomy into a dataframe"""
-    return pd.read_excel(_SIC_OUTPUT_FILE, skiprows=1, dtype={"Division": str})
+    return pd.read_excel(
+        _SIC_OUTPUT_FILE,
+        skiprows=1,
+        dtype={"Division": str, "Group": str, "Class": str, "Sub Class": str},
+    )
 
 
 if __name__ == "__main__":
@@ -48,7 +52,6 @@ if __name__ == "__main__":
 
     if not os.path.exists(_SIC_LOOKUP_FILE):
         logging.info("Making code - name lookup")
-        name_lookup = load_sic_taxonomy().pipe(extract_sic_code_description, 
-                                               "Division")
+        name_lookup = load_sic_taxonomy().pipe(extract_sic_code_description, "Division")
         with open(_SIC_LOOKUP_FILE, "w") as outfile:
             json.dump(name_lookup, outfile)
