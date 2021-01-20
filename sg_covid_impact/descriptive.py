@@ -186,8 +186,11 @@ def read_shape():
 def assign_nuts1_to_lad(c):
     """Assigns nuts1 to LAD"""
 
-    if c in _LAD_NUTS1_LOOKUP.keys():
+    if pd.isnull(c) is True:
+        return np.nan
+    elif c in _LAD_NUTS1_LOOKUP.keys():
         return _LAD_NUTS1_LOOKUP[c]
+
     elif c[0] == "S":
         return "Scotland"
     elif c[0] == "W":
@@ -886,13 +889,6 @@ def plot_choro(
 
 
 def plot_time_choro(
-    sh,
-    exposure_df,
-    month,
-    exposure,
-    name="high exposure",
-    exposure_var="rank",
-    scale_type="linear",
     sh, exposure_df, month, exposure=8, name="high exposure", exposure_var="rank"
 ):
     """Plots exposure choropleth
