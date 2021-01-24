@@ -22,6 +22,7 @@ from jacc_hammer.top_matches import get_top_matches_chunked
 # from glass_ai.flows.glass_clean import CleanGlass
 # from glass_ai.flows.companies_house_dump import CompaniesHouseDump
 # from glass_ai import flow_getter
+from sg_covid_impact import project_dir
 from sg_covid_impact.utils.metaflow import flow_getter
 
 
@@ -67,12 +68,9 @@ class GlassHouseMatch(FlowSpec):
             "CompaniesHouseMergeDumpFlow", run_id=self.companies_house_flow_id
         )
 
-        # Interim results alongside other run data in `.metaflow`
-        # self.tmp_dir = "/".join(
-        #     [get_metadata(), ".metaflow", current.flow_name, current.run_id]
-        # ).strip("local@")
-        self.tmp_dir = Path("/tmp/jacchammer")
-        self.tmp_dir.mkdir(exist_ok=True)
+        run_id = current.origin_run_id or current.run_id
+        self.tmp_dir = Path(f"{project_dir}/data/interim/{current.flow_name}/{run_id}").resolve()
+        self.tmp_dir.mkdir(parents=True, exist_ok=True)
 
         if self.test_mode:
             nrows = 10_000
