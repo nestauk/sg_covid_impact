@@ -109,7 +109,6 @@ def read_claimant_counts():
 
     return cl
 
-
 def read_search_trends(stop_words=["love"]):
     """Read search trends"""
 
@@ -119,6 +118,10 @@ def read_search_trends(stop_words=["love"]):
         parse_dates=["date"],
     )
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5f5dc1f0a3f84436badd343c3ce5f4c827e95ed4
     d["division_name"] = d["division"].map(_DIVISION_NAME_LOOKUP)
     d["section"] = d["division"].map(_SECTION_DIVISION_LOOKUP)
     d["section_name"] = d["section"].map(_SECTION_NAME_LOOKUP)
@@ -866,12 +869,8 @@ def plot_area_composition(
 
 
 def plot_choro(
-    shapef,
-    count_var,
-    count_var_name,
-    region_name="region",
-    scheme="spectral",
-    scale_type="linear",
+    shapef, count_var, count_var_name, region_name="region", scheme="spectral",
+    scale_type='linear'
 ):
     """This function plots an altair choropleth
 
@@ -919,8 +918,7 @@ def plot_time_choro(
     exposure,
     name="high exposure",
     exposure_var="rank",
-    scale_type="linear",
-):
+    scale_type="linear"):
     """Plots exposure choropleth
     Args:
         sh (geodf): shapefile
