@@ -9,6 +9,12 @@ This section provides an overview of where stakeholders from Scottish government
 
 # Contributors
 
+# Functionality
+
+## Data processing pipeline
+
+run `python sg_covid_impact/extract_salient_terms.py` to extract salient terms from Glass company descriptions extracted fron  websites
+
 ## Flow conventions
 
 For each flow defined in this repository create:
