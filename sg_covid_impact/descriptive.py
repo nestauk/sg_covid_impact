@@ -109,6 +109,7 @@ def read_claimant_counts():
 
     return cl
 
+
 def read_search_trends(stop_words=["love"]):
     """Read search trends"""
 
@@ -117,7 +118,6 @@ def read_search_trends(stop_words=["love"]):
         dtype={"division": str},
         parse_dates=["date"],
     )
-
 
     d["division_name"] = d["division"].map(_DIVISION_NAME_LOOKUP)
     d["section"] = d["division"].map(_SECTION_DIVISION_LOOKUP)
@@ -278,6 +278,7 @@ def search_trend_norm(d):
     ]
     return pre_post_change
 
+
 def make_weighted_trends(terms, trends):
     """Weights trend data by sector salience and volume
     ArgsL
@@ -353,6 +354,7 @@ def rank_sector_exposures(
     )
     return exposure_rank
 
+
 def calculate_sector_exposure(weighted=True):
     """Calculates sector exposures after some weighting that takes into
     account a term's salience and its search volume
@@ -374,7 +376,8 @@ def calculate_sector_exposure(weighted=True):
         _DIVISION_NAME_LOOKUP
     )
 
-    return exposures_ranked,kw_weighted_norm
+    return exposures_ranked, kw_weighted_norm
+
 
 def make_exposure_shares(exposure_levels, geography="geo_nm", variable="rank"):
     """Aggregate shares of activity at different levels of exposure
@@ -477,8 +480,8 @@ def plot_trend_point(
             selector,
             alt.Color(
                 f"{color}:Q",
-                scale=alt.Scale(scheme='Spectral'),
-                #legend=None,
+                scale=alt.Scale(scheme="Spectral"),
+                # legend=None,
                 sort="descending",
             ),
             alt.value("grey"),
@@ -490,7 +493,7 @@ def plot_trend_point(
             alt.Color(
                 f"{color}:Q",
                 scale=alt.Scale(scheme="Spectral"),
-                #legend=None,
+                # legend=None,
                 sort="descending",
             ),
             alt.value("grey"),
@@ -763,8 +766,9 @@ def plot_exposure_comparison(exp_levels_comp, month="interactive"):
     return nat_comp
 
 
-def plot_area_composition(exposures, month, area=False, interactive=False,
-                          legend_columns=1):
+def plot_area_composition(
+    exposures, month, area=False, interactive=False, legend_columns=1
+):
     """Plot the compositon of an area
     Args:
         exposures (df): exposure shares by sector
@@ -785,7 +789,7 @@ def plot_area_composition(exposures, month, area=False, interactive=False,
                 tooltip=["division_name"],
                 color=alt.Color(
                     "section",
-                    legend=alt.Legend(columns=5,orient='bottom'),
+                    legend=alt.Legend(columns=5, orient="bottom"),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
                 order=alt.Order("share", sort="descending"),
@@ -818,7 +822,7 @@ def plot_area_composition(exposures, month, area=False, interactive=False,
                 color=alt.Color(
                     "section",
                     title="Section",
-                    legend=alt.Legend(columns=3,orient='bottom'),
+                    legend=alt.Legend(columns=3, orient="bottom"),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
                 order=alt.Order("share", sort="descending"),
@@ -862,8 +866,12 @@ def plot_area_composition(exposures, month, area=False, interactive=False,
 
 
 def plot_choro(
-    shapef, count_var, count_var_name, region_name="region", scheme="spectral",
-    scale_type='linear'
+    shapef,
+    count_var,
+    count_var_name,
+    region_name="region",
+    scheme="spectral",
+    scale_type="linear",
 ):
     """This function plots an altair choropleth
 
@@ -911,7 +919,8 @@ def plot_time_choro(
     exposure,
     name="high exposure",
     exposure_var="rank",
-    scale_type="linear"):
+    scale_type="linear",
+):
     """Plots exposure choropleth
     Args:
         sh (geodf): shapefile
@@ -922,14 +931,18 @@ def plot_time_choro(
         exposure_var (str): name for exposure variable
     """
 
-    selected = exposure_df.query(f"month == {month}").query(
-        f"{exposure_var} >= {exposure}"
-    ).groupby('geo_cd')['share'].sum().reset_index(drop=False)
+    selected = (
+        exposure_df.query(f"month == {month}")
+        .query(f"{exposure_var} >= {exposure}")
+        .groupby("geo_cd")["share"]
+        .sum()
+        .reset_index(drop=False)
+    )
 
     merged = sh.merge(selected, left_on="lad19cd", right_on="geo_cd")
 
     merged_json = json.loads(merged.to_json())
-    
+
     my_map = plot_choro(
         merged_json, "share", ["Share of", f"{name}"], "lad19nm", scale_type=scale_type
     )
