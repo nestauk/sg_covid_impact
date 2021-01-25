@@ -25,6 +25,7 @@ dependencies:
   - pandas-profiling
   - statsmodels
   - filelock
+  - sklearn
 
   - pip:
     # Put any pip dependencies here (and no conda ones anywhere below)
