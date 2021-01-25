@@ -1,6 +1,8 @@
 # %%
 """Metaflow pipeline to fuzzy match two name sets.
 
+TODO: refactor into research_daps
+
 TODO: Run remotely and in isolated environment. Currently dependency on
 `sg_covid_impact` and setting of `self.tmp_dir` prevents this.
 """
@@ -8,7 +10,7 @@ import logging
 from pathlib import Path
 
 from cytoolz.curried import curry, pipe
-from metaflow import FlowSpec, Parameter, step, current, get_metadata, namespace
+from metaflow import FlowSpec, Parameter, step, current, namespace
 from jacc_hammer.fuzzy_hash import (
     Cos_config,
     Fuzzy_config,
@@ -18,10 +20,6 @@ from jacc_hammer.fuzzy_hash import (
 from jacc_hammer.name_clean import preproc_names
 from jacc_hammer.top_matches import get_top_matches_chunked
 
-# import glass_ai
-# from glass_ai.flows.glass_clean import CleanGlass
-# from glass_ai.flows.companies_house_dump import CompaniesHouseDump
-# from glass_ai import flow_getter
 from sg_covid_impact import project_dir
 from sg_covid_impact.utils.metaflow import flow_getter
 
@@ -69,7 +67,9 @@ class GlassHouseMatch(FlowSpec):
         )
 
         run_id = current.origin_run_id or current.run_id
-        self.tmp_dir = Path(f"{project_dir}/data/interim/{current.flow_name}/{run_id}").resolve()
+        self.tmp_dir = Path(
+            f"{project_dir}/data/interim/{current.flow_name}/{run_id}"
+        ).resolve()
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
 
         if self.test_mode:
