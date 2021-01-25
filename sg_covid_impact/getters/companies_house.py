@@ -39,7 +39,8 @@ def get_sector() -> pd.DataFrame:
     return (
         GETTER.organisationsector.sort_values("date")
         .drop_duplicates(["company_number", "rank"], keep="last")
-        .rename(columns={"date": "data_dump_date"})
+        .assign(SIC4_code=lambda x: x.sector_id.str.slice(0, 4))
+        .rename(columns={"date": "data_dump_date", "sector_id": "SIC5_code"})
     )
 
 
