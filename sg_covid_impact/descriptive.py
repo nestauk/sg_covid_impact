@@ -262,14 +262,19 @@ def search_trend_norm(d):
 
 
 def make_weighted_trends(terms, trends):
-    """Weights trend data by sector salience and volume"""
-
+    """Weights trend data by sector salience and volume
+    ArgsL
+        terms (df): list of terms extracted from glass descriptions including
+        their salience
+        trends (df): google search results associated to terms
+    """
+    # Merges terms and trends
     kw_merged = terms.merge(trends, on=["keyword", "division"])
-    kw_weighted = (
+    kw_weighted = (  # First it weights search volumes by salience
         kw_merged.assign(value_salience=lambda x: x["salience"] * x["value"])
         .groupby(["division", "month", "year"])
         .apply(
-            lambda df: df.assign(
+            lambda df: df.assign(  # Rescales normalised values
                 value_norm=lambda x: x["value_salience"] / x["value_salience"].sum()
             )
         )
@@ -335,10 +340,9 @@ def calculate_sector_exposure(weighted=True):
     """
     logging.info("Reading data")
     term_salience = read_salience()
-    trends_clean = (read_search_trends()
-                    .drop_duplicates(
-                        ["keyword", "division", "month", "year"],
-                         keep="first"))
+    trends_clean = read_search_trends().drop_duplicates(
+        ["keyword", "division", "month", "year"], keep="first"
+    )
 
     logging.info("Calculating weighted trends")
     kw_weighted = make_weighted_trends(term_salience, trends_clean)
@@ -838,8 +842,13 @@ def plot_area_composition(exposures, month, area=False, interactive=False):
 
 
 def plot_choro(
-    shapef, count_var, count_var_name, region_name="region", scheme="spectral",
-    scale_type='linear'):
+    shapef,
+    count_var,
+    count_var_name,
+    region_name="region",
+    scheme="spectral",
+    scale_type="linear",
+):
     """This function plots an altair choropleth
 
     Args:
@@ -865,7 +874,7 @@ def plot_choro(
             color=alt.Color(
                 f"properties.{count_var}:Q",
                 title=count_var_name,
-                scale=alt.Scale(scheme="spectral",type=scale_type),
+                scale=alt.Scale(scheme="spectral", type=scale_type),
                 sort="descending",
             ),
             tooltip=[
@@ -879,8 +888,9 @@ def plot_choro(
     return comb
 
 
-def plot_time_choro(sh, exposure_df, month, exposure=8, name="high",
-                    scale_type='linear'):
+def plot_time_choro(
+    sh, exposure_df, month, exposure=8, name="high", scale_type="linear"
+):
     """Plots exposure choropleth
     Args:
         sh (geodf): shapefile
@@ -897,8 +907,12 @@ def plot_time_choro(sh, exposure_df, month, exposure=8, name="high",
     merged_json = json.loads(merged.to_json())
 
     my_map = plot_choro(
-        merged_json, "share", ["Share of", f"{name} exposure"], "lad19nm",
-        scale_type=scale_type)
+        merged_json,
+        "share",
+        ["Share of", f"{name} exposure"],
+        "lad19nm",
+        scale_type=scale_type,
+    )
 
     return my_map
 
