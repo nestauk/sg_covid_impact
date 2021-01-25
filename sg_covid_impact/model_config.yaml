@@ -5,6 +5,10 @@ flows:
     run_id: 633
   glass:
     run_id: 414
+  glass_house:
+    params:
+      test_mode: false
+    run_id: 920
   nomis:
     params:
       test_mode: false
