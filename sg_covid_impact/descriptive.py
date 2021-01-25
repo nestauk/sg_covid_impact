@@ -261,14 +261,19 @@ def search_trend_norm(d):
     return pre_post_change
 
 def make_weighted_trends(terms, trends):
-    """Weights trend data by sector salience and volume"""
-
+    """Weights trend data by sector salience and volume
+    ArgsL
+        terms (df): list of terms extracted from glass descriptions including
+        their salience
+        trends (df): google search results associated to terms
+    """
+    # Merges terms and trends
     kw_merged = terms.merge(trends, on=["keyword", "division"])
-    kw_weighted = (
+    kw_weighted = (  # First it weights search volumes by salience
         kw_merged.assign(value_salience=lambda x: x["salience"] * x["value"])
         .groupby(["division", "month", "year"])
         .apply(
-            lambda df: df.assign(
+            lambda df: df.assign(  # Rescales normalised values
                 value_norm=lambda x: x["value_salience"] / x["value_salience"].sum()
             )
         )
@@ -892,9 +897,7 @@ def plot_time_choro(
     exposure,
     name="high exposure",
     exposure_var="rank",
-    scale_type="linear",
-    sh, exposure_df, month, exposure=8, name="high exposure", exposure_var="rank"
-):
+    scale_type="linear"):
     """Plots exposure choropleth
     Args:
         sh (geodf): shapefile
@@ -916,7 +919,6 @@ def plot_time_choro(
     my_map = plot_choro(
         merged_json, "share", ["Share of", f"{name}"], "lad19nm", scale_type=scale_type
     )
-    
     return my_map
 
 
