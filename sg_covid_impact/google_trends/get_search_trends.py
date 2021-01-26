@@ -1,13 +1,12 @@
 from pickle import load
 
 import pandas as pd
+from metaflow import namespace
 
 import sg_covid_impact
 from sg_covid_impact.getters.gtab import get_trends
-from metaflow import namespace
 
 namespace(None)
-
 project_dir = sg_covid_impact.project_dir
 
 

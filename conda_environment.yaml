@@ -32,6 +32,7 @@ dependencies:
     - ratelim
     # - git+ssh://git@github.com/nestauk/jacc-hammer.git@legacy
     - pytrends
+    - gtab
     - altair-saver
     - webdriver-manager
     - selenium

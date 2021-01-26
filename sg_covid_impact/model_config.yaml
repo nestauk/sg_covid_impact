@@ -1,10 +1,17 @@
 flows:
   companies_house:
     run_id: 978
-  nspl:
-    run_id: 633
   glass:
     run_id: 414
+  google_search:
+    params:
+      anchor_periods:
+        jan2019_onward: 2019-01-01 2021-01-25
+      term_salience_threshold: 0.1
+      test_mode: false
+    run_id: 982
+  nspl:
+    run_id: 633
   glass_house:
     params:
       test_mode: false
@@ -27,5 +34,3 @@ diversification:
   lads: ['East Lothian','Aberdeenshire','Stirling']
 modelling:
   nuts1: 'Scotland'
-
-
