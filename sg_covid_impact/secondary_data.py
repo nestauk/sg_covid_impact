@@ -89,7 +89,7 @@ def simd_population_share_quantiles(
     )
     # Sums shares living in high deprivation areas
     sim_high_depr_share = (
-        sim_pop_share.loc[:, :high_depr + 1].sum(axis=1).reset_index(name="value")
+        sim_pop_share.loc[:, : high_depr + 1].sum(axis=1).reset_index(name="value")
     )
 
     return sim_high_depr_share

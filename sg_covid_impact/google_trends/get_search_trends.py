@@ -5,6 +5,7 @@ import pandas as pd
 import sg_covid_impact
 from sg_covid_impact.getters.gtab import get_trends
 from metaflow import namespace
+
 namespace(None)
 
 project_dir = sg_covid_impact.project_dir
@@ -43,6 +44,7 @@ def _division_term_lookup_v2() -> pd.DataFrame:
             .reset_index()
         )
 
+
 def make_division_term_lookup() -> pd.DataFrame:
     """DataFrame giving salient keywords for each division.
 
@@ -73,5 +75,6 @@ if __name__ == "__main__":
         .sort_values(["division", "anchor_period", "date", "keyword"])
     )
 
-
-    division_trends.to_csv(f"{project_dir}/data/processed/term_trends_v2.csv",index=False)
+    division_trends.to_csv(
+        f"{project_dir}/data/processed/term_trends_v2.csv", index=False
+    )

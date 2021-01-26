@@ -23,7 +23,7 @@ from sg_covid_impact.descriptive import (
     plot_time_choro,
     plot_area_composition,
     plot_ranked_exposures,
-    make_exposure_shares
+    make_exposure_shares,
 )
 from sg_covid_impact.utils.altair_save_utils import (
     google_chrome_driver_setup,
@@ -32,6 +32,7 @@ from sg_covid_impact.utils.altair_save_utils import (
 from sg_covid_impact.make_sic_division import extract_sic_code_description
 
 import sg_covid_impact
+
 project_dir = sg_covid_impact.project_dir
 
 # Prep
@@ -47,10 +48,10 @@ os.makedirs(f"{FIG_PATH}/png", exist_ok=True)
 os.makedirs(f"{FIG_PATH}/html", exist_ok=True)
 
 # model config
-with open(f"{project_dir}/sg_covid_impact/model_config.yaml",'r') as infile:
-    out_params = yaml.safe_load(infile)['descriptive']
+with open(f"{project_dir}/sg_covid_impact/model_config.yaml", "r") as infile:
+    out_params = yaml.safe_load(infile)["descriptive"]
 
-nuts1_focus = out_params['nuts1']
+nuts1_focus = out_params["nuts1"]
 
 
 # Lookups
@@ -61,15 +62,14 @@ _DIVISION_NAME_LOOKUP = extract_sic_code_description(load_sic_taxonomy(), "Divis
 # Read and plot claimant counts
 cl = read_claimant_counts()
 cl_norm = claimant_count_norm(cl)
-claimant_nuts1 = plot_trend_point(cl_norm.query(f"nuts1=='{nuts1_focus}'"),
-                                     x_axis="month")
+claimant_nuts1 = plot_trend_point(
+    cl_norm.query(f"nuts1=='{nuts1_focus}'"), x_axis="month"
+)
 
-save_altair(claimant_nuts1, f"claimant_counts_{nuts1_focus}", driver,
-            path=FIG_PATH)
+save_altair(claimant_nuts1, f"claimant_counts_{nuts1_focus}", driver, path=FIG_PATH)
 
 cl_trend = plot_claimant_trend_all_nuts(cl_norm)
-save_altair(cl_trend, "claimant_counts_nuts1", driver,
-            path=FIG_PATH)
+save_altair(cl_trend, "claimant_counts_nuts1", driver, path=FIG_PATH)
 
 # Read, process and plot search trends
 d = read_search_trends()
@@ -78,8 +78,7 @@ trends_normalised = search_trend_norm(d)
 
 month_trends = plot_keyword_tends_chart(trends_normalised)
 
-save_altair(month_trends, "keyword_trends", driver=driver,
-            path=FIG_PATH)
+save_altair(month_trends, "keyword_trends", driver=driver, path=FIG_PATH)
 
 # Calculate sector exposures
 
@@ -87,14 +86,12 @@ exposures_ranked, keyword_weights = calculate_sector_exposure()
 
 ranked_ch = plot_ranked_exposures(exposures_ranked)
 
-save_altair(ranked_ch, "sector_exposures", driver=driver,
-            path=FIG_PATH)
+save_altair(ranked_ch, "sector_exposures", driver=driver, path=FIG_PATH)
 
 # Read official data
 bres = read_official()
 
-exposure_levels = exposures_ranked.merge(bres, left_on="division", 
-                                         right_on="division")
+exposure_levels = exposures_ranked.merge(bres, left_on="division", right_on="division")
 
 exposure_lad = make_exposure_shares(exposure_levels)
 
@@ -102,13 +99,15 @@ exposure_lad = make_exposure_shares(exposure_levels)
 exposure_levels_ = exposure_levels.copy()
 exposure_levels_nat_comp = make_exposure_shares_detailed(exposure_levels_, "nuts1")
 
-nat_exp = plot_emp_shares_specialisation(exposure_levels_nat_comp, month=10,
-                                         nuts1=nuts1_focus)
+nat_exp = plot_emp_shares_specialisation(
+    exposure_levels_nat_comp, month=10, nuts1=nuts1_focus
+)
 
 save_altair(
-    nat_exp.properties(title=f"{nuts1_focus}, October"), 
-    f"exposure_shares_{nuts1_focus}", 
-    driver=driver,path=FIG_PATH
+    nat_exp.properties(title=f"{nuts1_focus}, October"),
+    f"exposure_shares_{nuts1_focus}",
+    driver=driver,
+    path=FIG_PATH,
 )
 
 # Exposure by LAD
@@ -137,8 +136,7 @@ exposure_trend = plot_trend_point(
     high_exposure_nuts1.query("month>2"), **exp_share_vars
 ).properties(width=250, height=250)
 
-save_altair(exposure_trend, "exposure_trend_lads", driver=driver,
-            path=FIG_PATH)
+save_altair(exposure_trend, "exposure_trend_lads", driver=driver, path=FIG_PATH)
 
 # Maps
 shapef = read_shape()
@@ -151,7 +149,7 @@ ms = alt.hconcat(
         plot_time_choro(
             shapef, exposure_lad_codes_nuts1, m, 8, scale_type="quantile"
         ).properties(height=200, width=275, title=calendar.month_abbr[m])
-        for m in out_params['months']
+        for m in out_params["months"]
     ]
 )
 
@@ -160,15 +158,11 @@ profiles = [
     plot_area_composition(
         exposure_lad_detailed, month=month, interactive=False, area=area
     ).properties(height=200, width=250)
-    for area, month in zip(
-        out_params['lads'], 
-        out_params['months']
-    )
+    for area, month in zip(out_params["lads"], out_params["months"])
 ]
 
 profiles_series = alt.hconcat(*profiles).resolve_scale(color="shared")
 
 map_profiles = alt.vconcat(ms, profiles_series).configure_view(strokeWidth=0)
 
-save_altair(map_profiles, f"geo_profiles_{nuts1_focus}", driver=driver,
-            path=FIG_PATH)
+save_altair(map_profiles, f"geo_profiles_{nuts1_focus}", driver=driver, path=FIG_PATH)
