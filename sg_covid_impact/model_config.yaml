@@ -1,6 +1,6 @@
 flows:
   companies_house:
-    run_id: 413
+    run_id: 978
   glass:
     run_id: 414
   google_search:
@@ -11,15 +11,27 @@ flows:
       test_mode: false
     run_id: 829
     run_id_old: 585
+  nspl:
+    run_id: 633
+  glass_house:
+    params:
+      test_mode: false
+    run_id: 920
   nomis:
     params:
       test_mode: false
       years:
       - 2018
     run_id: 386
-  glass:
-    run_id: 414
-  companies_house:
-    run_id: 413
 fetch_urls:
   sic_taxonomy: https://www.ons.gov.uk/file?uri=/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007/sic2007summaryofstructurtcm6.xls
+descriptive:
+  nuts1: 'Scotland'
+  months: [4,8,10]
+  lads: ["Highland", "East Dunbartonshire", "Dumfries and Galloway"]
+diversification:
+  nuts1: 'Scotland'
+  months: [4,7,10]
+  lads: ['East Lothian','Aberdeenshire','Stirling']
+modelling:
+  nuts1: 'Scotland'

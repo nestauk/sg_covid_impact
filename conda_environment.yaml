@@ -25,6 +25,7 @@ dependencies:
   - pandas-profiling
   - statsmodels
   - filelock
+  - sklearn
 
   - pip:
     # Put any pip dependencies here (and no conda ones anywhere below)
@@ -35,6 +36,9 @@ dependencies:
     - altair-saver
     - webdriver-manager
     - selenium
+    - fsspec
+    - s3fs
+    - python-Levenshtein
 
   # Tooling requirements (don't edit)
     - tornado>=5.0  # Stops luigi breaking jupyter
