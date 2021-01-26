@@ -1,11 +1,12 @@
 from pickle import load
 
 import pandas as pd
+from metaflow import namespace
 
 import sg_covid_impact
 from sg_covid_impact.getters.gtab import get_trends
 
-
+namespace(None)
 project_dir = sg_covid_impact.project_dir
 
 
@@ -71,4 +72,8 @@ if __name__ == "__main__":
         make_division_term_lookup()
         .merge(trends.rename(columns={"variable": "keyword"}), on="keyword", how="left")
         .sort_values(["division", "anchor_period", "date", "keyword"])
+    )
+
+    division_trends.to_csv(
+        f"{project_dir}/data/processed/term_trends_v2.csv", index=False
     )

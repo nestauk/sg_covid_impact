@@ -45,6 +45,42 @@ def load_sic_taxonomy():
     )
 
 
+def make_sic_lookups():
+    """Produces SIC code - name lookups we use to label tables later
+    Args:
+        path (str): the path to the sic summary file
+    Returns:
+        Lookup between sic codes and sic descriptions
+        Lookup between section names and sic descriptions
+        Lookup between sic codes and corresponding sections
+    """
+
+    # SIC names to code lookup
+    sic2007 = load_sic_taxonomy()
+    sic4_name_lookup = extract_sic_code_description(sic2007, "Class")
+
+    # Create a section to description lookup
+    section_names = sic2007.dropna(axis=0, subset=["SECTION"]).iloc[:, :2]
+
+    section_name_lookup = {
+        s.strip(): s.strip()
+        + f": {' '.join([x.capitalize() for x in descr.lower().split(' ')])}"
+        for s, descr in zip(section_names["SECTION"], section_names["Unnamed: 1"])
+    }
+    # Division-sic4 lookup
+    sic2007_ = sic2007.copy()
+
+    sic2007_["SECTION"].fillna(method="ffill", inplace=True)
+    sic2007_.dropna(axis=0, subset=["Class"], inplace=True)
+    sic2007_["sic_4"] = [re.sub("\\.", "", x) for x in sic2007_["Class"]]
+    sic2007_["section_descr"] = (
+        sic2007_["SECTION"].apply(lambda x: x.strip()).map(section_name_lookup)
+    )
+    sic4_to_div_lookup = sic2007_.set_index("sic_4")["section_descr"].to_dict()
+
+    return sic4_name_lookup, section_name_lookup, sic4_to_div_lookup
+
+
 if __name__ == "__main__":
 
     if not os.path.exists(_SIC_OUTPUT_FILE):
