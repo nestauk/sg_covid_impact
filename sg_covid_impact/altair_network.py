@@ -1,4 +1,3 @@
-# %%
 # Plot network data using altair
 import pandas as pd
 import altair as alt

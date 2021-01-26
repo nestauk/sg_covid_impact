@@ -1,4 +1,3 @@
-# %%
 """Functions for Glass description processing and extraction of salient terms 
 by sector
 """

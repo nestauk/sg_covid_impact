@@ -1,4 +1,3 @@
-# %%
 # Analysis of diversification opportunities
 import yaml
 import altair as alt

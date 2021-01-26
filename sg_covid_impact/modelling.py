@@ -1,4 +1,3 @@
-# %%
 # Functions from Scottish modelling
 
 import os

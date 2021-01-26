@@ -1,4 +1,3 @@
-# %%
 # Charts for Scotland analysis
 import yaml
 import os

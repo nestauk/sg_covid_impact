@@ -1,4 +1,3 @@
-# %%
 # Models relations between variables of interest
 import yaml
 import altair as alt

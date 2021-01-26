@@ -1,4 +1,3 @@
-# %%
 """Extract salient terms in Glass descriptions by sector
 """
 import logging
