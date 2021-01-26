@@ -30,7 +30,9 @@ def get_organisation() -> pd.DataFrame:
 
 @cache_getter_fn
 def get_address() -> pd.DataFrame:
-    return GETTER.address
+    return GETTER.organisationaddress.drop_duplicates(
+        ["company_number", "address_id"]
+    ).merge(GETTER.address, on="address_id")
 
 
 @cache_getter_fn
