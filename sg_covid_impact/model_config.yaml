@@ -21,5 +21,7 @@ diversification:
   nuts1: 'Scotland'
   months: [4,7,10]
   lads: ['East Lothian','Aberdeenshire','Stirling']
+modelling:
+  nuts1: 'Scotland'
 
 
