@@ -23,7 +23,7 @@ def get_trends() -> pd.DataFrame:
         _get_trends(run_id()).sort_values(["anchor_period", "date", "variable"])
         # Some rows have NaT/nan date and a value of -1 because they couldn't
         # have trends found, drop these:
-        .dropna()
+        .loc[lambda x: x.value >= 0]
         # Drop duplicates (ignoring value column) due to merging two runs
         .drop_duplicates(subset=["date", "anchor_period", "variable"])
     )
