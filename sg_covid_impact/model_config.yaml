@@ -17,3 +17,15 @@ flows:
     run_id: 386
 fetch_urls:
   sic_taxonomy: https://www.ons.gov.uk/file?uri=/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007/sic2007summaryofstructurtcm6.xls
+descriptive:
+  nuts1: 'Scotland'
+  months: [4,8,10]
+  lads: ["Highland", "East Dunbartonshire", "Dumfries and Galloway"]
+diversification:
+  nuts1: 'Scotland'
+  months: [4,7,10]
+  lads: ['East Lothian','Aberdeenshire','Stirling']
+modelling:
+  nuts1: 'Scotland'
+
+
