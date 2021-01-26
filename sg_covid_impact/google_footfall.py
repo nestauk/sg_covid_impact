@@ -27,15 +27,15 @@ def process_footfall_data(country_code):
     """Reads and processes country data for a country
     Args:
         country_code (str): country iso code
-        TODO: adapt to extract subregional data! 
+        TODO: adapt to extract subregional data!
     """
     print(country_code)
     logging.info(f"Processing Google footfall data for {country_code}")
     c = pd.read_csv(f"{_TARGET_DIR}/2020_{country_code}_Region_Mobility_Report.csv")
-    
+
     # Only keep the rows with subregion field missing (ie the national data)
     c = c.loc[c["sub_region_1"].isna()]
-    
+
     # Make tidy
     c_long = c.dropna(axis=1).melt(
         id_vars=["country_region", "country_region_code", "date"]
@@ -44,8 +44,7 @@ def process_footfall_data(country_code):
 
 
 def load_uk_footfall():
-    """Loads processed google footfall data for the uk
-    """
+    """Loads processed google footfall data for the uk"""
     return pd.read_csv(f"{project_dir}/data/processed/google_footfall_GB.csv")
 
 
@@ -54,7 +53,4 @@ if __name__ == "__main__":
         os.makedirs(_TARGET_DIR, exist_ok=True)
     fetch_footfall_data()
     c_long = process_footfall_data(country_code="GB")
-    c_long.to_csv(
-                  f"{project_dir}/data/processed/google_footfall_GB.csv", 
-                  index=False
-                  )
+    c_long.to_csv(f"{project_dir}/data/processed/google_footfall_GB.csv", index=False)

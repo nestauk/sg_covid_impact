@@ -150,9 +150,8 @@ diversification_lad_detailed["divers_ranking"] = diversification_lad_detailed[
 ].fillna("Less exposed")
 # Calculate diversification shares
 diversification_shares = make_exposure_shares(
-    diversification_lad_detailed,
-    geography="geo_cd",
-    variable="divers_ranking").query("divers_ranking != 'Less exposed'")
+    diversification_lad_detailed, geography="geo_cd", variable="divers_ranking"
+).query("divers_ranking != 'Less exposed'")
 
 diversification_nuts = diversification_shares.assign(
     nuts1=lambda x: x["geo_cd"].map(assign_nuts1_to_lad)

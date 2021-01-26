@@ -162,7 +162,7 @@ def plot_local_network(
     palette="Spectral_r",
     scale=1000,
     levels=10,
-    fs=(14,7),
+    fs=(14, 7),
 ):
     """Plots a local sector space network including exposure to Covid colors
     and shares of employment by sector (node)
@@ -305,7 +305,7 @@ def plot_exposure_neighbours(neighb_shares):
         )
     )
     ch = (
-        base.mark_bar(stroke='grey',strokeWidth=0.1).encode(
+        base.mark_bar(stroke="grey", strokeWidth=0.1).encode(
             x=alt.X("value", title="Share of neighbours"),
             tooltip=["division_name"],
             color=alt.Color(
@@ -329,7 +329,8 @@ def plot_exposure_neighbours(neighb_shares):
     out = alt.hconcat(ch, bar).resolve_scale(color="independent", y="shared")
     return out
 
-def make_national_network(p, exposures_ranked, bres, g, month=4,**kwargs):
+
+def make_national_network(p, exposures_ranked, bres, g, month=4, **kwargs):
     """Plot"""
     ranked_dict = (
         exposures_ranked.query(f"month=={month}")
@@ -351,13 +352,12 @@ def make_national_network(p, exposures_ranked, bres, g, month=4,**kwargs):
         node_label="node_name",
         node_size="node_size",
         node_color="node_color",
-        **kwargs
+        **kwargs,
     )
     return ch
 
 
-def make_local_network(p, place, exposures_ranked, bres, g, month=4,
-                       **kwargs):
+def make_local_network(p, place, exposures_ranked, bres, g, month=4, **kwargs):
     ranked_dict = (
         exposures_ranked.query(f"month=={month}")
         .set_index("division")["rank"]
@@ -386,6 +386,6 @@ def make_local_network(p, place, exposures_ranked, bres, g, month=4,
         node_label="node_name",
         node_size="node_size",
         node_color="node_color",
-        **kwargs
+        **kwargs,
     )
-    return ch.properties(title=', '.join([place,'month '+str(month)]))
+    return ch.properties(title=", ".join([place, "month " + str(month)]))

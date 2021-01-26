@@ -17,7 +17,7 @@ from sg_covid_impact.make_sic_division import (
 )
 from sg_covid_impact.utils.altair_save_utils import (
     google_chrome_driver_setup,
-    save_altair
+    save_altair,
 )
 
 from sg_covid_impact.sic import load_sic_taxonomy, extract_sic_code_description
@@ -201,8 +201,7 @@ if __name__ == "__main__":
 
     train_test_size = 300000
 
-    div_code_description = extract_sic_code_description(load_sic_taxonomy(),
-                                                        "Division")
+    div_code_description = extract_sic_code_description(load_sic_taxonomy(), "Division")
     div_sect_lookup, section_name_lookup = make_section_division_lookup()
 
     logging.info("Creating glass - ch dataset")
@@ -231,12 +230,12 @@ if __name__ == "__main__":
 
     # Validate results
     out = validate_results(preds_df, actuals, thres=0.05)
-    perf,sort_divisions = process_validation_outputs(out)
+    perf, sort_divisions = process_validation_outputs(out)
 
     # Visualise validation outputs
     driver = google_chrome_driver_setup()
-    perf_chart = plot_model_performance(perf,sort_divisions)
-    save_altair(perf_chart,"appendix_model_validation",driver=driver)
+    perf_chart = plot_model_performance(perf, sort_divisions)
+    save_altair(perf_chart, "appendix_model_validation", driver=driver)
 
     # Apply model to population of companies and save results
     X_all = count_vect.transform(gl_sector["description"])

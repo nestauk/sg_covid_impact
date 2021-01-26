@@ -25,15 +25,18 @@ def node_layer(
 
     if node_size in node_df.columns:
         node_chart = node_chart.encode(
-            size=alt.Size(node_size,title=kwargs['node_size_title'], 
-                          legend=alt.Legend(orient="bottom"))
+            size=alt.Size(
+                node_size,
+                title=kwargs["node_size_title"],
+                legend=alt.Legend(orient="bottom"),
+            )
         )
 
     if node_color in node_df.columns:
         node_chart = node_chart.encode(
             color=alt.Color(
                 node_color,
-                title=kwargs['node_color_title'],
+                title=kwargs["node_color_title"],
                 legend=alt.Legend(columns=2),
                 scale=alt.Scale(scheme="Spectral"),
                 sort="descending",
@@ -88,7 +91,7 @@ def calculate_edge_positions(graph, node_pos_lookup, edge_scale):
     return edges_pos_df, weighted
 
 
-def edge_layer(edges_pos_df, weighted, edge_opacity,**kwargs):
+def edge_layer(edges_pos_df, weighted, edge_opacity, **kwargs):
     """Creates edge layer in the plot"""
     edge_chart = (
         alt.Chart(edges_pos_df)
@@ -97,9 +100,11 @@ def edge_layer(edges_pos_df, weighted, edge_opacity,**kwargs):
     )
     if weighted is True:
         edge_chart = edge_chart.encode(
-            strokeWidth=alt.StrokeWidth("weight", 
-                                        title=kwargs['edge_weight_title'],
-                                        legend=alt.Legend(orient="bottom"))
+            strokeWidth=alt.StrokeWidth(
+                "weight",
+                title=kwargs["edge_weight_title"],
+                legend=alt.Legend(orient="bottom"),
+            )
         )
     return edge_chart
 
@@ -151,14 +156,13 @@ def plot_altair_network(
         graph, node_pos_lookup, edge_scale
     )
 
-    edge_plot = edge_layer(edge_positions, weighted, edge_opacity,**kwargs)
+    edge_plot = edge_layer(edge_positions, weighted, edge_opacity, **kwargs)
 
     # Combine plots
 
     net_plot = (
-        (node_plot + edge_plot)
-        .properties(title=kwargs['title'])
-        #.configure_axis(grid=False)
-        #.configure_view(strokeWidth=0)
+        (node_plot + edge_plot).properties(title=kwargs["title"])
+        # .configure_axis(grid=False)
+        # .configure_view(strokeWidth=0)
     )
     return net_plot

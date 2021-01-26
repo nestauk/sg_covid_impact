@@ -77,6 +77,7 @@ def make_claimant_data():
 
     return last_date, claimant_proc
 
+
 def read_claimant_data():
     return pd.read_csv(_CLAIM_FILE)
 
