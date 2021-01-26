@@ -1,7 +1,7 @@
 # Jupytext config file
 
 # Always pair ipynb notebooks to py:percent files
-default_jupytext_formats = "ipynb,py:percent"
+default_jupytext_formats = "notebooks///ipynb,notebooks///py:percent"
 
 # Comment out magics (allows code formatting)
 comment_magics = true

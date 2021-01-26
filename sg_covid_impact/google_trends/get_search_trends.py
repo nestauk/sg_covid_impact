@@ -1,4 +1,3 @@
-# %%
 from pickle import load
 
 import pandas as pd
