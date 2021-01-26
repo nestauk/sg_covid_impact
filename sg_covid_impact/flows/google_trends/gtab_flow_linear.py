@@ -1,4 +1,3 @@
-# %%
 """Metaflow pipeline to fetch salient terms for SIC divisions using Google trends."""
 import json
 import logging
