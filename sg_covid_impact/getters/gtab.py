@@ -1,21 +1,7 @@
-# %%
-import json
-from typing import Optional
-
 import pandas as pd
 import metaflow as mf
-import toolz.curried as t
 
-from sg_covid_impact.utils.metaflow import flow_getter, cache_getter_fn
 import sg_covid_impact
-
-
-def run_id_old() -> int:
-    """Get `run_id` for flow
-
-    NOTE: This is loaded from __init__.py not from file
-    """
-    return sg_covid_impact.config["flows"]["google_search"]["run_id_old"]
 
 
 def run_id() -> int:
@@ -34,9 +20,7 @@ def get_trends() -> pd.DataFrame:
     """Merges latest `run_id`, and the older `run_id_old` with more salient terms."""
 
     return (
-        _get_trends(run_id_old())
-        .append(_get_trends(run_id()))
-        .sort_values(["anchor_period", "date", "variable"])
+        _get_trends(run_id()).sort_values(["anchor_period", "date", "variable"])
         # Some rows have NaT/nan date and a value of -1 because they couldn't
         # have trends found, drop these:
         .dropna()
