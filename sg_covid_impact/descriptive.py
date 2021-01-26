@@ -109,6 +109,7 @@ def read_claimant_counts():
 
     return cl
 
+
 def read_search_trends(stop_words=["love"]):
     """Read search trends"""
 
@@ -117,11 +118,6 @@ def read_search_trends(stop_words=["love"]):
         dtype={"division": str},
         parse_dates=["date"],
     )
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 5f5dc1f0a3f84436badd343c3ce5f4c827e95ed4
     d["division_name"] = d["division"].map(_DIVISION_NAME_LOOKUP)
     d["section"] = d["division"].map(_SECTION_DIVISION_LOOKUP)
     d["section_name"] = d["section"].map(_SECTION_NAME_LOOKUP)
@@ -706,6 +702,90 @@ def plot_exposure_evol(exposure_levels, mode="single", geo=None, columns=None):
     return output
 
 
+def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
+    """Plots levels of employment and specialisation in sectors with
+    different levels of exposure to Covid-19
+    Args:
+        exp_df (df): df with levels of employment by sector and exposure to Covid-19
+        month (int): month to focus on
+        nuts1 (str): nuts region to focus on
+    """
+
+    exposure_nuts = (
+        exp_df.query(f"nuts1 == '{nuts1}'").query(f"month=={month}").query("share>0")
+    )
+    exp_df[f"is_{nuts1}"] = [x == nuts1 for x in exp_df["nuts1"]]
+
+    exposure_sort = (
+        exposure_nuts.sort_values(
+            ["section", "rank", "share"], ascending=[True, False, False]
+        )["division"]
+    ).tolist()
+
+    exposure_barch = (
+        alt.Chart(exposure_nuts)
+        .mark_bar(stroke="black", strokeWidth=0.3)
+        .encode(
+            x=alt.X("share", title="Share of employment"),
+            y=alt.Y("division", sort=exposure_sort, axis=alt.Axis(labels=False)),
+            color=alt.Color(
+                "rank",
+                title="Exposure rank",
+                legend=alt.Legend(orient="bottom"),
+                sort="descending",
+                scale=alt.Scale(scheme="Spectral"),
+            ),
+            tooltip=["division_name"],
+        )
+    ).properties(height=500, width=250)
+
+    specialisation_month = exp_df.query(f"month=={month}")
+
+    specialisation_nuts = (
+        specialisation_month.pivot_table(
+            index=["division", "division_name", "rank"],
+            columns=[f"is_{nuts1}"],
+            values="share",
+        )
+        .rename(columns={False: f"not {nuts1}", True: f"{nuts1}"})
+        .assign(norm=lambda x: (x[f"{nuts1}"] / x[f"not {nuts1}"]))
+        .assign(ruler=1)
+        .reset_index(drop=False)
+    )
+
+    specialisation_bar = (
+        alt.Chart(specialisation_nuts)
+        .mark_point(filled=True, stroke="black", strokeWidth=0.3)
+        .transform_filter(alt.datum.norm > 0)
+        .encode(
+            x=alt.X(
+                "norm",
+                title="Relative specialisation (log)",
+                scale=alt.Scale(type="log"),
+            ),
+            y=alt.Y(
+                "division", sort=exposure_sort, title=None, axis=alt.Axis(labels=False)
+            ),
+            color=alt.Color(
+                "rank",
+                title="Exposure rank",
+                legend=alt.Legend(orient="bottom"),
+                sort="descending",
+                scale=alt.Scale(scheme="Spectral"),
+            ),
+            tooltip=["division_name"],
+        )
+    ).properties(height=500, width=250)
+    specialisation_ruler = (
+        alt.Chart(specialisation_nuts)
+        .mark_rule(stroke="black", strokeDash=[2, 1])
+        .encode(x="ruler")
+    )
+
+    nat_exp = alt.hconcat(exposure_barch, specialisation_bar + specialisation_ruler)
+    return nat_exp
+
+
 def plot_exposure_comparison(exp_levels_comp, month="interactive"):
     """Plot comparing exposure shares in Scotland and rest of UK
     Args:
@@ -869,8 +949,12 @@ def plot_area_composition(
 
 
 def plot_choro(
-    shapef, count_var, count_var_name, region_name="region", scheme="spectral",
-    scale_type='linear'
+    shapef,
+    count_var,
+    count_var_name,
+    region_name="region",
+    scheme="spectral",
+    scale_type="linear",
 ):
     """This function plots an altair choropleth
 
@@ -918,7 +1002,8 @@ def plot_time_choro(
     exposure,
     name="high exposure",
     exposure_var="rank",
-    scale_type="linear"):
+    scale_type="linear",
+):
     """Plots exposure choropleth
     Args:
         sh (geodf): shapefile

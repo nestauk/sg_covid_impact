@@ -17,6 +17,19 @@ Run `python sg_covid_impact/extract_salient_terms.py` to extract salient terms f
 
 Run `python sg_covid_impact/sector_prediction.py` to predict industry labels based on company descriptions
 
+## Data analysis and plotting
+
+Run `python sg_covid_impact/make_report_descriptive.py` to plot exposure to Covid-19
+
+Run `python sg_covid_impact/make_report_diversification.py` to plot diversification from Covid-19
+
+Run `python sg_covid_impact/make_report_modelling.py` to plot outputs from modelling relations between key variables
+
+The output charts are stored in `figures/scotland`.
+
+You can change some of the parameters used to produce the charts in `sg_covid_impact/model_config.yaml`
+
+
 ## Flow conventions
 
 For each flow defined in this repository create:
