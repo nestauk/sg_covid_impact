@@ -132,6 +132,23 @@ def read_search_trends(stop_words=["love"]):
     ]
     d = d.loc[~d["keyword"].isin(stop_words)]
 
+    # # Focus on top terms by division
+    # if top!='all':
+    #     filtered_cont = []
+    #     for div in set(d['division']):
+    #         selected_df = d.loc[d['division']==div]
+    #         top_words = (d
+    #                      .groupby('keyword')['value']
+    #                      .mean()
+    #                      .sort_values(ascending=False)
+    #                      .index
+    #                      .tolist()[:top])
+    #         filtered_df = (selected_df.loc[
+    #                        selected_df['keyword'].isin(top_words)])
+    #         filtered_cont.append(filtered_df)
+
+    #     d = pd.concat(filtered_cont).reset_index(drop=True)
+    # d = d .loc[~d['keyword'].isin(drop)]
     return d
 
 
@@ -260,6 +277,7 @@ def search_trend_norm(d):
     ]
     return pre_post_change
 
+
 def make_weighted_trends(terms, trends):
     """Weights trend data by sector salience and volume
     ArgsL
@@ -335,6 +353,7 @@ def rank_sector_exposures(
     )
     return exposure_rank
 
+
 def calculate_sector_exposure(weighted=True):
     """Calculates sector exposures after some weighting that takes into
     account a term's salience and its search volume
@@ -356,7 +375,8 @@ def calculate_sector_exposure(weighted=True):
         _DIVISION_NAME_LOOKUP
     )
 
-    return exposures_ranked,kw_weighted_norm
+    return exposures_ranked, kw_weighted_norm
+
 
 def make_exposure_shares(exposure_levels, geography="geo_nm", variable="rank"):
     """Aggregate shares of activity at different levels of exposure
@@ -459,8 +479,8 @@ def plot_trend_point(
             selector,
             alt.Color(
                 f"{color}:Q",
-                scale=alt.Scale(scheme='Spectral'),
-                #legend=None,
+                scale=alt.Scale(scheme="Spectral"),
+                # legend=None,
                 sort="descending",
             ),
             alt.value("grey"),
@@ -472,7 +492,7 @@ def plot_trend_point(
             alt.Color(
                 f"{color}:Q",
                 scale=alt.Scale(scheme="Spectral"),
-                #legend=None,
+                # legend=None,
                 sort="descending",
             ),
             alt.value("grey"),
@@ -682,6 +702,90 @@ def plot_exposure_evol(exposure_levels, mode="single", geo=None, columns=None):
     return output
 
 
+def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
+    """Plots levels of employment and specialisation in sectors with
+    different levels of exposure to Covid-19
+    Args:
+        exp_df (df): df with levels of employment by sector and exposure to Covid-19
+        month (int): month to focus on
+        nuts1 (str): nuts region to focus on
+    """
+
+    exposure_nuts = (
+        exp_df.query(f"nuts1 == '{nuts1}'").query(f"month=={month}").query("share>0")
+    )
+    exp_df[f"is_{nuts1}"] = [x == nuts1 for x in exp_df["nuts1"]]
+
+    exposure_sort = (
+        exposure_nuts.sort_values(
+            ["section", "rank", "share"], ascending=[True, False, False]
+        )["division"]
+    ).tolist()
+
+    exposure_barch = (
+        alt.Chart(exposure_nuts)
+        .mark_bar(stroke="black", strokeWidth=0.3)
+        .encode(
+            x=alt.X("share", title="Share of employment"),
+            y=alt.Y("division", sort=exposure_sort, axis=alt.Axis(labels=False)),
+            color=alt.Color(
+                "rank",
+                title="Exposure rank",
+                legend=alt.Legend(orient="bottom"),
+                sort="descending",
+                scale=alt.Scale(scheme="Spectral"),
+            ),
+            tooltip=["division_name"],
+        )
+    ).properties(height=500, width=250)
+
+    specialisation_month = exp_df.query(f"month=={month}")
+
+    specialisation_nuts = (
+        specialisation_month.pivot_table(
+            index=["division", "division_name", "rank"],
+            columns=[f"is_{nuts1}"],
+            values="share",
+        )
+        .rename(columns={False: f"not {nuts1}", True: f"{nuts1}"})
+        .assign(norm=lambda x: (x[f"{nuts1}"] / x[f"not {nuts1}"]))
+        .assign(ruler=1)
+        .reset_index(drop=False)
+    )
+
+    specialisation_bar = (
+        alt.Chart(specialisation_nuts)
+        .mark_point(filled=True, stroke="black", strokeWidth=0.3)
+        .transform_filter(alt.datum.norm > 0)
+        .encode(
+            x=alt.X(
+                "norm",
+                title="Relative specialisation (log)",
+                scale=alt.Scale(type="log"),
+            ),
+            y=alt.Y(
+                "division", sort=exposure_sort, title=None, axis=alt.Axis(labels=False)
+            ),
+            color=alt.Color(
+                "rank",
+                title="Exposure rank",
+                legend=alt.Legend(orient="bottom"),
+                sort="descending",
+                scale=alt.Scale(scheme="Spectral"),
+            ),
+            tooltip=["division_name"],
+        )
+    ).properties(height=500, width=250)
+    specialisation_ruler = (
+        alt.Chart(specialisation_nuts)
+        .mark_rule(stroke="black", strokeDash=[2, 1])
+        .encode(x="ruler")
+    )
+
+    nat_exp = alt.hconcat(exposure_barch, specialisation_bar + specialisation_ruler)
+    return nat_exp
+
+
 def plot_exposure_comparison(exp_levels_comp, month="interactive"):
     """Plot comparing exposure shares in Scotland and rest of UK
     Args:
@@ -745,8 +849,9 @@ def plot_exposure_comparison(exp_levels_comp, month="interactive"):
     return nat_comp
 
 
-def plot_area_composition(exposures, month, area=False, interactive=False,
-                          legend_columns=1):
+def plot_area_composition(
+    exposures, month, area=False, interactive=False, legend_columns=1
+):
     """Plot the compositon of an area
     Args:
         exposures (df): exposure shares by sector
@@ -767,7 +872,7 @@ def plot_area_composition(exposures, month, area=False, interactive=False,
                 tooltip=["division_name"],
                 color=alt.Color(
                     "section",
-                    legend=alt.Legend(columns=5,orient='bottom'),
+                    legend=alt.Legend(columns=5, orient="bottom"),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
                 order=alt.Order("share", sort="descending"),
@@ -800,7 +905,7 @@ def plot_area_composition(exposures, month, area=False, interactive=False,
                 color=alt.Color(
                     "section",
                     title="Section",
-                    legend=alt.Legend(columns=3,orient='bottom'),
+                    legend=alt.Legend(columns=3, orient="bottom"),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
                 order=alt.Order("share", sort="descending"),
@@ -876,7 +981,7 @@ def plot_choro(
             color=alt.Color(
                 f"properties.{count_var}:Q",
                 title=count_var_name,
-                scale=alt.Scale(scheme="spectral", type=scale_type),
+                scale=alt.Scale(scheme="Spectral", type=scale_type),
                 sort="descending",
             ),
             tooltip=[
@@ -897,7 +1002,8 @@ def plot_time_choro(
     exposure,
     name="high exposure",
     exposure_var="rank",
-    scale_type="linear"):
+    scale_type="linear",
+):
     """Plots exposure choropleth
     Args:
         sh (geodf): shapefile
@@ -908,9 +1014,13 @@ def plot_time_choro(
         exposure_var (str): name for exposure variable
     """
 
-    selected = exposure_df.query(f"month == {month}").query(
-        f"{exposure_var} >= {exposure}"
-    ).groupby('geo_cd')['share'].sum().reset_index(drop=False)
+    selected = (
+        exposure_df.query(f"month == {month}")
+        .query(f"{exposure_var} >= {exposure}")
+        .groupby("geo_cd")["share"]
+        .sum()
+        .reset_index(drop=False)
+    )
 
     merged = sh.merge(selected, left_on="lad19cd", right_on="geo_cd")
 
