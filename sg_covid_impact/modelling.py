@@ -1,22 +1,22 @@
-# Script with functions from Scottish modelling
+# Functions from Scottish modelling
 
 import os
 import logging
 import pandas as pd
 import numpy as np
+import altair as alt
 import sg_covid_impact
-from sg_covid_impact.complexity import calc_eci
+from sg_covid_impact.getters.nomis import get_BRES
+from sg_covid_impact.complexity import calc_eci, create_lq
 from sg_covid_impact.secondary_data import read_secondary
 from sg_covid_impact.descriptive import (
     read_official,
-    read_lad_nuts1_lookup,
     assign_nuts1_to_lad,
     calculate_sector_exposure,
     read_claimant_counts,
     claimant_count_norm,
     make_exposure_shares,
     make_high_exposure,
-    make_exposure_shares_detailed,
 )
 from sg_covid_impact.make_sic_division import (
     extract_sic_code_description,
@@ -29,6 +29,8 @@ from sg_covid_impact.diversification import (
     make_diversification_options,
     make_sector_space_base,
 )
+
+
 import statsmodels.api as sm
 
 project_dir = sg_covid_impact.project_dir
@@ -200,8 +202,25 @@ def make_secondary_variables():
     secondary_out = secondary.rename(columns={"geography_code": "geo_cd"})[
         ["geo_cd", "variable", "value"]
     ]
+    compl = make_complexity()
 
-    return secondary_out
+    return pd.concat([secondary_out, compl])
+
+
+def make_complexity():
+    """Make complexity variable"""
+    bres_sic_wide = get_BRES().pivot_table(
+        index="geo_cd", columns="SIC4", values="value"
+    )
+
+    compl = (
+        calc_eci(create_lq(bres_sic_wide, binary=True))
+        .reset_index(drop=False)
+        .assign(variable="eci")
+        .rename(columns={"eci": "value"})
+        .assign(value=lambda x: -x.value)
+    )
+    return compl
 
 
 def make_geo_average(ser):
@@ -304,6 +323,159 @@ def make_regression_table(
     return data
 
 
+def make_tidy_agg_table(
+    reg_table, exp_vars, out_vars, secondary_vars, nuts_focus="Scotland"
+):
+    """Correlate our vars (exposure and diversification) with secondary
+    Args:
+        reg_table
+        exp_vars (list): variables that capture exposure
+        out_vars (list): variables that capture outputs
+        secondary_vars (list): secondary variables
+    """
+
+    # Create scatter table
+    scatter_table = (
+        reg_table.copy()
+        .assign(nuts1=lambda x: x["geo_cd"].apply(assign_nuts1_to_lad))
+        .assign(is_focus=lambda x: x["nuts1"] == nuts_focus)
+        .assign(geo_nm=lambda x: x["geo_cd"].map(lad_name_code_lu))
+        .rename(columns={"is_focus": f"is_{nuts_focus}"})
+    )
+
+    tidy_agg_table = [
+        (
+            scatter_table.groupby("geo_cd")[sel_vars]
+            .mean()
+            .reset_index(drop=False)
+            .melt(
+                id_vars=["geo_cd"],
+                var_name=var_name + "_var",
+                value_name=var_name + "_value",
+            )
+            .set_index("geo_cd")
+        )
+        for sel_vars, var_name in zip(
+            [exp_vars, out_vars, secondary_vars], ["exposure", "claimant", "secondary"]
+        )
+    ]
+
+    tidy_agg_df = (
+        pd.merge(tidy_agg_table[0], tidy_agg_table[1], on="geo_cd")
+        .merge(tidy_agg_table[2], on="geo_cd")
+        .reset_index(drop=False)
+        .assign(nuts1=lambda x: x["geo_cd"].apply(assign_nuts1_to_lad))
+        .assign(is_scotland=lambda x: x["nuts1"] == nuts_focus)
+        .assign(geo_nm=lambda x: x["geo_cd"].map(lad_name_code_lu))
+        .query("geo_nm !='Isles of Scilly'")
+        .query(f"nuts1=='{nuts_focus}'")
+    )
+    return tidy_agg_df
+
+
+def plot_variable_correlations(tidy_agg_df):
+    """Plots bivariate correlations between variables of interest"""
+    base_scatter = alt.Chart(tidy_agg_df).encode(
+        x=alt.X(
+            "exposure_value", scale=alt.Scale(zero=False), axis=alt.Axis(title=None)
+        ),
+        y=alt.Y(
+            "secondary_value", scale=alt.Scale(zero=False), axis=alt.Axis(title=None)
+        ),
+    )
+
+    base_point = base_scatter.mark_point(
+        filled=True, stroke="black", strokeWidth=0.2
+    ).encode(
+        color=alt.Color(
+            "claimant_value:Q", scale=alt.Scale(scheme="Spectral"), sort="descending"
+        ),
+        tooltip=["geo_nm"],
+    )
+
+    base_reg = base_scatter.transform_regression(
+        "exposure_value", "secondary_value"
+    ).mark_line(strokeWidth=2, strokeDash=[2, 1])
+
+    params = (
+        base_scatter.transform_regression(
+            "exposure_value", "secondary_value", params=True
+        )
+        .mark_text(align="left", color="red")
+        .encode(
+            x=alt.value(150), y=alt.value(20), text=alt.Text("rSquared:N", format=".3")
+        )
+    )
+
+    scatters = (
+        (base_point + base_reg + params)
+        .properties(width=200, height=100)
+        .facet(row="secondary_var", column="exposure_var")
+        .resolve_scale(y="independent", x="independent")
+    )
+
+    return scatters
+
+
+def plot_correlation_evolution(reg_table, nuts_focus="Scotland"):
+    """Plots evolution of correlation between variables"""
+    my_vars = [
+        "cl_count",
+        "cl_count_norm",
+        "exposure_share_lagged",
+        "low_div_share_lagged",
+    ]
+
+    # Calculates correlations between variables over months
+    reg_table_ = reg_table.copy()
+    reg_table_["nuts1"] = reg_table_["geo_cd"].apply(assign_nuts1_to_lad)
+    reg_table_[f"is_{nuts_focus}"] = [
+        nuts_focus if x == nuts_focus else f"Not {nuts_focus}"
+        for x in reg_table_["nuts1"]
+    ]
+
+    reg_results = (
+        reg_table_.groupby(["month", f"is_{nuts_focus}"])
+        .apply(lambda x: x[my_vars].corr())
+        .reset_index(drop=False)[
+            [
+                "month",
+                f"is_{nuts_focus}",
+                "level_2",
+                "exposure_share_lagged",
+                "low_div_share_lagged",
+            ]
+        ]
+    )
+    reg_results = (
+        reg_results.loc[reg_results["level_2"].isin(["cl_count", "cl_count_norm"])]
+        .melt(id_vars=["month", "level_2", f"is_{nuts_focus}"])
+        .reset_index(drop=False)
+    )
+
+    reg_results["x"] = 0
+
+    corr_ch = (
+        alt.Chart(reg_results)
+        .mark_point(filled=True)
+        .encode(x="month", y=alt.Y("value", title="Correlation"), color="variable")
+        .properties(height=100, width=120)
+    )
+
+    corr_line = (
+        alt.Chart(reg_results)
+        .mark_rule(strokeDash=[3, 1], stroke="black")
+        .encode(y="x")
+    ).properties(height=100, width=120)
+
+    corr_evol = (corr_ch + corr_line).facet(
+        column=alt.Column("level_2", title="Claimant variable"),
+        row=alt.Row(f"is_{nuts_focus}", title=None),
+    )
+
+    return corr_evol
+
+
 def fit_regression(table, dep, indep_focus, fe=True):
     """Fits regression
     Args:
@@ -353,6 +525,93 @@ def extract_model_results(model, name):
 
     return res
 
+
+# def plot_variable_correlations(exp, div, cl, secondary):
+#     """Plots correlations between variables in our model
+#     Args:
+#         exp (df): share of emp in high exposure sectors
+#         div (df): share of emp in low diversification sectors
+#         cl (df): claimant counts
+#         secondary (df): secondary variables
+#     """
+#     all_vars_df_wide = pd.concat(
+#         [make_geo_average(x) for x in [div, exp, cl, secondary]], axis=1
+#     )
+
+#     all_vars_df_corr = all_vars_df_wide.corr()
+
+#     # Calculate correlations
+#     exp_div_corr = (
+#         all_vars_df_corr[["low_diversification_share", "exposure_share"]]
+#         .drop(
+#             index=[
+#                 "cl_count",
+#                 "cl_count_norm",
+#                 "low_diversification_share",
+#                 "exposure_share",
+#                 "smd_high_deprivation_share",
+#                 "% with other qualifications (NVQ) - aged 16-64",
+#             ]
+#         )
+#         .reset_index(drop=False)
+#         .melt(id_vars="variable", var_name="exposure_measure")
+#     )
+#     exp_div_corr["v"] = 0
+
+#     base = (
+#         alt.Chart(exp_div_corr).encode(
+#             y=alt.Y(
+#                 "variable",
+#                 title="Variable",
+#                 sort=alt.EncodingSortField("value", op="min", order="descending"),
+#             ),
+#             x="value",
+#         )
+#     ).properties(width=150, height=200)
+
+#     # Point plot
+#     out = base.mark_point(filled=True, size=75, stroke="black", strokeWidth=0.5).encode(
+#         color=alt.Color("exposure_measure")
+#     )
+#     out_lines = base.mark_line(stroke="grey", strokeWidth=1, strokeDash=[2, 1]).encode(
+#         detail="variable"
+#     )
+
+#     vline = base.mark_rule().encode(x=alt.X("v", title="Correlation coefficient"))
+
+#     ch = out + out_lines + vline
+
+#     return ch
+
+
+def plot_model_coefficients(model_selected):
+    """Plots model coefficients"""
+    base = alt.Chart().encode(
+        y=alt.Y("temporal", sort=["present", "lagged"], title=None)
+    )
+
+    ch = (
+        base.mark_bar().encode(
+            x="coefficient", color=alt.Color("temporal", legend=None)
+        )
+    ).properties(width=120, height=75)
+    err = (
+        base.mark_errorbar(color="black").encode(
+            x=alt.X("min", title="Coefficient"), x2="max"
+        )
+    ).properties(width=120, height=75)
+
+    reg_plot = alt.layer(ch, err, data=model_selected).facet(
+        column=alt.Column("indep", title=None),
+        row=alt.Row(
+            "pred", sort=["exp", "diversification"], title="Measure of exposure"
+        ),
+    )
+
+    return reg_plot
+
+
+lad_name_code_lu = make_lad_lookup()
 
 _SHORT_VAR_NAMES = {
     "% with NVQ4+ - aged 16-64": "% tertiary",
