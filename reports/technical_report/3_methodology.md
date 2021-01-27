@@ -79,7 +79,7 @@ We have collected additional data from a number of secondary sources which we us
 ### e. Business registry sources
 
 <!---
-Alex adds info here
+Alex explains why there were no suitable sources
 -->
 
 ## 3. Data processing
