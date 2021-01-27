@@ -50,6 +50,7 @@ if __name__ == "__main__":
         "--anchor_periods": dumps(anchor_periods),
         "--terms": dumps(terms),
         "--test_mode": str(params["test_mode"]),
+        "--max-workers": "1",
     }
     flow_file = Path(__file__).resolve().parents[0] / "gtab_flow_linear.py"
     run_id = execute_flow(
@@ -60,7 +61,6 @@ if __name__ == "__main__":
             # "--metadata": "local",
             # "--datastore": "local"
             "--with": "batch:queue=job-queue-many-nesta-metaflow",
-            "--max-workers": "1"
             # "--tag": "sg_covid_impact"
         },
     )
