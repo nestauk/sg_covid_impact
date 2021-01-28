@@ -25,6 +25,7 @@ project_dir = sg_covid_impact.project_dir
 
 _DIV_CODE_DESCRIPTION = extract_sic_code_description(load_sic_taxonomy(), "Division")
 
+
 def preview(x):
     print(x.head())
     return x
@@ -73,6 +74,7 @@ def make_glass_ch_sectors(glass_descr, glass_ch, ch_sectors, threshold=60):
 
     _DIV_CODE_DESCRIPTION = extract_sic_code_description(
         load_sic_taxonomy(), "Division"
+    )
 
     gl_ch_sector = (
         glass_descr.query("date == '2020-06-01'")
@@ -97,7 +99,8 @@ def make_glass_ch_merged():
     )
 
     return gl_descr_sector
-      
+
+
 def glass_descr_preprocessing(gl_descr):
     """Preprocesses glass descriptions (ie tokenise, bigram)
     Args:
@@ -188,6 +191,7 @@ if __name__ == "__main__":
 
     _DIV_CODE_DESCRIPTION = extract_sic_code_description(
         load_sic_taxonomy(), "Division"
+    )
     gl_descr_sector = make_glass_ch_merged()
 
     # Identify companies with description and pre-process descriptions
@@ -211,4 +215,3 @@ if __name__ == "__main__":
         f"{project_dir}/data/processed/salient_words_division.p", "wb"
     ) as outfile:
         pickle.dump(division_salient_words, outfile)
-
