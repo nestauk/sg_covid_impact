@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import altair as alt
@@ -6,7 +5,7 @@ from itertools import combinations
 import networkx as nx
 import sg_covid_impact
 from sg_covid_impact.make_sic_division import extract_sic_code_description
-from sg_covid_impact.descriptive import load_sic_taxonomy
+from sg_covid_impact.descriptive import load_sic_taxonomy, get_date_label
 from sg_covid_impact.altair_network import plot_altair_network
 
 project_dir = sg_covid_impact.project_dir
@@ -17,6 +16,18 @@ _DIVISION_NAME_LOOKUP = extract_sic_code_description(load_sic_taxonomy(), "Divis
 def flatten_list(_list):
     """Flatten a nested list"""
     return [x for el in _list for x in el]
+
+
+def make_month_range(first, last):
+    """Creates a list of month dates"""
+    return [
+        str(x).split(" ")[0][:-2] + "01" for x in pd.date_range(first, last, freq="M")
+    ]
+
+
+def month_string_from_datetime(dt):
+    """Converts a datetime into a string with month, year and day"""
+    return str(dt).split(" ")[0]
 
 
 def load_predicted():
@@ -100,125 +111,7 @@ def make_sector_space_base(sector_space, extra_edges=100):
     return pos, united_graph, labs
 
 
-def plot_nat_network(
-    graph,
-    position,
-    labels,
-    exposure_ranking,
-    month,
-    palette="Spectral_r",
-    levels=10,
-    fig_size=(14, 7),
-):
-    """Plots a national sector space network including exposure to Covid colors
-    Args:
-        graph (networkx): network object
-        position (networkx): positions of nodes
-        labels (list): labels for the nodes
-        exposure_ranking (dict): lookup between division / months and exposure
-        palette (str): color palette
-        levels (int): levels of exposure (for legend)
-        fig_size (tuple): figure size
-    """
-    division_exposure_month = {
-        k[0]: v for k, v in exposure_ranking.items() if k[1] == month
-    }
-
-    fig, ax = plt.subplots(figsize=fig_size)
-
-    widths = [e[2]["weight"] / 5000 for e in graph.edges(data=True)]
-
-    nx.draw_networkx_edges(graph, position, ax=ax, edge_color="lightgrey", width=widths)
-    nx.draw_networkx_nodes(
-        graph,
-        position,
-        ax=ax,
-        # node_size=20000,
-        node_color=[division_exposure_month[x] for x in graph.nodes],
-        edgecolors="black",
-        alpha=0.5,
-        label=graph.nodes,
-        cmap=palette,
-    )
-    nx.draw_networkx_labels(graph, position, ax=ax, labels=labels)
-
-    sm = plt.cm.ScalarMappable(cmap=palette, norm=plt.Normalize(vmin=0, vmax=levels))
-    sm._A = []
-    cbar = plt.colorbar(sm, ticks=range(0, levels))
-    cbar.set_label("Ranking in exposure to Covid-19", rotation=90, fontsize=12)
-    plt.tight_layout()
-
-    ax.axis("off")
-
-
-def plot_local_network(
-    graph,
-    position,
-    labels,
-    exposure_ranking,
-    month,
-    area,
-    employment_shares,
-    palette="Spectral_r",
-    scale=1000,
-    levels=10,
-    fs=(14, 7),
-):
-    """Plots a local sector space network including exposure to Covid colors
-    and shares of employment by sector (node)
-    Args:
-        graph (networkx): network object
-        position (networkx): positions of nodes
-        labels (list): labels for the nodes
-        exposure_ranking (dict): lookup between division / months and exposure
-        area (str): name of location
-        employment_shares (df): df with employment shares by sector
-        palette (str): color palette
-        levels (int): levels of exposure (for legend)
-        fig_size (tuple): figure size
-    """
-    division_exposure_month = {
-        k[0]: v for k, v in exposure_ranking.items() if k[1] == month
-    }
-    division_employment_share = (
-        employment_shares.query(f"month=={month}")
-        .query(f"geo_nm=='{area}'")
-        .set_index("division")["share"]
-        .to_dict()
-    )
-
-    fig, ax = plt.subplots(figsize=fs)
-
-    widths = [e[2]["weight"] / 5000 for e in graph.edges(data=True)]
-
-    nx.draw_networkx_edges(graph, position, ax=ax, edge_color="lightgrey", width=widths)
-    nx.draw_networkx_nodes(
-        graph,
-        position,
-        ax=ax,
-        node_color=[division_exposure_month[x] * scale for x in graph.nodes],
-        node_size=[division_employment_share[x] * scale for x in graph.nodes],
-        edgecolors="black",
-        alpha=0.5,
-        label=graph.nodes,
-        cmap=palette,
-    )
-    nx.draw_networkx_labels(graph, position, ax=ax, labels=labels)
-
-    sm = plt.cm.ScalarMappable(cmap=palette, norm=plt.Normalize(vmin=0, vmax=levels))
-    sm._A = []
-    cbar = plt.colorbar(sm, ticks=range(0, levels))
-    cbar.set_label("Ranking in exposure to Covid-19", rotation=90, fontsize=12)
-    plt.tight_layout()
-    ax.set_title(f"{area}, Month {str(month)}")
-
-    ax.axis("off")
-    plt.tight_layout()
-
-
 # Diversification options based on network structure
-
-
 def make_diversification_options(network, exposure_ranking, month, exposed, safe):
     """Extracts minimum and mean distances of negatively exposed sectors
     to neutrally or positively exposed sectors
@@ -330,10 +223,10 @@ def plot_exposure_neighbours(neighb_shares):
     return out
 
 
-def make_national_network(p, exposures_ranked, bres, g, month=4, **kwargs):
+def make_national_network(p, exposures_ranked, bres, g, month="2021-01-01", **kwargs):
     """Plot"""
     ranked_dict = (
-        exposures_ranked.query(f"month=={month}")
+        exposures_ranked.query(f"month_year=='{month}'")
         .set_index("division")["rank"]
         .to_dict()
     )
@@ -357,9 +250,11 @@ def make_national_network(p, exposures_ranked, bres, g, month=4, **kwargs):
     return ch
 
 
-def make_local_network(p, place, exposures_ranked, bres, g, month=4, **kwargs):
+def make_local_network(
+    p, place, exposures_ranked, bres, g, month="2021-01-01", **kwargs
+):
     ranked_dict = (
-        exposures_ranked.query(f"month=={month}")
+        exposures_ranked.query(f"month_year=='{month}'")
         .set_index("division")["rank"]
         .to_dict()
     )
@@ -388,4 +283,4 @@ def make_local_network(p, place, exposures_ranked, bres, g, month=4, **kwargs):
         node_color="node_color",
         **kwargs,
     )
-    return ch.properties(title=", ".join([place, "month " + str(month)]))
+    return ch.properties(title=", ".join([place, get_date_label(month)]))

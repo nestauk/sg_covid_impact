@@ -1,4 +1,5 @@
 # %%
+import calendar
 import os
 import pickle
 import logging
@@ -22,9 +23,10 @@ from sg_covid_impact.make_sic_division import (
 project_dir = sg_covid_impact.project_dir
 
 
+# Build some of the parameters we use in the functions
+_DIVISION_NAME_LOOKUP = extract_sic_code_description(load_sic_taxonomy(), "Division")
+
 # Utility functions
-
-
 def zscore(series):
     """Calculate zscore for a variable"""
     m = series.mean(skipna=True)
@@ -39,9 +41,27 @@ def make_grouped_share(df, variable, name="share"):
     return df
 
 
+# def get_date_label(timestamp):
+#     '''Returns a nice label for timestamped months-years
+#     '''
+
+#     return(f"{calendar.month_abbr[timestamp.month]} {str(timestamp.year)}")
+
+
+def get_date_label(time):
+    """Returns a nice label for timestamped months-years"""
+
+    split = [int(x) for x in time.split("-")]
+
+    return f"{calendar.month_abbr[split[1]]} {str(split[0])}"
+
+
 def make_weighted_average(df, weight_var, value_var):
     """Creates a weighted average"""
     return np.sum([r[weight_var] * r[value_var] for _id, r in df.iterrows()])
+
+
+# A couple of functions that make lookups we will use later
 
 
 def make_section_division_lookup():
@@ -73,6 +93,29 @@ def make_section_division_lookup():
     return section_division_lu, section_name_lookup_long
 
 
+_SECTION_DIVISION_LOOKUP, _SECTION_NAME_LOOKUP = make_section_division_lookup()
+
+# Reading functions
+
+
+def read_lad_nuts1_lookup(year=2019):
+    """Read a lookup between local authorities and NUTS"""
+
+    if year == 2019:
+        lu_df = pd.read_csv(
+            "https://opendata.arcgis.com/datasets/3ba3daf9278f47daba0f561889c3521a_0.csv"
+        )
+        return lu_df.set_index("LAD19CD")["RGN19NM"].to_dict()
+    else:
+        lu_df = pd.read_csv(
+            "https://opendata.arcgis.com/datasets/054349b09c094df2a97f8ddbd169c7a7_0.csv"
+        )
+        return lu_df.set_index("LAD20CD")["RGN20NM"].to_dict()
+
+
+_LAD_NUTS1_LOOKUP = read_lad_nuts1_lookup()
+
+
 # Reading functions
 def read_salience():
     """Reads salience data"""
@@ -90,14 +133,6 @@ def read_salience():
     return pd.concat(dfs).reset_index(drop=False).rename(columns={"index": "keyword"})
 
 
-def read_lad_nuts1_lookup():
-    """Read a lookup between local authorities and NUTS"""
-    lu_df = pd.read_csv(
-        "https://opendata.arcgis.com/datasets/3ba3daf9278f47daba0f561889c3521a_0.csv"
-    )
-    return lu_df.set_index("LAD19CD")["RGN19NM"].to_dict()
-
-
 def read_claimant_counts():
     """Read claimant ccount data and process it"""
     cl = pd.read_csv(f"{project_dir}/data/processed/claimant_counts.csv")
@@ -105,8 +140,9 @@ def read_claimant_counts():
     cl["month"], cl["year"] = [
         cl["date"].apply(lambda x: getattr(x, p)) for p in ["month", "year"]
     ]
-    cl["nuts1"] = cl["geography_code"].apply(assign_nuts1_to_lad)
-
+    cl["nuts1"] = cl["geography_code"].apply(
+        assign_nuts1_to_lad, lu=read_lad_nuts1_lookup(year=2020)
+    )
     return cl
 
 
@@ -114,7 +150,7 @@ def read_search_trends(stop_words=["love"]):
     """Read search trends"""
 
     d = pd.read_csv(
-        f"{project_dir}/data/processed/term_trends_v2.csv",
+        f"{project_dir}/data/processed/term_trends_v3.csv",
         dtype={"division": str},
         parse_dates=["date"],
     )
@@ -131,24 +167,6 @@ def read_search_trends(stop_words=["love"]):
         [getattr(x, p) for x in d["date"]] for p in ["month", "year"]
     ]
     d = d.loc[~d["keyword"].isin(stop_words)]
-
-    # # Focus on top terms by division
-    # if top!='all':
-    #     filtered_cont = []
-    #     for div in set(d['division']):
-    #         selected_df = d.loc[d['division']==div]
-    #         top_words = (d
-    #                      .groupby('keyword')['value']
-    #                      .mean()
-    #                      .sort_values(ascending=False)
-    #                      .index
-    #                      .tolist()[:top])
-    #         filtered_df = (selected_df.loc[
-    #                        selected_df['keyword'].isin(top_words)])
-    #         filtered_cont.append(filtered_df)
-
-    #     d = pd.concat(filtered_cont).reset_index(drop=True)
-    # d = d .loc[~d['keyword'].isin(drop)]
     return d
 
 
@@ -200,11 +218,11 @@ def read_shape():
 # Processing functions
 
 
-def assign_nuts1_to_lad(c):
+def assign_nuts1_to_lad(c, lu=_LAD_NUTS1_LOOKUP):
     """Assigns nuts1 to LAD"""
 
-    if c in _LAD_NUTS1_LOOKUP.keys():
-        return _LAD_NUTS1_LOOKUP[c]
+    if c in lu.keys():
+        return lu[c]
     elif c[0] == "S":
         return "Scotland"
     elif c[0] == "W":
@@ -215,40 +233,94 @@ def assign_nuts1_to_lad(c):
         return np.nan
 
 
+def make_normaliser(data, year, value, keep_vars):
+    """Creates a table with prepandemic activity
+    Args:
+        data (df): table we want to extract the baseline from
+        year (int): baseline year
+        value (str): value var
+        keep_vars (list): variables to keep
+    """
+    pre_c = (
+        data.query(f"{value}>0")
+        .query(f"year=={year}")[keep_vars]
+        .rename(columns={value: f"{value}_rescaler"})
+    )
+    return pre_c
+
+
 def claimant_count_norm(cl):
     """Normalise claimant count data (2020 months normalised by 2019)
     TODO: Generalise so we can also normalise 2021 months
     """
+    cl_rate = cl.query(
+        "measure_name == 'Claimants as a proportion of residents aged 16-64'"
+    )
+
+    cl_rescaler = make_normaliser(
+        cl_rate, 2019, "obs_value", ["month", "geography_code", "obs_value"]
+    )
+
     cl_norm = (
-        cl.query("measure_name == 'Claimants as a proportion of residents aged 16-64'")
-        .pivot_table(
-            index=["geography_name", "geography_code", "month", "nuts1"],
-            columns=["year"],
-            values="obs_value",
-        )
-        .assign(cl_norm=lambda x: x[2020] / x[2019])
-        .reset_index(drop=False)
-        .drop(axis=1, labels=[2019, 2020])
+        cl_rate.query("year>2019")
+        .merge(cl_rescaler, on=["month", "geography_code"])
+        .assign(cl_norm=lambda x: x["obs_value"] / x["obs_value_rescaler"])
         .assign(
             date=lambda df: [
                 datetime.datetime(2020, x["month"], 1) for r, x in df.iterrows()
             ]
         )
     )
-
     mean_cl_count = (
-        cl_norm.query("month>3").groupby(["geography_code"])["cl_norm"].mean().to_dict()
+        cl_norm.query('date>"2020-03-01"')
+        .groupby(["geography_code"])["cl_norm"]
+        .mean()
+        .to_dict()
     )
     cl_norm["mean_cl_count"] = cl_norm["geography_code"].map(mean_cl_count)
 
-    return cl_norm
+    return cl_norm[
+        [
+            "geography_name",
+            "geography_code",
+            "month",
+            "nuts1",
+            "cl_norm",
+            "date",
+            "mean_cl_count",
+        ]
+    ]
 
 
 def search_trend_norm(d):
     """Normalise search trends"""
-    pre_post_change = (
-        d.query("month!=11")
-        .groupby(
+    # Calculate mean volume by week
+    d_agg = (
+        d.groupby(
+            [
+                "month_year",
+                "keyword",
+                "division",
+                "month",
+                "section",
+                "section_name",
+                "year",
+            ]
+        )[["value"]]
+        .mean()
+        .reset_index(drop=False)
+    )
+
+    # Calculate normalising factor
+    search_rescaler = make_normaliser(
+        d_agg, 2019, "value", ["keyword", "month", "value"]
+    )
+
+    # Normalise
+    d_norm = (
+        d_agg.query("year>2019")
+        .merge(search_rescaler, on=["keyword", "month"])
+        .assign(norm=lambda x: x["value"] / x["value_rescaler"])[
             [
                 "month_year",
                 "keyword",
@@ -257,25 +329,15 @@ def search_trend_norm(d):
                 "month",
                 "section",
                 "section_name",
+                "value",
+                "norm",
             ]
-        )["value"]
-        .mean()
-        .reset_index(drop=False)
-        .pivot_table(
-            index=["keyword", "division", "month", "section_name", "section"],
-            columns="year",
-            values="value",
-        )
-        .assign(norm=lambda x: x[2020] / x[2019])
-        .reset_index(drop=False)
+        ]
+        .query("value>0")
     )
 
-    pre_post_change.columns = [str(x) for x in pre_post_change.columns]
-    # Remove items with zero searches
-    pre_post_change = pre_post_change.loc[
-        (pre_post_change["2019"] > 0) & (pre_post_change["2020"] > 0)
-    ]
-    return pre_post_change
+    # Return results
+    return d_norm
 
 
 def make_weighted_trends(terms, trends):
@@ -289,21 +351,25 @@ def make_weighted_trends(terms, trends):
     kw_merged = terms.merge(trends, on=["keyword", "division"])
     kw_weighted = (  # First it weights search volumes by salience
         kw_merged.assign(value_salience=lambda x: x["salience"] * x["value"])
-        .groupby(["division", "month", "year"])
+        .groupby(["division", "month_year", "year"])
         .apply(
             lambda df: df.assign(  # Rescales normalised values
                 value_norm=lambda x: x["value_salience"] / x["value_salience"].sum()
             )
         )
-        .reset_index(drop=True)
-        .query("year==2020")[
+        .reset_index(drop=True)[
             [
                 "keyword",
                 "division",
                 "salience",
                 "value",
                 "value_salience",
+                "norm",
                 "value_norm",
+                "month_year",
+                "section",
+                "section_name",
+                "year",
                 "month",
             ]
         ]
@@ -324,19 +390,19 @@ def rank_sector_exposures(
 
     if weighted == True:
         mean_interest = (
-            trends.groupby([sector, "month"])
+            trends.groupby([sector, "month_year"])
             .apply(lambda x: make_weighted_average(x, "value_norm", "norm"))
             .reset_index(name="interest_mean")
         )
     else:
         mean_interest = (
-            trends.groupby([sector, "month"])["norm"]
+            trends.groupby([sector, "month_year"])["norm"]
             .mean()
             .reset_index(name="interest_mean")
         )
 
     exposure_rank = (
-        mean_interest.groupby("month")
+        mean_interest.groupby("month_year")
         .apply(
             lambda x: (
                 x.assign(zscore=lambda x: zscore(-x["interest_mean"])).assign(
@@ -361,21 +427,21 @@ def calculate_sector_exposure(weighted=True):
     logging.info("Reading data")
     term_salience = read_salience()
     trends_clean = read_search_trends().drop_duplicates(
-        ["keyword", "division", "month", "year"], keep="first"
+        ["keyword", "division", "month_year", "year"], keep="first"
     )
 
     logging.info("Calculating weighted trends")
-    kw_weighted = make_weighted_trends(term_salience, trends_clean)
-    kw_norm = search_trend_norm(trends_clean)
-    kw_weighted_norm = kw_norm.merge(kw_weighted, on=["keyword", "division", "month"])
+    kw_weighted = make_weighted_trends(term_salience, search_trend_norm(trends_clean))
+    # kw_norm = search_trend_norm(trends_clean)
+    # kw_weighted_norm = kw_norm.merge(kw_weighted, on=["keyword", "division", "month_year"])
 
     logging.info("Calculating Sector exposure")
-    exposures_ranked = rank_sector_exposures(kw_weighted_norm, weighted=weighted)
+    exposures_ranked = rank_sector_exposures(kw_weighted, weighted=weighted)
     exposures_ranked["division_name"] = exposures_ranked["division"].map(
         _DIVISION_NAME_LOOKUP
     )
 
-    return exposures_ranked, kw_weighted_norm
+    return exposures_ranked, kw_weighted
 
 
 def make_exposure_shares(exposure_levels, geography="geo_nm", variable="rank"):
@@ -388,10 +454,10 @@ def make_exposure_shares(exposure_levels, geography="geo_nm", variable="rank"):
     """
 
     exp_distr = (
-        exposure_levels.groupby(["month", variable, geography])["value"]
+        exposure_levels.groupby(["month_year", variable, geography])["value"]
         .sum()
         .reset_index(drop=False)
-        .groupby([geography, "month"])
+        .groupby([geography, "month_year"])
         .apply(lambda x: x.assign(share=lambda df: df["value"] / df["value"].sum()))
     ).reset_index(drop=True)
 
@@ -405,20 +471,22 @@ def make_exposure_shares_detailed(exposure_levels, geo):
         geo (str): geographical variable to calculate shares by
     """
 
-    exposure_div_oct_lookup = exposure_levels.set_index(["division_name", "month"])[
-        "rank"
-    ].to_dict()
+    exposure_div_oct_lookup = exposure_levels.set_index(
+        ["division_name", "month_year"]
+    )["rank"].to_dict()
 
     shares_comp = (
-        exposure_levels.groupby(["division", "division_name", "month", geo])["value"]
+        exposure_levels.groupby(["division", "division_name", "month_year", geo])[
+            "value"
+        ]
         .sum()
         .reset_index(drop=False)
-        .groupby(["month", geo])
+        .groupby(["month_year", geo])
         .apply(lambda x: make_grouped_share(x, "value"))
     )
 
     shares_comp["rank"] = [
-        exposure_div_oct_lookup[(x["division_name"], x["month"])]
+        exposure_div_oct_lookup[(x["division_name"], x["month_year"])]
         for r, x in shares_comp.iterrows()
     ]
 
@@ -437,7 +505,7 @@ def make_high_exposure(exp_shares, level=8, geo="geo_nm"):
     """
     exp_shares = (
         exp_shares.query(f"rank>{level}")
-        .groupby(["month", geo])["share"]
+        .groupby(["month_year", geo])["share"]
         .sum()
         .reset_index(drop=False)
     )
@@ -450,7 +518,7 @@ def make_high_exposure(exp_shares, level=8, geo="geo_nm"):
 def plot_trend_point(
     table,
     geo_var="geography_name",
-    x_axis="date",
+    x_axis="yearmonth(date)",
     y_axis="cl_norm",
     y_title="Claimant count normalised",
     color="mean_cl_count",
@@ -470,7 +538,7 @@ def plot_trend_point(
     selector = alt.selection_single(fields=[geo_var])
 
     base = alt.Chart(table).encode(
-        x=f"{x_axis}:O",
+        x=alt.X(f"{x_axis}:O", title=None),
         y=alt.Y(y_axis, title=y_title),
         tooltip=[geo_var, y_axis],
     )
@@ -515,7 +583,7 @@ def plot_claimant_trend_all_nuts(cl_norm):
         alt.Chart(cl_norm)
         .mark_line()
         .encode(
-            x="date:T",
+            x=alt.X("date:T", title=None),
             y=alt.Y("cl_norm", title=["Claimant count", "normalised"]),
             color=alt.Color(
                 "mean_cl_count:N",
@@ -536,7 +604,7 @@ def plot_claimant_trend_all_nuts(cl_norm):
     return cl_line
 
 
-def plot_keyword_tends_chart(trends, axis="months"):
+def plot_keyword_tends_chart(trends):
     """Plot keyword trends
     Args:
         trends (df): normalised trends by keyword
@@ -547,71 +615,39 @@ def plot_keyword_tends_chart(trends, axis="months"):
 
     _trends = trends.copy()
 
-    if axis == "sector":
-        bubbles = (
-            alt.Chart(_trends)
-            .transform_filter(alt.datum.norm > 0)
-            .mark_point(filled=True, stroke="black", strokeWidth=0.1)
-            .encode(
-                y=alt.Y(
-                    "section_name",
-                    title="SIC section",
-                    sort=alt.EncodingSortField("mean(norm)"),
-                ),
-                x=alt.X(
-                    "norm",
-                    scale=alt.Scale(type="log"),
-                    title="Search volume in 2020 normalised by 2019",
-                ),
-                size=alt.Size("mean(2020)", title="Mean search scale in 2020"),
-                color=alt.Color(
-                    "month:O",
-                    scale=alt.Scale(scheme="spectral"),
-                    sort="ascending",
-                    title="Month",
-                ),
-                tooltip=["keyword", "month"],
-            )
-        ).properties(height=400, width=300)
-    else:
-        _bubbles = (
-            alt.Chart(_trends)
-            .transform_filter(alt.datum.norm > 0)
-            .mark_point(filled=True, stroke="black", strokeWidth=0.1)
-            .encode(
-                x=alt.X(
-                    "month:O",
-                    title="Month",
-                    # sort=alt.EncodingSortField('mean(norm)')
-                ),
-                y=alt.Y(
-                    "norm",
-                    scale=alt.Scale(type="log"),
-                    title=["2020 search volume", "(normalised by 2019)"],
-                ),
-                size=alt.Size("mean(2020)", title="Mean search volume in 2020"),
-                color=alt.Color(
-                    "section_name:O",
-                    scale=alt.Scale(scheme="spectral"),
-                    sort="ascending",
-                    legend=alt.Legend(columns=2),
-                    title="Section Name",
-                ),
-                tooltip=["keyword", "section_name", "month"],
-            )
-        ).properties(height=300, width=400)
-
-        # Add the horizontal
-        _trends["v"] = 1
-
-        v = (
-            alt.Chart(_trends)
-            .mark_rule(strokeWidth=0.5, strokeDash=[1, 1])
-            .encode(y=alt.Y("v", scale=alt.Scale(type="log")))
+    _bubbles = (
+        alt.Chart(_trends)
+        .transform_filter(alt.datum.norm > 0)
+        .mark_point(filled=True, stroke="black", strokeWidth=0.1)
+        .encode(
+            x=alt.X("yearmonth(month_year):O", title="Month"),
+            y=alt.Y(
+                "norm",
+                scale=alt.Scale(type="log"),
+                title=["Search volume", "(normalised by 2019)"],
+            ),
+            size=alt.Size("mean(value)", title="Mean search volume in 2020"),
+            color=alt.Color(
+                "section_name:O",
+                scale=alt.Scale(scheme="spectral"),
+                sort="ascending",
+                legend=alt.Legend(columns=2),
+                title="Section Name",
+            ),
+            tooltip=["keyword", "section_name", "month_year"],
         )
+    ).properties(height=300, width=400)
 
-        bubbles = _bubbles + v
+    # Add the horizontal
+    _trends["v"] = 1
 
+    v = (
+        alt.Chart(_trends)
+        .mark_rule(strokeWidth=0.5, strokeDash=[1, 1])
+        .encode(y=alt.Y("v", scale=alt.Scale(type="log")))
+    )
+
+    bubbles = _bubbles + v
     return bubbles
 
 
@@ -635,7 +671,7 @@ def plot_ranked_exposures(
         alt.Chart(ranked)
         .mark_rect()
         .encode(
-            x=alt.X("month:O"),
+            x=alt.X("yearmonth(month_year):O", title="Month"),
             y=alt.Y(f"{sector}:O", sort=sort_sectors, title=title),
             color=alt.Color(
                 "rank:Q",
@@ -643,7 +679,7 @@ def plot_ranked_exposures(
                 title="Exposure rank",
                 scale=alt.Scale(scheme=scheme),
             ),
-            tooltip=[sector, f"{sector}_name", "month", "rank"],
+            tooltip=[sector, f"{sector}_name", "month_year", "rank"],
         )
         .properties(width=400, height=500)
     )
@@ -666,7 +702,7 @@ def plot_exposure_evol(exposure_levels, mode="single", geo=None, columns=None):
         alt.Chart(exposure_levels)
         .mark_area(strokeWidth=0.8)
         .encode(
-            x="month:N",
+            x=alt.X("yearmonth(month_year):O", title="Month"),
             y=alt.Y("share", scale=alt.Scale(domain=[0, 1])),
             stroke=alt.condition(selector, alt.value("grey"), alt.value("white")),
             tooltip=["rank", "share"],
@@ -682,7 +718,7 @@ def plot_exposure_evol(exposure_levels, mode="single", geo=None, columns=None):
 
     if mode == "faceted":
         geo_sorted = (
-            exposure_levels.query("month==10")
+            exposure_levels.query("month_year=='2021-01-01")
             .query("rank>8")
             .groupby(geo)["share"]
             .sum()
@@ -712,7 +748,9 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
     """
 
     exposure_nuts = (
-        exp_df.query(f"nuts1 == '{nuts1}'").query(f"month=={month}").query("share>0")
+        exp_df.query(f"nuts1 == '{nuts1}'")
+        .query(f"month_year=='{month}'")
+        .query("share>0")
     )
     exp_df[f"is_{nuts1}"] = [x == nuts1 for x in exp_df["nuts1"]]
 
@@ -739,7 +777,7 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
         )
     ).properties(height=500, width=250)
 
-    specialisation_month = exp_df.query(f"month=={month}")
+    specialisation_month = exp_df.query(f"month_year=='{month}'")
 
     specialisation_nuts = (
         specialisation_month.pivot_table(
@@ -795,7 +833,7 @@ def plot_exposure_comparison(exp_levels_comp, month="interactive"):
     """
 
     if month != "interactive":
-        d = exp_levels_comp.query(f"month=={month}")
+        d = exp_levels_comp.query(f"month=='{month}'")
 
         nat_comp = (
             alt.Chart(d)
@@ -815,13 +853,16 @@ def plot_exposure_comparison(exp_levels_comp, month="interactive"):
                 ),
                 row=alt.Row("rank:N", title="Exposure rank", spacing=10),
             )
-            .properties(height=30, width=200, title=f"Month {month}")
+            .properties(height=30, width=200, title=get_date_label(month))
         )
 
     else:
         slider = alt.binding_range(min=4, max=10, step=1)
         select_month = alt.selection_single(
-            name="month", fields=["month"], bind=slider, init={"month": 10}
+            name="month_year",
+            fields=["month_year"],
+            bind=slider,
+            init={"month_year": "2021-01-01"},
         )
         nat_comp = (
             alt.Chart(exp_levels_comp)
@@ -862,9 +903,9 @@ def plot_area_composition(
     """
 
     if interactive is False:
-        d = exposures.query(f"geo_nm=='{area}'").query(f"month=={month}")
+        d = exposures.query(f"geo_nm=='{area}'").query(f"month_year=='{month}'")
         local_profile = (
-            alt.Chart(d, title=f"{area} - month {month}")
+            alt.Chart(d, title=f"{area} - {get_date_label(month)}")
             .mark_bar(stroke="white", strokeWidth=0.2)
             .encode(
                 y="rank:N",
@@ -884,7 +925,7 @@ def plot_area_composition(
 
         d = exposures.query(f"month == {month}")
 
-        max_x = d.groupby(["rank", "month", "geo_nm"])["share"].sum().max()
+        max_x = d.groupby(["rank", "month_year", "geo_nm"])["share"].sum().max()
 
         input_dropdown = alt.binding_select(options=list(set(d["geo_nm"])))
         select_place = alt.selection_single(
@@ -923,10 +964,13 @@ def plot_area_composition(
         slider = alt.binding_range(min=4, max=10, step=1)
 
         select_month = alt.selection_single(
-            name="month", fields=["month"], bind=slider, init={"month": 4}
+            name="month",
+            fields=["month_year"],
+            bind=slider,
+            init={"month_year": "2021-01-01"},
         )
 
-        max_x = d.groupby(["rank", "month"])["share"].sum().max()
+        max_x = d.groupby(["rank", "month_year"])["share"].sum().max()
 
         local_profile = (
             alt.Chart(d, title=area)
@@ -1015,7 +1059,7 @@ def plot_time_choro(
     """
 
     selected = (
-        exposure_df.query(f"month == {month}")
+        exposure_df.query(f"month_year == '{month}'")
         .query(f"{exposure_var} >= {exposure}")
         .groupby("geo_cd")["share"]
         .sum()
@@ -1032,15 +1076,8 @@ def plot_time_choro(
     return my_map
 
 
-# Build some of the parameters we use in the functions
+# At the end: fetch shapefiles if needed
 _SHAPE_PATH = f"{project_dir}/data/shape/lad_shape_2019/"
-logging.info(_SHAPE_PATH)
-
-_LAD_NUTS1_LOOKUP = read_lad_nuts1_lookup()
-
-_SECTION_DIVISION_LOOKUP, _SECTION_NAME_LOOKUP = make_section_division_lookup()
-
-_DIVISION_NAME_LOOKUP = extract_sic_code_description(load_sic_taxonomy(), "Division")
 
 if os.path.exists(_SHAPE_PATH) is False:
     logging.info("Fetching shapefiles")

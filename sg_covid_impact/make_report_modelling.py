@@ -5,7 +5,6 @@ import pandas as pd
 from sg_covid_impact.utils.altair_save_utils import (
     google_chrome_driver_setup,
     save_altair,
-    make_fig_path,
 )
 from sg_covid_impact.modelling import (
     make_div_share_variable,
@@ -34,7 +33,7 @@ alt.data_transformers.disable_max_rows()
 driver = google_chrome_driver_setup()
 
 FIG_PATH = f"{project_dir}/figures/scotland"
-make_fig_path(FIG_PATH)
+# make_fig_path(FIG_PATH)
 
 with open(f"{project_dir}/sg_covid_impact/model_config.yaml", "r") as infile:
     out_params = yaml.safe_load(infile)["modelling"]

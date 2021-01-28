@@ -75,5 +75,5 @@ if __name__ == "__main__":
     )
 
     division_trends.to_csv(
-        f"{project_dir}/data/processed/term_trends_v2.csv", index=False
+        f"{project_dir}/data/processed/term_trends_v3.csv", index=False
     )

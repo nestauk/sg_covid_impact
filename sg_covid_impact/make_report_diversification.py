@@ -1,10 +1,10 @@
 # Analysis of diversification opportunities
 import yaml
 import altair as alt
-import calendar
 import pandas as pd
 import numpy as np
 from sg_covid_impact.descriptive import (
+    get_date_label,
     make_section_division_lookup,
     read_official,
     calculate_sector_exposure,
@@ -16,6 +16,7 @@ from sg_covid_impact.descriptive import (
     assign_nuts1_to_lad,
 )
 from sg_covid_impact.diversification import (
+    make_month_range,
     load_predicted,
     extract_sectors,
     extract_network,
@@ -25,12 +26,13 @@ from sg_covid_impact.diversification import (
     plot_exposure_neighbours,
     make_local_network,
     make_national_network,
+    month_string_from_datetime,
 )
 from sg_covid_impact.make_sic_division import extract_sic_code_description
 from sg_covid_impact.utils.altair_save_utils import (
     google_chrome_driver_setup,
     save_altair,
-    make_fig_path,
+    # make_fig_path,
 )
 
 import sg_covid_impact
@@ -45,7 +47,7 @@ alt.data_transformers.disable_max_rows()
 driver = google_chrome_driver_setup()
 
 FIG_PATH = f"{project_dir}/figures/scotland"
-make_fig_path(FIG_PATH)
+# make_fig_path(FIG_PATH)
 
 with open(f"{project_dir}/sg_covid_impact/model_config.yaml", "r") as infile:
     out_params = yaml.safe_load(infile)["diversification"]
@@ -80,9 +82,13 @@ exposures_ranked, weighted_scores = calculate_sector_exposure()
 
 my_divisions = list(set(exposures_ranked["division"]))
 
-division_month_exposure_dict = exposures_ranked.set_index(["division", "month"])[
-    "rank"
-].to_dict()
+division_month_exposure_dict = (
+    exposures_ranked
+    # Here we need to turn the timestamps into strings for merging
+    .assign(month_str=lambda x: x["month_year"].apply(month_string_from_datetime))
+    .set_index(["division", "month_str"])["rank"]
+    .to_dict()
+)
 # Read official data
 bres = read_official()
 
@@ -110,7 +116,7 @@ scot_space = make_national_network(
 save_altair(scot_space, f"sector_space_{nuts1_focus}", driver=driver, path=FIG_PATH)
 
 # # Calculate and plot diversification options
-neighb_shares = make_neighbor_shares(g, division_month_exposure_dict, 4)
+neighb_shares = make_neighbor_shares(g, division_month_exposure_dict, "2021-01-01")
 
 neigh_shares = plot_exposure_neighbours(neighb_shares)
 
@@ -129,21 +135,27 @@ monthly_diversification_rankings = pd.concat(
                     -x["mean"], q=np.arange(0, 1.1, 0.25), labels=False
                 )
             )
-            .assign(month=m)
+            .assign(month_year=m)
         )
-        for m in range(3, 11)
+        for m in make_month_range("2020-03-01", "2021-02-01")
     ]
 )
 
 # Merge with diversification information
-diversification_lad_detailed = make_exposure_shares_detailed(
-    exposure_levels, geo="geo_cd"
-).merge(
-    monthly_diversification_rankings,
-    left_on=["division", "month"],
-    right_on=["division", "month"],
-    how="outer",
+# Merge with diversification information
+diversification_lad_detailed = (
+    make_exposure_shares_detailed(exposure_levels, geo="geo_cd")
+    .assign(month_year=lambda x: x["month_year"].apply(month_string_from_datetime))
+    .merge(
+        monthly_diversification_rankings,
+        left_on=["division", "month_year"],
+        right_on=["division", "month_year"],
+        how="outer",
+    )
 )
+
+print(diversification_lad_detailed.head())
+
 
 diversification_lad_detailed["divers_ranking"] = diversification_lad_detailed[
     "divers_ranking"
@@ -167,7 +179,7 @@ div_map_strip = [
         scale_type="quantile",
         exposure_var="divers_ranking",
         name="low diversification",
-    ).properties(height=200, width=275, title=calendar.month_abbr[m])
+    ).properties(height=200, width=275, title=get_date_label(m))
     for m in out_params["months"]
 ]
 
