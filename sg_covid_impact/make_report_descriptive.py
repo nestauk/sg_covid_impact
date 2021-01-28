@@ -100,11 +100,11 @@ exposure_levels_ = exposure_levels.copy()
 exposure_levels_nat_comp = make_exposure_shares_detailed(exposure_levels_, "nuts1")
 
 nat_exp = plot_emp_shares_specialisation(
-    exposure_levels_nat_comp, month=10, nuts1=nuts1_focus
+    exposure_levels_nat_comp, month="2021-01-01", nuts1=nuts1_focus
 )
 
 save_altair(
-    nat_exp.properties(title=f"{nuts1_focus}, October"),
+    nat_exp.properties(title=f"{nuts1_focus}, January 2021"),
     f"exposure_shares_{nuts1_focus}",
     driver=driver,
     path=FIG_PATH,
@@ -118,7 +118,7 @@ high_exposure_nuts1 = make_high_exposure(
 )
 
 mean_high_exposure = (
-    high_exposure_nuts1.query("month>3").groupby(["geo_nm"])["share"].mean().to_dict()
+    high_exposure_nuts1.query("month_year>'2020-03-01'").groupby(["geo_nm"])["share"].mean().to_dict()
 )
 high_exposure_nuts1["mean_high_exposure"] = high_exposure_nuts1["geo_nm"].map(
     mean_high_exposure
@@ -126,14 +126,14 @@ high_exposure_nuts1["mean_high_exposure"] = high_exposure_nuts1["geo_nm"].map(
 
 exp_share_vars = {
     "geo_var": "geo_nm",
-    "x_axis": "month",
+    "x_axis": "month_year",
     "y_axis": "share",
     "y_title": "Share high exposure",
     "color": "mean_high_exposure",
 }
 
 exposure_trend = plot_trend_point(
-    high_exposure_nuts1.query("month>2"), **exp_share_vars
+    high_exposure_nuts1.query("month_year>'2020-02-01'"), **exp_share_vars
 ).properties(width=250, height=250)
 
 save_altair(exposure_trend, "exposure_trend_lads", driver=driver, path=FIG_PATH)
@@ -148,7 +148,8 @@ ms = alt.hconcat(
     *[
         plot_time_choro(
             shapef, exposure_lad_codes_nuts1, m, 8, scale_type="quantile"
-        ).properties(height=200, width=275, title=calendar.month_abbr[m])
+        ).properties(height=200, width=275, 
+        title=calendar.month_abbr[int(m.split('-')[1])])
         for m in out_params["months"]
     ]
 )
