@@ -464,7 +464,7 @@ def make_exposure_shares(exposure_levels, geography="geo_nm", variable="rank"):
     return exp_distr
 
 
-def make_exposure_shares_detailed(exposure_levels, geo):
+def make_exposure_shares_detailed(exposure_levels, geo="geo_cd"):
     """Calculates detailed exposure shares (at the division level)
     Args:
         exposure_levels (df): table with activity by geo, month, ranking
