@@ -10,7 +10,8 @@
 set -euo pipefail
 
 # Code formatting
-jupytext --from py:percent --pipe black --pre-commit
+black sg_covid_impact
+jupytext --from ipynb --pipe black --pre-commit
 
 # Absolute path of repo
 repopath=$(git rev-parse --show-toplevel)
