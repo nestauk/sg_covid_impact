@@ -118,7 +118,10 @@ high_exposure_nuts1 = make_high_exposure(
 )
 
 mean_high_exposure = (
-    high_exposure_nuts1.query("month_year>'2020-03-01'").groupby(["geo_nm"])["share"].mean().to_dict()
+    high_exposure_nuts1.query("month_year>'2020-03-01'")
+    .groupby(["geo_nm"])["share"]
+    .mean()
+    .to_dict()
 )
 high_exposure_nuts1["mean_high_exposure"] = high_exposure_nuts1["geo_nm"].map(
     mean_high_exposure
@@ -148,8 +151,9 @@ ms = alt.hconcat(
     *[
         plot_time_choro(
             shapef, exposure_lad_codes_nuts1, m, 8, scale_type="quantile"
-        ).properties(height=200, width=275, 
-        title=calendar.month_abbr[int(m.split('-')[1])])
+        ).properties(
+            height=200, width=275, title=calendar.month_abbr[int(m.split("-")[1])]
+        )
         for m in out_params["months"]
     ]
 )

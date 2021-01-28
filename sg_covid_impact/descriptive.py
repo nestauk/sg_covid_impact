@@ -40,19 +40,20 @@ def make_grouped_share(df, variable, name="share"):
     df[name] = df[variable] / df[variable].sum()
     return df
 
+
 # def get_date_label(timestamp):
-#     '''Returns a nice label for timestamped months-years 
+#     '''Returns a nice label for timestamped months-years
 #     '''
-    
+
 #     return(f"{calendar.month_abbr[timestamp.month]} {str(timestamp.year)}")
 
+
 def get_date_label(time):
-    '''Returns a nice label for timestamped months-years 
-    '''
-    
-    split = [int(x) for x in time.split('-')]
-    
-    return(f"{calendar.month_abbr[split[1]]} {str(split[0])}")
+    """Returns a nice label for timestamped months-years"""
+
+    split = [int(x) for x in time.split("-")]
+
+    return f"{calendar.month_abbr[split[1]]} {str(split[0])}"
 
 
 def make_weighted_average(df, weight_var, value_var):
@@ -310,12 +311,10 @@ def search_trend_norm(d):
         .reset_index(drop=False)
     )
 
-
     # Calculate normalising factor
     search_rescaler = make_normaliser(
         d_agg, 2019, "value", ["keyword", "month", "value"]
     )
-
 
     # Normalise
     d_norm = (
@@ -358,8 +357,7 @@ def make_weighted_trends(terms, trends):
                 value_norm=lambda x: x["value_salience"] / x["value_salience"].sum()
             )
         )
-        .reset_index(drop=True)
-        [
+        .reset_index(drop=True)[
             [
                 "keyword",
                 "division",
@@ -372,7 +370,7 @@ def make_weighted_trends(terms, trends):
                 "section",
                 "section_name",
                 "year",
-                "month"
+                "month",
             ]
         ]
     )
@@ -433,10 +431,9 @@ def calculate_sector_exposure(weighted=True):
     )
 
     logging.info("Calculating weighted trends")
-    kw_weighted = make_weighted_trends(term_salience, 
-                                       search_trend_norm(trends_clean))
-    #kw_norm = search_trend_norm(trends_clean)
-    #kw_weighted_norm = kw_norm.merge(kw_weighted, on=["keyword", "division", "month_year"])
+    kw_weighted = make_weighted_trends(term_salience, search_trend_norm(trends_clean))
+    # kw_norm = search_trend_norm(trends_clean)
+    # kw_weighted_norm = kw_norm.merge(kw_weighted, on=["keyword", "division", "month_year"])
 
     logging.info("Calculating Sector exposure")
     exposures_ranked = rank_sector_exposures(kw_weighted, weighted=weighted)
@@ -474,12 +471,14 @@ def make_exposure_shares_detailed(exposure_levels, geo):
         geo (str): geographical variable to calculate shares by
     """
 
-    exposure_div_oct_lookup = exposure_levels.set_index(["division_name", "month_year"])[
-        "rank"
-    ].to_dict()
+    exposure_div_oct_lookup = exposure_levels.set_index(
+        ["division_name", "month_year"]
+    )["rank"].to_dict()
 
     shares_comp = (
-        exposure_levels.groupby(["division", "division_name", "month_year", geo])["value"]
+        exposure_levels.groupby(["division", "division_name", "month_year", geo])[
+            "value"
+        ]
         .sum()
         .reset_index(drop=False)
         .groupby(["month_year", geo])
@@ -539,7 +538,7 @@ def plot_trend_point(
     selector = alt.selection_single(fields=[geo_var])
 
     base = alt.Chart(table).encode(
-        x=alt.X(f"{x_axis}:O",title=None),
+        x=alt.X(f"{x_axis}:O", title=None),
         y=alt.Y(y_axis, title=y_title),
         tooltip=[geo_var, y_axis],
     )
@@ -584,7 +583,7 @@ def plot_claimant_trend_all_nuts(cl_norm):
         alt.Chart(cl_norm)
         .mark_line()
         .encode(
-            x=alt.X("date:T",title=None),
+            x=alt.X("date:T", title=None),
             y=alt.Y("cl_norm", title=["Claimant count", "normalised"]),
             color=alt.Color(
                 "mean_cl_count:N",
@@ -749,7 +748,9 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
     """
 
     exposure_nuts = (
-        exp_df.query(f"nuts1 == '{nuts1}'").query(f"month_year=='{month}'").query("share>0")
+        exp_df.query(f"nuts1 == '{nuts1}'")
+        .query(f"month_year=='{month}'")
+        .query("share>0")
     )
     exp_df[f"is_{nuts1}"] = [x == nuts1 for x in exp_df["nuts1"]]
 
@@ -858,8 +859,10 @@ def plot_exposure_comparison(exp_levels_comp, month="interactive"):
     else:
         slider = alt.binding_range(min=4, max=10, step=1)
         select_month = alt.selection_single(
-            name="month_year", 
-            fields=["month_year"], bind=slider, init={"month_year": '2021-01-01'}
+            name="month_year",
+            fields=["month_year"],
+            bind=slider,
+            init={"month_year": "2021-01-01"},
         )
         nat_comp = (
             alt.Chart(exp_levels_comp)
@@ -961,8 +964,10 @@ def plot_area_composition(
         slider = alt.binding_range(min=4, max=10, step=1)
 
         select_month = alt.selection_single(
-            name="month", fields=["month_year"], bind=slider, 
-            init={"month_year": "2021-01-01"}
+            name="month",
+            fields=["month_year"],
+            bind=slider,
+            init={"month_year": "2021-01-01"},
         )
 
         max_x = d.groupby(["rank", "month_year"])["share"].sum().max()
