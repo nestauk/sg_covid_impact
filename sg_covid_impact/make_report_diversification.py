@@ -154,6 +154,8 @@ diversification_lad_detailed = (
     )
 )
 
+print(diversification_lad_detailed.head())
+
 
 diversification_lad_detailed["divers_ranking"] = diversification_lad_detailed[
     "divers_ranking"

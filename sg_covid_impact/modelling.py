@@ -2,6 +2,7 @@
 
 import os
 import logging
+import datetime
 import pandas as pd
 import numpy as np
 import altair as alt
@@ -23,6 +24,8 @@ from sg_covid_impact.make_sic_division import (
     load_sic_taxonomy,
 )
 from sg_covid_impact.diversification import (
+    month_string_from_datetime,
+    make_month_range,
     load_predicted,
     extract_sectors,
     extract_network,
@@ -64,7 +67,7 @@ def make_local_exposure_table(exposures_ranked):
     return exposure_lad_codes
 
 
-def make_exposure_share_variable(exposure_thres=7):
+def make_exposure_share_variable(exposure_thres=6):
     """Extracts exposure shares by LAD
     Args:
         exposure_thres (int): exposure ranking
@@ -85,7 +88,7 @@ def make_exposure_share_variable(exposure_thres=7):
     return exposure_high
 
 
-def make_div_share_variable(exposure_level=7, div_level=2):
+def make_div_share_variable(exposure_level=7, div_level=3):
     """Calculates the share of employment in a low diversification sector
     Args:
         exposure_level (int): min threshold for high exposure
@@ -98,9 +101,16 @@ def make_div_share_variable(exposure_level=7, div_level=2):
 
     logging.info("Calculating sector exposure")
     exposures_ranked = calculate_sector_exposure()[0]
-    division_month_exposure_dict = exposures_ranked.set_index(["division", "month"])[
-        "rank"
-    ].to_dict()
+
+    my_divisions = list(set(exposures_ranked["division"]))
+
+    division_month_exposure_dict = (
+        exposures_ranked
+        # Here we need to turn the timestamps into strings for merging
+        .assign(month_str=lambda x: x["month_year"].apply(month_string_from_datetime))
+        .set_index(["division", "month_str"])["rank"]
+        .to_dict()
+    )
 
     logging.info("Making sector space")
     my_divisions = list(set(exposures_ranked["division"]))
@@ -113,12 +123,14 @@ def make_div_share_variable(exposure_level=7, div_level=2):
 
     logging.info("Calculating local exposure shares")
     bres = read_official()
+
     exposure_levels = exposures_ranked.merge(
         bres, left_on="division", right_on="division"
     )
     exposure_levels["division_name"] = exposure_levels["division"].map(
         _DIVISION_NAME_LOOKUP
     )
+    # exposure_lad_detailed = make_exposure_shares_detailed(exposure_levels, "geo_nm")
 
     logging.info("Calculating diversification share rankings")
     monthly_diversification_rankings = pd.concat(
@@ -140,34 +152,44 @@ def make_div_share_variable(exposure_level=7, div_level=2):
                         duplicates="drop",
                     )
                 )
-                .assign(month=m)
+                .assign(month_year=m)
             )
-            for m in range(3, 11)
+            for m in make_month_range("2020-03-01", "2021-02-01")
         ]
     )
 
     # Merge with diversification information
     logging.info(f"Calculating diversification shares level {str(div_level)}")
-    diversification_lad_detailed = exposure_levels.merge(
+    diversification_lad_detailed = exposure_levels.assign(
+        month_year=lambda x: x["month_year"].apply(month_string_from_datetime)
+    ).merge(
         monthly_diversification_rankings,
-        left_on=["division", "month"],
-        right_on=["division", "month"],
+        left_on=["division", "month_year"],
+        right_on=["division", "month_year"],
         how="outer",
     )
-
     diversification_lad_detailed["divers_ranking"] = diversification_lad_detailed[
         "divers_ranking"
     ].fillna("Less exposed")
+
+    print(diversification_lad_detailed["divers_ranking"].value_counts())
 
     diversification_shares = (
         make_exposure_shares(
             diversification_lad_detailed, geography="geo_cd", variable="divers_ranking"
         )
-        .query(f"divers_ranking == {div_level}")
+        .query("divers_ranking!='Less exposed'")
+        .query(f"divers_ranking >= {div_level}")
+        .groupby(["geo_cd", "month_year"])["share"]
+        .sum()
+        .reset_index(name="share")
         .assign(variable="low_diversification_share")
-        .drop(axis=1, labels=["value"])
-        .rename(columns={"share": "value"})[["month", "geo_cd", "variable", "value"]]
-    ).reset_index(drop=True)
+        .rename(columns={"share": "value"})[
+            ["month_year", "geo_cd", "variable", "value"]
+        ]
+        .assign(month_year=lambda x: pd.to_datetime(x["month_year"]))
+        .reset_index(drop=True)
+    )
 
     return diversification_shares
 
@@ -177,7 +199,7 @@ def make_claimant_count_variable():
     cl = read_claimant_counts()
     cl_count = (
         cl.query("measure_name=='Claimants as a proportion of residents aged 16-64'")[
-            ["geography_code", "month", "obs_value"]
+            ["geography_code", "date", "obs_value"]
         ]
         .assign(variable="cl_count")
         .rename(columns={"obs_value": "value", "geography_code": "geo_cd"})
@@ -186,7 +208,7 @@ def make_claimant_count_variable():
     cl_norm_ = claimant_count_norm(cl)
 
     cl_norm = (
-        cl_norm_[["geography_code", "month", "cl_norm"]]
+        cl_norm_[["geography_code", "date", "cl_norm"]]
         .rename(columns={"geography_code": "geo_cd", "cl_norm": "value"})
         .assign(variable="cl_count_norm")
     )
@@ -238,23 +260,25 @@ def make_lagged_web(var, name):
 
     results = []
 
-    var_ = var.query("month>=3")
+    var_ = var.query("month_year>'2020-03-01'")
 
-    for m in set(var_["month"]):
-        pre = var_.query(f"month<{m}")
+    for m in set(var_["month_year"]):
+        pre = var_.query(f"month_year<'{m}'")
         stat = pre.groupby(["geo_cd", "variable"])["value"].mean()
         stat.name = m
         # stat.assign(month=m)
         results.append(stat)
 
+    results_df = pd.concat(results, axis=1)
     lagged = (
-        pd.concat(results, axis=1)
-        .loc[:, range(4, 11)]
+        results_df.loc[
+            :, [x > datetime.datetime(2020, 4, 1) for x in results_df.columns]
+        ]
         .reset_index(drop=False)
-        .melt(id_vars=["geo_cd", "variable"], var_name="month")
+        .melt(id_vars=["geo_cd", "variable"], var_name="month_year")
         .drop(axis=1, labels=["variable"])
         .rename(columns={"value": f"{name}_lagged"})
-        .set_index(["geo_cd", "month"])
+        .set_index(["geo_cd", "month_year"])
     )
     return lagged
 
@@ -288,16 +312,17 @@ def make_regression_table(
     # pivots over variables
     X = (
         cl.copy()
-        .query("month>3")
-        .pivot_table(index=["geo_cd", "month"], columns="variable", values="value")
+        .query("date>'2020-03-01'")
+        .rename(columns={"date": "month_year"})
+        .pivot_table(index=["geo_cd", "month_year"], columns="variable", values="value")
     )
 
     # Present period exposure / diversification variables
     present = pd.concat(
         [
             var.rename(columns={"value": f"{name}_present"})
-            .query("month>3")
-            .set_index(["month", "geo_cd"])
+            .query("month_year>'2020-03-01'")
+            .set_index(["month_year", "geo_cd"])
             .drop(axis=1, labels=["variable"])
             for var, name in zip([exp, div], ["exposure_share", "low_div_share"])
         ],
@@ -315,8 +340,8 @@ def make_regression_table(
     sec_vars = make_secondary_reg(keep, secondary)
 
     data = (
-        X.merge(present, on=["geo_cd", "month"])
-        .merge(lagged, on=["geo_cd", "month"])
+        X.merge(present, on=["geo_cd", "month_year"])
+        .merge(lagged, on=["geo_cd", "month_year"])
         .merge(sec_vars, on="geo_cd")
     )
 
@@ -435,11 +460,11 @@ def plot_correlation_evolution(reg_table, nuts_focus="Scotland"):
     ]
 
     reg_results = (
-        reg_table_.groupby(["month", f"is_{nuts_focus}"])
+        reg_table_.groupby(["month_year", f"is_{nuts_focus}"])
         .apply(lambda x: x[my_vars].corr())
         .reset_index(drop=False)[
             [
-                "month",
+                "month_year",
                 f"is_{nuts_focus}",
                 "level_2",
                 "exposure_share_lagged",
@@ -449,7 +474,7 @@ def plot_correlation_evolution(reg_table, nuts_focus="Scotland"):
     )
     reg_results = (
         reg_results.loc[reg_results["level_2"].isin(["cl_count", "cl_count_norm"])]
-        .melt(id_vars=["month", "level_2", f"is_{nuts_focus}"])
+        .melt(id_vars=["month_year", "level_2", f"is_{nuts_focus}"])
         .reset_index(drop=False)
     )
 
@@ -458,7 +483,11 @@ def plot_correlation_evolution(reg_table, nuts_focus="Scotland"):
     corr_ch = (
         alt.Chart(reg_results)
         .mark_point(filled=True)
-        .encode(x="month", y=alt.Y("value", title="Correlation"), color="variable")
+        .encode(
+            x=alt.X("yearmonth(month_year):O", title=None),
+            y=alt.Y("value", title="Correlation"),
+            color="variable",
+        )
         .properties(height=100, width=120)
     )
 
@@ -500,6 +529,7 @@ def fit_regression(table, dep, indep_focus, fe=True):
             "low_div_share_present",
             "low_div_share_lagged",
             "geo_cd",
+            "month_year",
         ]
     )
 
