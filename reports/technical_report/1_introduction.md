@@ -1,6 +1,5 @@
 ---
-title: "1.Introduction"
-bibliography: "technical_report.bib"
+title: "Mapping the impact of Covid-19 in Scotland"
 ---
 
 # 1. Introduction

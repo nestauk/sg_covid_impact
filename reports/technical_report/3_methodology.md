@@ -1,8 +1,3 @@
----
-title: "3. Methodology"
-bibliography: technical_report.bib
----
-
 # 3. Data sources and methodology
 
 This section describes the data we have collected and the methods we have deployed in its analysis in order to answer the following questions:
@@ -27,7 +22,7 @@ Our prior is that some of these limitations can be addressed by combining busine
 
 [@fig:pipeline] summarises our approach.
 
-![Figure 1](https://raw.githubusercontent.com/nestauk/sg_covid_impact/80_reporting/reports/technical_report/pipeline_1.png){#fig:pipeline}
+![Figure 1](pipeline_1.png){#fig:pipeline}
 
 ## 2. Data sources
 
@@ -127,7 +122,7 @@ We use similarity between business website descriptions in order to calculate si
 
 In order to calculate similarities between industries we train a machine learning model that predicts the SIC divisions for companies in the Glass-Companies House matched dataset using their descriptions after standard pre-proxessing. We use grid-search to select the model type and parametres that yield the best predictive performance, which in this case is a regularised logistic regresssion. 
 
-![Figure Predictive model](https://raw.githubusercontent.com/nestauk/sg_covid_impact/80_reporting/figures/scotland/png/appendix_model_validation.png){#fig:model}
+![Figure Predictive model](../../figures/scotland/png/appendix_model_validation.png){#fig:model}
 
 [@fig:model] summarises the predictive performance of the model for different SIC divisions. The model includes the actual label in the top five predictions it makes 72% of the times, and in the top ten 84%. This feels reasonable given the degree of noise in company descriptions and low level of informativeness in some SIC labels such as "Other activities not elsewhere classified" but there is still room for improvement in future work. 
 
@@ -154,17 +149,17 @@ We have compared the industrial and geographic distribution of the Glass data wi
 
 In [@fig:sector_val] we present the differences between shares of sectoral activity accounted by SIC division in Glass and Companies House. Positive values capture situations where a division is overrepresented in Glass data.
 
-![Comparison of Glass and Companies House sectoral coverage](https://raw.githubusercontent.com/nestauk/sg_covid_impact/80_reporting/figures/scotland/png/glass_sector_validation.png){#fig:sector_val}
+![Comparison of Glass and Companies House sectoral coverage](../../figures/scotland/png/glass_sector_validation.png){#fig:sector_val}
 
 The figure shows that *Primary sectors* and *Transportation* tend to be underrepresented in the Glass data while *Manufacturing*, *Administrative services*, *Health*, the *Arts* and *Professional Activities* tend to be overrepresented. *Activities of Membership Organisations* is an outlier in terms of representation probably because of the presence of some charity data in Glass.
 
 In [@place_val] we perform a similar analysis but comparing the geographical representation of different Local Authority Districts in Glass and Companies House. 
 
-![Comparison of Glass and Companies House geographical coverage](https://raw.githubusercontent.com/nestauk/sg_covid_impact/80_reporting/figures/scotland/png/glass_place_validation.png){#fig:place_val}
+![Comparison of Glass and Companies House geographical coverage](../../figures/scotland/png/glass_place_validation.png){#fig:place_val}
 
 We see that Local Authorities in Highlands and Islands tend, in general, to be overrepresented in the Glass data while Local Authorities around Aberdeen and the central belt - in particular Glasgow City - are underrepresented. We dig further into the potential reasons for this in [@sector_place_val], where we present, in the left panel, the over or underrepresentations of SIC divisions (horizontal axis) in each Local Authority District (vertical axis). The left panel shows the correlation between the sectoral distribution of activity in Glass and Companies House by Local Authority. For example, in the case of Glasgow City, the low correlation between Glass and Companies House sectoral distributions seems to be driven by an underrepresentation of *Postal and Courier* activities in Glass and an overrepresentation of various *professional* and *administrative services*. One question that we do not consider here is to which extent are these divergences explained by limitations in Glass coverage or by geographical divergences in the levels of website adoption.
 
-![Comparison of Glass and Companies House geographical coverage](https://raw.githubusercontent.com/nestauk/sg_covid_impact/80_reporting/figures/scotland/png/glass_sector_place_validation.png){#fig:sector_place_val}
+![Comparison of Glass and Companies House geographical coverage](../../figures/scotland/png/glass_sector_place_validation.png){#fig:sector_place_val}
 
 We conclude by noting that although at a high level, the Scottish sectoral and geographical distributions of activity in Glass and Companies House are similar, there remain some important differences for particular industries and locations that create challenges for using it directly in order to generate indicators comparing the situation in different locations. This is one of the reasons why in one of our main streams of analysis we use Glass to generate industry vocabularies which we then scale to local authorities using representative BRES data instead of directly relying on Glass micro-data whose biases are likely to become amplified when focusing on geography-sector cells with small sample sizes.
 
@@ -178,7 +173,7 @@ This has the goal of sense-checking whether the resulting trends are consistent 
 
 [@fig:keyword_trends] shows the evolution of normalised search volumes since January 2020 (we use a logarithmic scale in the Y axis to reduce the impact of outliers). The size of the points represents the volume of search and the color the SIC section they are related to (we note that we have not normalised keyword volumes by industry salience / overall volume of search in this chart). 
 
-![Evolution in keyword search trends](https://raw.githubusercontent.com/nestauk/sg_covid_impact/80_reporting/figures/scotland/png/keyword_trends.png){#fig:keyword_trends}
+![Evolution in keyword search trends](../../figures/scotland/png/keyword_trends.png){#fig:keyword_trends}
 
 The chart, which can be explosed [here](add link) shows that at the beginning of the pandemic terms such as *symptoms* and *news* attracted unusual (versus the pre-Covid-19 baseline) levels of attention. By contrast, terms related to travelling, sports and social consumption such as *airport*, *bus*, *football* or restaurant experience a drop compared to the same month in the previous year. Certain products and services that anecdotally have experienced an increase in demand during the pandemic such as *bread*, *video* or *bicycles* also experience an increase. Later in the year, we note high volumes of normalised searching for *tests* while interest in cultural activities such as *cinema*, *theatre* or *museum* remain depressed. We note that a blip of interest in the term *global* in December which might be spurious (we expect that our averaging and weighting methodology should make our sectoral exposure estimates robust to this kind of disturbance in search activity). 
 
@@ -186,7 +181,7 @@ The chart, which can be explosed [here](add link) shows that at the beginning of
 
 [@fig:sector_exposures] presents monthly changes in sectoral exposure to Covid-19. Every row in the Y axis is a SIC division (not all of them are labelled - the chart can be explored interactively [here](add link)). The colour of each cell represents the position of a SIC division in the ranking of exposure to Covid-19. Red colours indicate high levels of exposure (ie low volumes of search for keywords about the industry in relation to the baseline) and blue colours indicate the opposite. 
 
-![Evolution in sectoral exposure](https://raw.githubusercontent.com/nestauk/sg_covid_impact/80_reporting/figures/scotland/png/sector_exposures.png){#fig:sector_exposures}
+![Evolution in sectoral exposure](../../figures/scotland/png/sector_exposures.png){#fig:sector_exposures}
 
 The results are consistent with our understanding of the sectoral impact of the pandemic based on measures of GDP mentioned in the literature review: *Libraries*, *Creative arts*, *Air transport*, *Accommodation* appear among the most highly exposed sectors on a consistent basis while *Computer programming*, *Waste removal*,  *Information service activities* and *repair and installation of equipment* appear amongst the least exposed. It is interesting that our methodology appears to capture temporal shifts in exposure to Covid-19 - for example *Food and beverage services* appear less exposed during the summer when some social distancing measures where lifted. *Construction* and *Real Estate* appear highly exposed during the first lockdown in April and May but less so since. In summary, our estimates of sectoral exposure to Covid-19 appear to capture our intuitions about what sectors have been impacted by the pandemic. 
 
@@ -194,7 +189,7 @@ The results are consistent with our understanding of the sectoral impact of the 
 
 As an additional validation step, we have correlated time-series of search interest on products and services related to different industries aggregated at the SIC section level with other trend data indicative of the severity of Covid-19 and its impact on individual behaviours proxied via Google Footfall data. We present the results in [@fig:add_val], where every facet presents the correlation coefficients between search trends for keywords in an industry and our additional validation measures.
 
-![](https://github.com/nestauk/sg_covid_impact/raw/80_reporting/figures/scotland/png/trend_triangulation.png){#fig:add_val}
+![](../../figures/scotland/png/trend_triangulation.png){#fig:add_val}
 
 The chart shows that volumes of interest in sector requiring high levels of physical proximity and social interaction such as *Construction*, *Arts and Entertainment*, *Transport* or *Real Estate* are negatively correlated with proxies for the impact of the severity of the pandemic (and allied social distancing and lock down measures). They are also negatively correlated with measures of consumer activity in residential areas based on mobility data (again a proxy for the lockdown) and positively correlated with measures of mobility in retail, workplace and transit areas. 
 

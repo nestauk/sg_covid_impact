@@ -1,4 +1,4 @@
-.PHONY: git clean lint sync_data_to_s3 sync_data_from_s3
+.PHONY: git clean lint sync_data_to_s3 sync_data_from_s3 report
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -32,6 +32,10 @@ endef
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
+
+## Build report
+report:
+	bash bin/make_report.sh
 
 ## Setup git for notebooks
 git:
