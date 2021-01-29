@@ -738,6 +738,63 @@ def plot_exposure_evol(exposure_levels, mode="single", geo=None, columns=None):
     return output
 
 
+def plot_national_comparison(df, geo, sel_geo="Scotland", rank=8, w=550, h=150):
+    """Composite chart comparing evolution and composition of exposures
+    Args:
+        df (df): df with levels of employment and exposure ranks
+        geo (df): geographical variable to compare
+        sel_ge0 (df): geography to focus on in the bottom of the chart
+        rank (int): threshold for including as 'high exposure'
+        w (int): width in pixels
+        h (int): height in pixels
+    """
+
+    exposure_levels_nat_detailed = make_exposure_shares_detailed(df, geo)
+
+    # Make plot of shares of employment by month and location
+    exposure_nat_high = exposure_levels_nat_detailed.query(f"rank>={rank}").query(
+        "month_year>'2020-02-01'"
+    )
+
+    # Evolution of shares of employment in high exposure sectors
+    share_agg_evol = (
+        exposure_nat_high.groupby(["month_year", geo])["share"]
+        .sum()
+        .reset_index(drop=False)
+    )
+
+    ch = (
+        alt.Chart(share_agg_evol)
+        .mark_line()
+        .encode(
+            x=alt.X("yearmonth(month_year)", title=None),
+            y=alt.Y("share", title=["Share of high exposed", "employment"]),
+            color=alt.Color(geo),
+        )
+        .properties(width=w, height=h)
+    )
+
+    # Evolution of composition of employment (detailed)
+    share_agg_detailed = exposure_nat_high.query(f"{geo}=='{sel_geo}'")
+    det_ch = (
+        alt.Chart(share_agg_detailed)
+        .mark_bar(stroke="white", strokeWidth=0.5)
+        .encode(
+            x=alt.X("yearmonth(month_year)", title=None),
+            y=alt.Y("share", title=["Share of high exposed", "employment"]),
+            color=alt.Color(
+                "section",
+                scale=alt.Scale(scheme="category20c"),
+                legend=alt.Legend(orient="bottom", columns=3),
+            ),
+            order=alt.Order("section", sort="ascending"),
+            tooltip=["division_name"],
+        )
+    ).properties(width=w, height=h)
+
+    return alt.vconcat(ch, det_ch).resolve_scale(color="independent")
+
+
 def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
     """Plots levels of employment and specialisation in sectors with
     different levels of exposure to Covid-19

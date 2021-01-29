@@ -7,6 +7,7 @@ from sg_covid_impact.descriptive import (
     make_section_division_lookup,
     load_sic_taxonomy,
     read_claimant_counts,
+    plot_national_comparison,
     claimant_count_norm,
     plot_trend_point,
     plot_claimant_trend_all_nuts,
@@ -99,6 +100,16 @@ exposure_lad = make_exposure_shares(exposure_levels)
 exposure_levels_ = exposure_levels.copy()
 exposure_levels_nat_comp = make_exposure_shares_detailed(exposure_levels_, "nuts1")
 
+# Compare evolution and composition of exposure in / out of Scotland
+exposure_levels_nat_comp["Country"] = [
+    "Scotland" if x == "Scotland" else "Not Scotland"
+    for x in exposure_levels_nat_comp["nuts1"]
+]
+
+evol_chart = plot_national_comparison(exposure_levels_nat_comp, "Country")
+
+save_altair(evol_chart, "national_exposure_evolution", driver, FIG_PATH)
+
 nat_exp = plot_emp_shares_specialisation(
     exposure_levels_nat_comp, month="2021-01-01", nuts1=nuts1_focus
 )
@@ -129,7 +140,7 @@ high_exposure_nuts1["mean_high_exposure"] = high_exposure_nuts1["geo_nm"].map(
 
 exp_share_vars = {
     "geo_var": "geo_nm",
-    "x_axis": "month_year",
+    "x_axis": "yearmonth(month_year)",
     "y_axis": "share",
     "y_title": "Share high exposure",
     "color": "mean_high_exposure",
@@ -137,7 +148,7 @@ exp_share_vars = {
 
 exposure_trend = plot_trend_point(
     high_exposure_nuts1.query("month_year>'2020-02-01'"), **exp_share_vars
-).properties(width=250, height=250)
+).properties(width=550, height=150)
 
 save_altair(exposure_trend, "exposure_trend_lads", driver=driver, path=FIG_PATH)
 
