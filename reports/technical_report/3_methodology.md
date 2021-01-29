@@ -131,6 +131,10 @@ Since this model is trained using a one vs rest classification regime that gener
 
 We create a network (the "industry space") where the nodes are SIC divisions and the edges are co-occurrences in business descriptions (the degree or thickness of these edges depends on the number of co-occurrences) and arrange it using a force-directed algorithm that bundles more closely those nodes which are similar to each other. In order to simplify our visualisations, we will use a maximum spanning tree algorithm that preserves those edges that create a fully connected network with the highest-degree edges and add to it the top 100 weighted-edges which are not part of the maximum spanning treee (this is the same approach that [@hidalgo2009building] use to the
 
+### c. Estimating sectoral exposure
+
+### d. Calculating sectoral diversification options
+
 ### e. Topic modelling Covid notices
 
 <!---
