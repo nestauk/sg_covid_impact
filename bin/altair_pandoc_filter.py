@@ -49,7 +49,9 @@ def altair(key, value, format, meta):
                 )
 
             else:
-                return Image(["", [], []], [], [element.get("static_path"), "fig:"])
+                figure_path = meta["figure_path"]["c"]
+                path = f"{figure_path}/{element.get('static_path')}"
+                return Image(["", [], []], [], [path, "fig:"])
 
 
 if __name__ == "__main__":

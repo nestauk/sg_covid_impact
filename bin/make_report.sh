@@ -6,7 +6,9 @@ pandoc -s 1_introduction.md 2_literature.md 3_methodology.md\
  -f markdown\
  -o report.tex\
  --natbib -F pandoc-crossref\
- --bibliography 'technicalreport.bib'
+ --bibliography 'technicalreport.bib'\
+ --filter ../../bin/altair_pandoc_filter.py\
+ --metadata figure_path="../../figures/scotland"
 pdflatex report.tex
 bibtex report || echo "Bibtex unsuccessful!"
 pdflatex report.tex
