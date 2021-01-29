@@ -27,7 +27,7 @@ fetch_urls:
 descriptive:
   nuts1: 'Scotland'
   months: ["2020-04-01","2020-09-01","2021-01-01"]
-  lads: ["Highland", "East Dunbartonshire", "Dumfries and Galloway"]
+  lads: ["Highland", "Aberdeen City", "Stirling"]
 diversification:
   nuts1: 'Scotland'
   months: ["2020-04-01","2020-09-01","2021-01-01"]
