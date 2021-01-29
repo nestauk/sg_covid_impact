@@ -98,11 +98,11 @@ def read_nspl(
 ):
     """Read and tag NSPL"""
     logging.info("Reading NSPL")
-    nspl = (pd.read_csv(nspl_location, usecols=["pcds", geo])
-            .dropna(axis=0,subset=[geo]))
+    nspl = pd.read_csv(nspl_location, usecols=["pcds", geo]).dropna(
+        axis=0, subset=[geo]
+    )
 
-    name_lu = (pd
-               .read_csv(os.path.join(meta_location, names)))
+    name_lu = pd.read_csv(os.path.join(meta_location, names))
 
     name_dict = name_lu.set_index(f"{geo_var_name}CD")[f"{geo_var_name}NM"].to_dict()
 

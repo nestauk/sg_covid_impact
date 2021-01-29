@@ -971,9 +971,9 @@ def plot_area_composition(
                 color=alt.Color(
                     "section",
                     legend=alt.Legend(columns=5, orient="bottom"),
-                    scale=alt.Scale(scheme="tableau20"),
+                    scale=alt.Scale(scheme="category20c"),
                 ),
-                order=alt.Order("share", sort="descending"),
+                order=alt.Order("section", sort="descending"),
             )
         ).properties(height=300)
         return local_profile
@@ -1006,7 +1006,7 @@ def plot_area_composition(
                     legend=alt.Legend(columns=3, orient="bottom"),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
-                order=alt.Order("share", sort="descending"),
+                order=alt.Order("section", sort="ascending"),
             )
             .add_selection(select_place)
             .transform_filter(select_place)
@@ -1041,7 +1041,7 @@ def plot_area_composition(
                     legend=alt.Legend(columns=1),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
-                order=alt.Order("share", sort="descending"),
+                order=alt.Order("section", sort="ascending"),
             )
             .add_selection(select_month)
             .transform_filter(select_month)
