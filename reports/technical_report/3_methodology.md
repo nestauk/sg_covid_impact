@@ -56,13 +56,13 @@ Alex adds info here
 
 Our analysis makes extensive use of official sources obtained from Nomis, a website offering access to open labour market statistics in the UK. We collect:
 
-* Data about Local Authority District levels of employment at the SIC-2 (Division) level from the [Business Register Employment Survey (BRES)](https://www.nomisweb.co.uk/sources/bres) for the most recent year available (2019).
+* [Business Register Employment Survey (BRES)](https://www.nomisweb.co.uk/sources/bres) data about Local Authority District levels of employment at the SIC-2 (Division) level for the most recent year available (2019).
 
 * [Claimant count](https://www.nomisweb.co.uk/sources/cc) data including information about people claiming Jobseekers Allowance or Universal Credit at the Local Authority District level. We collect monthly data on claimant count rates (claimant numbers normalised by working age population) for 2019 and 2020 and normalise monthly 2020 values by their 2019 equivalent in order to capture changes linked to Covid-19.
 
-* Employment and Economic Activity rates and percentages of the population with tertiary education and no education at the Local Authority District level from the December 2020 release of the [Annual Population Survey](https://www.nomisweb.co.uk/sources/aps).
+* [Annual Population Survey](https://www.nomisweb.co.uk/sources/aps) data about employment and Economic Activity rates and percentages of the population with tertiary education and no education at the Local Authority District level from the December 2020.
 
-* Medial annual gross income data from the Annual Survey of Hours and Earnings ([ASHE](https://www.nomisweb.co.uk/sources/ashe)).
+* [Annual Survey of Hours and Earnings](https://www.nomisweb.co.uk/sources/ashe) (ASHE) data about median annual gross income.
 
 #### Other validation sources
 
@@ -99,9 +99,9 @@ Table \ref{tab:examples} presents examples of industrial vocabularies randomly e
 |41: Construction of buildings      	|homes building housing apartments construction builders finish extensions residential projects new\_build decorating architects planning_permission developments      |
 |38: Waste collection, treatment and disposal activities| materials recovery recycling waste clearance scrap environmental skip\_hire asbestos skips metals disposal waste\_disposal scrap\_metal waste\_recycling waste\_management landfill |
 |58: Publishing activities 				|news games books press magazine journal editor fiction literature titles publishing articles writers readers authors|
-|21:Manufacture of basic pharmaceutical products and pharmaceutical preparations | health business also|
-|80:Security and investigation activities | police security cctv sia investigation guards alarms locksmith surveillance security\_systems access_control fire\_security security\_guards |
-|25:Manufacture of fabricated metal products, except machinery and equipment | metal steel engineering wire gates stainless\_steel aluminium components assembly welding precision cnc aerospace fabrication sheet\_metal | 
+|21: Manufacture of basic pharmaceutical products and pharmaceutical preparations | health business also|
+|80: Security and investigation activities | police security cctv sia investigation guards alarms locksmith surveillance security\_systems access_control fire\_security security\_guards |
+|25: Manufacture of fabricated metal products, except machinery and equipment | metal steel engineering wire gates stainless\_steel aluminium components assembly welding precision cnc aerospace fabrication sheet\_metal | 
 
 Table: Industrial vocabulary examples by SIC division \label{tab:examples}
 
