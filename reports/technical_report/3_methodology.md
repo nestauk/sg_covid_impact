@@ -74,7 +74,7 @@ Our analysis makes extensive use of official sources obtained from Nomis, a webs
 We have collected additional data from a number of secondary sources which we use to triangulate our trends results. They include:
 
 * [Google community mobility data](https://www.google.com/covid19/mobility/) which report disaggregated information about phone user mobility across different categories of places such as retail and recreation, groceries and pharmacies, parks, transit stations, workplaces, and residential.
-* [Covid incidence data](https://coronavirus.data.gov.uk/) including new deaths attributed to Covid-19 which we obtain from `data.gov.uk`.
+* [Covid incidence data](https://coronavirus.data.gov.uk/) including new deaths attributed to Covid-19 within 28 days of diagnosis which we obtain from `data.gov.uk`.
 
 ### e. Business registry sources
 
@@ -92,9 +92,44 @@ Alex adds description of fuzzy matching here
 
 ### b. Creating an industrial vocabulary
 
+In order to query Google Trends, we need a list of keywords related to the economic activities of different industries. We extract this "industry vocabulary" from Glass business descriptions. Our strategy is to aggregate the descriptions of all businesses in the same SIC division, tokenise then (extract individual works and commonly occurring combinations of words), count them and normalise these counts by the word distribution over the whole corpus. Having done this, we remove duplicate words (eg plurals) and focus, for each division on the top 25 / those that have a salience score above one (ie are overrepresented in the division) after removing tokens with less than 75 occurrences in each division to avoid low-frequency noisy terms.
+
+Table \ref{tab:examples} presents examples of industrial vocabularies randomly extracted from our list of SIC divisions. It shows that in general the approach we have taken appears to work well and generates intuitive vocabularies for various divisions, although in some cases such as with division 21 (pharmaceuticals), it generates very few keywords, potentially reducing the robustness of our search analysis for those sectors.
+
+<!---TODO: calculate % employment accounted by industries with short industry vocabularies - it will be low.
+--> 
+
+|Division									|Keywords|
+|------------------------------------|----------------------|
+|41: Construction of buildings      	|homes building housing apartments construction builders finish extensions residential projects new\_build decorating architects planning_permission developments      |
+|38: Waste collection, treatment and disposal activities| materials recovery recycling waste clearance scrap environmental skip\_hire asbestos skips metals disposal waste\_disposal scrap\_metal waste\_recycling waste\_management landfill |
+|58: Publishing activities 				|news games books press magazine journal editor fiction literature titles publishing articles writers readers authors|
+|21:Manufacture of basic pharmaceutical products and pharmaceutical preparations | health business also|
+|80:Security and investigation activities | police security cctv sia investigation guards alarms locksmith surveillance security\_systems access_control fire\_security security\_guards |
+|25:Manufacture of fabricated metal products, except machinery and equipment | metal steel engineering wire gates stainless\_steel aluminium components assembly welding precision cnc aerospace fabrication sheet\_metal | 
+
+Table: Industrial vocabulary examples by SIC division \label{tab:examples}
+
 ### c. Estimating sectoral exposure
 
+We extract normalised search volumes for keywords in industry vocabularies from Google Search Trends and use the results to produce measures of industrial exposure to Covid-19. In order to do this we:
+
+1. Take weekly search volumes by keyword to generate monthly averages.
+2. Normalise the search volume of each keyword by its salience in a SIC division. This means that keywords that are more salient for the industry will have a stronger weight when estimating its exposure to Covid-19 than terms that are less salient (ie occur more frequently in other divisions). For example, in Division 25 in table \ref{tab:examples} `metal` will be more salient (and have more weight when estimating that division's exposure to Covid-19) than a generic term such as `components`.
+3. Normalise search volumes by the total volume of searches in the industry vocabulary. This means that keyords that account for a larger proportion of all searches in an industry vocabulary will have a bigger weight in determining its exposure to Covid-19.
+4. Rescale 2020 and 2021 normalised keyword search volumes by the normalised search volumes in equivalent 2019 months in order capture deviations from a pre-Covid-19 baseline and account for seasonality in searches (ie the fact that people are more likely to search for information about air transport when they are planning their holidays at the beginning of the year, or for information about sports when a tournament starts).
+5. Calculate the average of 2019-rescaled keyword search volumes in a division weighted by the share of division search accounted by that keyword. 
+6. The procedure above yields a single monthly score for each SIC division capturing the extent to which search trends about keywords related to it are higher or lower than the pre-Covid 19 average. We change the sign of the score and quantize this series into deciles: we label sectors in the highest deciles as "highly exposed to Covid-19" (ie the weighted search volumes for their queries are much lower than the pre-Covid-19 baseline) and generally focus on them through our analysis.
+
 ### d. Calculating sectoral diversification options
+
+We use similarity between business website descriptions in order to calculate similarities between industries, which we interpret as a proxy for diversification opportunities: those sectors that are "close" to each other within the industry space that we build are more likely to be able to diversify into each other activities (this idea is based on the "Principle of Relatedness" which economic geographers have shown shapes the evolution of local economies [@hidalgo2018principle]).
+
+In order to calculate similarities between industries we train a machine learning model that predicts the SIC divisions for companies in the Glass-Companies House matched dataset using their descriptions. We use grid-search to select the model type and parametres that yield the best predictive performance, resulting in a regularised logistic regresssion. 
+
+Since this model is trained using a one vs rest classification regime that generates a probability score for each business and SIC division, we can use the resulting vector to calculate "industry co-occurrences" in a company (ie companies that are predicted to belong to more than one sector based on the machine learning model). 
+
+We create a network (the "industry space") where the nodes are SIC divisions and the edges are co-occurrences in business descriptions (the degree or thickness of these edges depends on the number of co-occurrences) and arrange it using a force-directed algorithm that bundles more closely those nodes which are similar to each other. In order to simplify our visualisations, we will use a maximum spanning tree algorithm that preserves those edges that create a fully connected network with the highest-degree edges and add to it the top 100 weighted-edges which are not part of the maximum spanning treee (this is the same approach that [@hidalgo2009building] use to the
 
 ### e. Topic modelling Covid notices
 
