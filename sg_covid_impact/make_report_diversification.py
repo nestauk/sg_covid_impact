@@ -159,9 +159,9 @@ div_trends = plot_divers_comparison(diversification_scot, 2)
 save_altair(div_trends, "div_trends", driver=driver, path=FIG_PATH)
 
 # Plot LAD situation
-diversification_lad_detailed = estimate_div_shares_geo(exposure_levels, 
-                                    monthly_diversification_rankings,
-                                    "geo_cd")
+diversification_lad_detailed = estimate_div_shares_geo(
+    exposure_levels, monthly_diversification_rankings, "geo_cd"
+)
 
 diversification_lad_detailed["divers_ranking"] = diversification_lad_detailed[
     "divers_ranking"

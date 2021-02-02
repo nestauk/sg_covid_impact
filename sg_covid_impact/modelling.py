@@ -67,7 +67,7 @@ def make_local_exposure_table(exposures_ranked):
     return exposure_lad_codes
 
 
-def make_exposure_share_variable(exposure_thres=6):
+def make_exposure_share_variable(exposure_thres=7):
     """Extracts exposure shares by LAD
     Args:
         exposure_thres (int): exposure ranking
@@ -171,8 +171,6 @@ def make_div_share_variable(exposure_level=7, div_level=3):
     diversification_lad_detailed["divers_ranking"] = diversification_lad_detailed[
         "divers_ranking"
     ].fillna("Less exposed")
-
-    print(diversification_lad_detailed["divers_ranking"].value_counts())
 
     diversification_shares = (
         make_exposure_shares(
@@ -624,12 +622,12 @@ def plot_model_coefficients(model_selected):
         base.mark_bar().encode(
             x="coefficient", color=alt.Color("temporal", legend=None)
         )
-    ).properties(width=120, height=75)
+    ).properties(width=400, height=150)
     err = (
         base.mark_errorbar(color="black").encode(
             x=alt.X("min", title="Coefficient"), x2="max"
         )
-    ).properties(width=120, height=75)
+    ).properties(width=400, height=150)
 
     reg_plot = alt.layer(ch, err, data=model_selected).facet(
         column=alt.Column("indep", title=None),
@@ -648,10 +646,10 @@ _SHORT_VAR_NAMES = {
     "% with no qualifications (NVQ) - aged 16-64": "% no qual",
     "% with other qualifications (NVQ) - aged 16-64": "% other qual",
     "Annual pay - gross": "Gross annual pay",
-    "Economic activity rate - aged 16-64": "Econ Activity rate",
+    "Economic activity rate - aged 16-64": "Economic Activity rate",
     "Employment rate - aged 16-64": "Emp rate",
-    "cl_count": "Claimant count",
-    "cl_count_norm": "Claimant (normalised)",
+    "cl_count": "Claimant count rate",
+    "cl_count_norm": "Claimant count rate (normalised)",
     "smd_high_deprivation_share": "SMDI",
     "eci": "ECI",
 }
@@ -665,3 +663,77 @@ sort_vars = [
     "% tertiary",
     "% no qual",
 ]
+
+clean_var_name = {
+    "% no qual": "% no qualification",
+    "% tertiary": "% tertiary",
+    "ECI": "Economic Complexity Index",
+    "Emp rate": "Employment rate",
+    "Gross annual pay": "Gross Annual Pay",
+    "cl_count": "Claimant count rate",
+    "cl_count_norm": "Claimant count rate (normalised)",
+    "exposure_share_lagged": "Exp employment share (lagged)",
+    "exposure_share_present": "Exp employment share (present)",
+    "low_div_share_lagged": "Low div. employment share (lagged)",
+    "low_div_share_present": "Low div employment share (present)",
+}
+
+order_vars = [
+    "Claimant count rate",
+    "Claimant count rate (normalised)",
+    "Employment rate",
+    "Gross Annual Pay",
+    "% no qualification",
+    "% tertiary",
+    "Economic Complexity Index",
+    "Exp employment share (present)",
+    "Exp employment share (lagged)",
+    "Low div employment share (present)",
+    "Low div. employment share (lagged)",
+]
+
+
+def make_correlation_plot(reg_table):
+    
+    # Create correlation table
+    corr_plot = (reg_table.iloc[:,2:].corr()
+                 .reset_index(drop=False)
+                 .melt(id_vars='index',var_name='variable_2')
+                 .reset_index(drop=True)
+                 .rename(columns={'index':'variable_1',0:'v2'}))
+    
+    # Clean variable names
+    for v in ['variable_1','variable_2']:
+        corr_plot[v] = corr_plot[v].map(clean_var_name)
+    
+    # Absolute value for circle sizes
+    corr_plot['size']= np.abs(corr_plot['value'])
+
+    # Avoid dominance by diagonal
+    for rid,r in corr_plot.iterrows():
+        if r['variable_1']==r['variable_2']:
+            corr_plot.loc[rid,'value']=0
+    
+    # Round coefficient for tooltip
+    corr_plot['coeff'] = [str(np.round(x,3))if x!=0 else '' for
+                          x in corr_plot['value']]
+    
+    ch = (alt.Chart(corr_plot)
+      .mark_rect()
+      .encode(x=alt.X('variable_1',title=None,sort=order_vars,
+                     axis=alt.Axis(labelAngle=315)),
+              y=alt.Y('variable_2',title=None,sort=order_vars),
+              tooltip=['variable_1','variable_2','coeff'],
+              color=alt.Color('value:Q',sort='descending',title='Correlation',
+                              scale=alt.Scale(scheme='Spectral'))))
+
+    text = (alt.Chart(corr_plot)
+          .mark_text()
+          .encode(x=alt.X('variable_1',title=None,sort=order_vars,
+                         axis=alt.Axis(labelAngle=315)),
+                  y=alt.Y('variable_2',title=None,sort=order_vars),
+                  text='coeff',
+                  opacity=alt.Opacity('size',legend=None,
+                                      scale=alt.Scale(range=[0.3,1]))))
+
+    return (ch+text).properties(width=500)

@@ -18,6 +18,7 @@ from sg_covid_impact.modelling import (
     plot_model_coefficients,
     make_tidy_agg_table,
     plot_correlation_evolution,
+    make_correlation_plot,
 )
 
 import sg_covid_impact
@@ -97,6 +98,13 @@ bivariate_scatters = plot_variable_correlations(tidy_agg_df)
 save_altair(bivariate_scatters, "bivariate_scatters", driver=driver, path=FIG_PATH)
 
 correlation_evolution = plot_correlation_evolution(reg_table, nuts_focus=nuts1_focus)
+
+# Correlation table
+scot_reg_table = reg_table.loc[[x[0] != "S" for x in reg_table["geo_cd"]]]
+
+corr_all = make_correlation_plot(scot_reg_table)
+save_altair(corr_all, "correlation_table", driver=driver, path=FIG_PATH)
+
 # Regression
 mods = {}
 
@@ -124,9 +132,9 @@ model_selected["temporal"] = [
 # Create plot with model coefficients
 regression_plot = plot_model_coefficients(model_selected)
 
-# Combine with correlation evolution plot above
-modelling_results = alt.vconcat(correlation_evolution, regression_plot).resolve_scale(
-    color="independent"
-)
+# # Combine with correlation evolution plot above
+# modelling_results = alt.vconcat(correlation_evolution, regression_plot).resolve_scale(
+#     color="independent"
+# )
 
-save_altair(modelling_results, "modelling_results", driver=driver, path=FIG_PATH)
+save_altair(regression_plot, "modelling_results", driver=driver, path=FIG_PATH)

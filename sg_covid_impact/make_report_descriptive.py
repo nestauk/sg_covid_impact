@@ -64,7 +64,7 @@ _DIVISION_NAME_LOOKUP = extract_sic_code_description(load_sic_taxonomy(), "Divis
 cl = read_claimant_counts()
 cl_norm = claimant_count_norm(cl)
 claimant_nuts1 = plot_trend_point(
-    cl_norm.query(f"nuts1=='{nuts1_focus}'"), x_axis="month"
+    cl_norm.query(f"nuts1=='{nuts1_focus}'"), x_axis="yearmonth(date)"
 )
 
 save_altair(claimant_nuts1, f"claimant_counts_{nuts1_focus}", driver, path=FIG_PATH)
