@@ -32,11 +32,7 @@ The core dataset for our analysis has been obtained from [Glass](https://www.gla
 
 The main advantage of Glass data that makes it relevant for our project is that it includes business descriptions that can be used to understand their economic activities at a higher level of resolution than is possible using industrial taxonomies. The fact that businesses generally use their websites to promote goods and services to consumers mean that we would expect their terminology to be suitable for querying with Google Search Trends, the data source that we will use to proxy consumer interests for the goods and services provided by different industries and its evolution.
 
-In addition to business metadata, Glass also started collecting Covid-19 notices at the beginning of the pandemic...
-
-<!---
-Alex adds info about Covid notices here
--->
+In addition to business metadata, Glass also started collecting Covid-19 notices at the beginning of the pandemic.... [content to be inserted from notice_analysis.md in branch 17_notice_topic_model]
 
 ### b. Google Search Trends
 
@@ -81,8 +77,16 @@ Alex explains why there were no suitable sources
 
 ### a. Matching Glass with Companies House
 
-<!---
-Alex adds description of fuzzy matching here
+In order to obtain SIC codes for business websites, and to a lesser extent to obtain a secondary source of address data, we match the Glass dataset to Companies house using the monthly data snapshots for May, June, and July 2020 - available at the time from the [Companies house website](http://download.companieshouse.gov.uk/en_output.html).
+
+<!-- 
+TODO:
+- Match on name
+- High number of combinations => cannot use straightforward approach
+- Combine cossine similarity and Jaccard similarity of k-shingles to trade-off token frequency with spelling mistakes/unique company made-up words to identify top candidates for each glass candidate
+- Then calculate an "exact" similarity measure for each of the top matches
+- Choose the best such that each glass org appears once but each CH company may appear multiple times
+- Falls short on things like libraries, museums etc. and multi company companies.
 -->
 
 ### b. Creating an industrial vocabulary
@@ -134,10 +138,7 @@ In order to estimate a sector's diversification options to reduce exposure to Co
 
 ### e. Topic modelling Covid notices
 
-<!---
-Alex adds info here
--->
-
+[content to be inserted from notice_analysis.md in branch 17_notice_topic_model]
 
 ## 4. Descriptive analysis and validation
 
