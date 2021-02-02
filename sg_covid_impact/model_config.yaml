@@ -31,6 +31,6 @@ descriptive:
 diversification:
   nuts1: 'Scotland'
   months: ["2020-04-01","2020-09-01","2021-01-01"]
-  lads: ['East Lothian','Aberdeenshire','Stirling']
+  lads: ['City of Edinburgh','Highland','Aberdeenshire']
 modelling:
   nuts1: 'Scotland'

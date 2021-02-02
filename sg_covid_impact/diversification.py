@@ -5,7 +5,11 @@ from itertools import combinations
 import networkx as nx
 import sg_covid_impact
 from sg_covid_impact.make_sic_division import extract_sic_code_description
-from sg_covid_impact.descriptive import load_sic_taxonomy, get_date_label
+from sg_covid_impact.descriptive import (
+    load_sic_taxonomy,
+    get_date_label,
+    make_exposure_shares_detailed,
+)
 from sg_covid_impact.altair_network import plot_altair_network
 
 project_dir = sg_covid_impact.project_dir
@@ -180,6 +184,28 @@ def make_neighbor_shares(network, exposure_ranking, month):
     return df.loc[exposure_sorted].fillna(0)
 
 
+def estimate_div_shares_geo(exposure_levels, monthly_div_rankings, geo):
+    """Calculates employment in different diversification shares per geography
+    Args:
+        exposure_levels (df): employment in sectors with different exposure levels
+        monthly_div_rankings (df): monthly diversification rankings
+        geo (str): geography to aggregate over
+    """
+
+    # Merge with diversification information
+    diversification_shares = (
+        make_exposure_shares_detailed(exposure_levels, geo=geo)
+        .assign(month_year=lambda x: x["month_year"].apply(month_string_from_datetime))
+        .merge(
+            monthly_div_rankings,
+            left_on=["division", "month_year"],
+            right_on=["division", "month_year"],
+            how="outer",
+        )
+    )
+    return diversification_shares
+
+
 def plot_exposure_neighbours(neighb_shares):
     """Plots exposure of neighbours and number of neighbours by node"""
 
@@ -194,7 +220,7 @@ def plot_exposure_neighbours(neighb_shares):
             "index",
             sort=neighb_shares.index.tolist(),
             axis=alt.Axis(labels=False, ticks=False),
-            title="Section",
+            title="Division",
         )
     )
     ch = (
@@ -284,3 +310,44 @@ def make_local_network(
         **kwargs,
     )
     return ch.properties(title=", ".join([place, get_date_label(month)]))
+
+
+def plot_divers_comparison(divers_trend, exp_ranking=2):
+    """Plots evolution of share of employment in low div industries
+    Args:
+        divers_trend (df): shares of employment in divisions & geographies
+        with diversification exposure ranking information
+        exp_ranking (int): min thres for exposure
+    """
+
+    low_div_opt = divers_trend.query(f"divers_ranking>={exp_ranking}")
+
+    trend = (
+        alt.Chart(low_div_opt)
+        .mark_line()
+        .encode(
+            x=alt.X("yearmonth(month_year)", title=None),
+            y=alt.Y(
+                "sum(share)", title=["Share of employment", "in low diversification"]
+            ),
+            color=alt.Color("is_scot", title="Country"),
+        )
+    ).properties(width=550, height=150)
+
+    comp = (
+        alt.Chart(low_div_opt.query("is_scot=='Scotland'"))
+        .mark_bar()
+        .encode(
+            x=alt.X("yearmonth(month_year)", title=None),
+            y=alt.X("share", title=["Share of employment", "in low diversification"]),
+            color=alt.Color(
+                "section",
+                scale=alt.Scale(scheme="category20c"),
+                legend=alt.Legend(orient="bottom", columns=3),
+            ),
+            order="section",
+            tooltip=["division_name"],
+        )
+    ).properties(width=550, height=150)
+
+    return alt.vconcat(trend, comp).resolve_scale(color="independent")
