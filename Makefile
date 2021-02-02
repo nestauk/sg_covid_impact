@@ -33,9 +33,13 @@ endef
 # COMMANDS                                                                      #
 #################################################################################
 
-## Build report
+## Build report (Latex PDF)
 report:
 	bash bin/make_report.sh
+
+## Build report (HTML)
+report_html:
+	bash bin/make_report_html.sh
 
 ## Setup git for notebooks
 git:
