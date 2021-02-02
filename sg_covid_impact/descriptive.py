@@ -522,6 +522,8 @@ def plot_trend_point(
     y_axis="cl_norm",
     y_title="Claimant count normalised",
     color="mean_cl_count",
+    w=500,
+    h=150,
     **kwargs,
 ):
     """Plots a linechart decorated with points to enable selection
@@ -532,6 +534,8 @@ def plot_trend_point(
         y_axis (str): name of y variable
         y_title (str): clean Y title
         color (str): name of color variable
+        w (int): width in pixels
+        h (int): height in pixels
 
     """
 
@@ -568,7 +572,7 @@ def plot_trend_point(
         strokeWidth=alt.condition(selector, alt.value(1.75), alt.value(0.5)),
     )
 
-    chart = (point + line).add_selection(selector).properties(width=300, height=300)
+    chart = (point + line).add_selection(selector).properties(width=w, height=h)
 
     return chart
 
