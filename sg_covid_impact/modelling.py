@@ -928,7 +928,7 @@ def plot_predictions(pred_actual, pred_month="Jan 2021", act_month="Dec 2020"):
         .mark_point(filled=True, stroke="black", strokeWidth=0.3)
         .encode(
             x="value",
-            y=alt.Y("geo_nm", sort=sort_lads, title="Council zone"),
+            y=alt.Y("geo_nm", sort=sort_lads, title="Council area"),
             shape=alt.Shape('variable',scale=alt.Scale(range=['square',
                                               'circle','circle'])),
             color=alt.Color("variable", title="Output type"),
