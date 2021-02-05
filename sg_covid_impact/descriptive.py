@@ -676,7 +676,8 @@ def plot_ranked_exposures(
         .mark_rect()
         .encode(
             x=alt.X("yearmonth(month_year):O", title="Month"),
-            y=alt.Y(f"{sector}:O", sort=sort_sectors, title=title),
+            y=alt.Y(f"{sector}:O", sort=sort_sectors, title=title,
+                    axis=alt.Axis(labelFontSize=8)),
             color=alt.Color(
                 "rank:Q",
                 sort="descending",
@@ -685,7 +686,7 @@ def plot_ranked_exposures(
             ),
             tooltip=[sector, f"{sector}_name", "month_year", "rank"],
         )
-        .properties(width=400, height=500)
+        .properties(width=400, height=700)
     )
     return hq
 
@@ -952,7 +953,12 @@ def plot_exposure_comparison(exp_levels_comp, month="interactive"):
 
 
 def plot_area_composition(
-    exposures, month, area=False, interactive=False, legend_columns=1
+    exposures,
+    month,
+    area=False,
+    interactive=False,
+    legend_columns=1,
+    legend_orient="bottom",
 ):
     """Plot the compositon of an area
     Args:
@@ -974,7 +980,7 @@ def plot_area_composition(
                 tooltip=["division_name"],
                 color=alt.Color(
                     "section",
-                    legend=alt.Legend(columns=5, orient="bottom"),
+                    legend=alt.Legend(columns=legend_columns, orient=legend_orient),
                     scale=alt.Scale(scheme="category20c"),
                 ),
                 order=alt.Order("section", sort="descending"),

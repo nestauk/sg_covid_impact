@@ -16,7 +16,7 @@ Here, we report the results of a pilot study conducted for Scottish Government w
 
 Our goals are three-fold: 
 
-1. To gauge the opportunities that novel data sources and methods offer for tracking the impacts of the pandemic, as well as their limitations, stemming for example fron biases in their coverage and noise in their content.
+1. To gauge the opportunities that novel data sources and methods offer for tracking the impacts of the pandemic, as well as their limitations, stemming for example from biases in their coverage and noise in their content.
 2. To understand what these data tell us about economic exposure and opportunities to diversify away from Covid-19 in Scotland, and the implications for Scottish Government.
 3. To assess options for building infrastructure for automated data collection, processing and visualisation that leverage the granularity and timeliness of novel data and their ability to inform economic policy decisions closer to real-time.
 
