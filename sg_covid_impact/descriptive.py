@@ -818,7 +818,7 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
 
     exposure_sort = (
         exposure_nuts.sort_values(
-            ["section", "rank", "share"], ascending=[True, False, False]
+            ["section", "share"], ascending=[True, False]
         )["division"]
     ).tolist()
 
@@ -827,7 +827,8 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
         .mark_bar(stroke="black", strokeWidth=0.3)
         .encode(
             x=alt.X("share", title="Share of employment"),
-            y=alt.Y("division", sort=exposure_sort, axis=alt.Axis(labels=False)),
+            y=alt.Y("division", sort=exposure_sort, 
+                    axis=alt.Axis(labelFontSize=8)),
             color=alt.Color(
                 "rank",
                 title="Exposure rank",
@@ -837,7 +838,7 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
             ),
             tooltip=["division_name"],
         )
-    ).properties(height=500, width=250)
+    ).properties(height=700, width=350)
 
     specialisation_month = exp_df.query(f"month_year=='{month}'")
 
@@ -875,7 +876,7 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
             ),
             tooltip=["division_name"],
         )
-    ).properties(height=500, width=250)
+    ).properties(height=700, width=200)
     specialisation_ruler = (
         alt.Chart(specialisation_nuts)
         .mark_rule(stroke="black", strokeDash=[2, 1])

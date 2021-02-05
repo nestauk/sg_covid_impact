@@ -219,7 +219,7 @@ def plot_exposure_neighbours(neighb_shares):
         y=alt.Y(
             "index",
             sort=neighb_shares.index.tolist(),
-            axis=alt.Axis(labels=False, ticks=False),
+            axis=alt.Axis(labelFontSize=8),
             title="Division",
         )
     )
@@ -235,7 +235,7 @@ def plot_exposure_neighbours(neighb_shares):
                 legend=alt.Legend(orient="bottom"),
             ),
         )
-    ).properties(height=400, width=200)
+    ).properties(height=700, width=300)
 
     bar = (
         base.mark_bar().encode(
@@ -243,7 +243,7 @@ def plot_exposure_neighbours(neighb_shares):
             tooltip=["division_name"],
             color=alt.Color("neighbour_n", legend=None),
         )
-    ).properties(height=400, width=200)
+    ).properties(height=700, width=200)
 
     out = alt.hconcat(ch, bar).resolve_scale(color="independent", y="shared")
     return out
