@@ -293,6 +293,47 @@ def make_secondary_reg(keep, secondary):
     return sec_wide[keep]
 
 
+def make_predictors(
+    exp,
+    div,
+    secondary,
+    keep=["% tertiary", "Gross annual pay", "Emp rate", "ECI", "% no qual"],
+):
+    """Creates a table of predictors for the regression analysis
+    exp (df): measures of exposure
+    div (df): measures of diversification
+    secondary (df): secondary variables
+    """
+    # Present period exposure / diversification variables
+
+    present = pd.concat(
+        [
+            var.rename(columns={"value": f"{name}_present"})
+            .query("month_year>'2020-03-01'")
+            .set_index(["month_year", "geo_cd"])
+            .drop(axis=1, labels=["variable"])
+            for var, name in zip([exp, div], ["exposure_share", "low_div_share"])
+        ],
+        axis=1,
+    ).reset_index(drop=False)
+
+    # Lagged variables
+    lagged = pd.concat(
+        [
+            make_lagged_web(v, name)
+            for v, name in zip([exp, div], ["exposure_share", "low_div_share"])
+        ],
+        axis=1,
+    ).reset_index(drop=False)
+
+    # Secondary variables
+    sec_vars = make_secondary_reg(keep, secondary)
+
+    return present.merge(lagged, on=["month_year", "geo_cd"]).merge(
+        sec_vars, on=["geo_cd"]
+    )
+
+
 def make_regression_table(
     cl,
     exp,
@@ -512,7 +553,7 @@ def fit_regression(table, dep, indep_focus, fe=True):
         fe (bool): if we include place fixed effects
     """
 
-    table_ = table.dropna(axis=0)
+    table_ = table.dropna(axis=0).sort_values("geo_cd")
 
     Y = table_[dep]
 
@@ -694,46 +735,196 @@ order_vars = [
 
 
 def make_correlation_plot(reg_table):
-    
+
     # Create correlation table
-    corr_plot = (reg_table.iloc[:,2:].corr()
-                 .reset_index(drop=False)
-                 .melt(id_vars='index',var_name='variable_2')
-                 .reset_index(drop=True)
-                 .rename(columns={'index':'variable_1',0:'v2'}))
-    
+    corr_plot = (
+        reg_table.iloc[:, 2:]
+        .corr()
+        .reset_index(drop=False)
+        .melt(id_vars="index", var_name="variable_2")
+        .reset_index(drop=True)
+        .rename(columns={"index": "variable_1", 0: "v2"})
+    )
+
     # Clean variable names
-    for v in ['variable_1','variable_2']:
+    for v in ["variable_1", "variable_2"]:
         corr_plot[v] = corr_plot[v].map(clean_var_name)
-    
+
     # Absolute value for circle sizes
-    corr_plot['size']= np.abs(corr_plot['value'])
+    corr_plot["size"] = np.abs(corr_plot["value"])
 
     # Avoid dominance by diagonal
-    for rid,r in corr_plot.iterrows():
-        if r['variable_1']==r['variable_2']:
-            corr_plot.loc[rid,'value']=0
-    
+    for rid, r in corr_plot.iterrows():
+        if r["variable_1"] == r["variable_2"]:
+            corr_plot.loc[rid, "value"] = 0
+
     # Round coefficient for tooltip
-    corr_plot['coeff'] = [str(np.round(x,3))if x!=0 else '' for
-                          x in corr_plot['value']]
-    
-    ch = (alt.Chart(corr_plot)
-      .mark_rect()
-      .encode(x=alt.X('variable_1',title=None,sort=order_vars,
-                     axis=alt.Axis(labelAngle=315)),
-              y=alt.Y('variable_2',title=None,sort=order_vars),
-              tooltip=['variable_1','variable_2','coeff'],
-              color=alt.Color('value:Q',sort='descending',title='Correlation',
-                              scale=alt.Scale(scheme='Spectral'))))
+    corr_plot["coeff"] = [
+        str(np.round(x, 3)) if x != 0 else "" for x in corr_plot["value"]
+    ]
 
-    text = (alt.Chart(corr_plot)
-          .mark_text()
-          .encode(x=alt.X('variable_1',title=None,sort=order_vars,
-                         axis=alt.Axis(labelAngle=315)),
-                  y=alt.Y('variable_2',title=None,sort=order_vars),
-                  text='coeff',
-                  opacity=alt.Opacity('size',legend=None,
-                                      scale=alt.Scale(range=[0.3,1]))))
+    ch = (
+        alt.Chart(corr_plot)
+        .mark_rect()
+        .encode(
+            x=alt.X(
+                "variable_1", title=None, sort=order_vars, axis=alt.Axis(labelAngle=315)
+            ),
+            y=alt.Y("variable_2", title=None, sort=order_vars),
+            tooltip=["variable_1", "variable_2", "coeff"],
+            color=alt.Color(
+                "value:Q",
+                sort="descending",
+                title="Correlation",
+                scale=alt.Scale(scheme="Spectral"),
+            ),
+        )
+    )
 
-    return (ch+text).properties(width=500)
+    text = (
+        alt.Chart(corr_plot)
+        .mark_text()
+        .encode(
+            x=alt.X(
+                "variable_1", title=None, sort=order_vars, axis=alt.Axis(labelAngle=315)
+            ),
+            y=alt.Y("variable_2", title=None, sort=order_vars),
+            text="coeff",
+            opacity=alt.Opacity("size", legend=None, scale=alt.Scale(range=[0.3, 1])),
+        )
+    )
+
+    return (ch + text).properties(width=500)
+
+
+def make_predicted_values(mods, exp, div, secondary, month="2021-01-01"):
+    """Predicts a months values based on our model
+    Args:
+        mods (dict): regression models predicting claimant count outcomes
+        exp (df): exposure data
+        div (df): diversification data
+        secondary (df): secondary data
+    """
+
+    predictive_results_container = []
+
+    # For each model
+    for k, model in mods.items():
+
+        # Predicted and predicted variable names
+        y = "_".join(k.split("_")[:-1])  # Output (cl count norm or not norm)
+        x = k.split("_")[-1]  # Predictor in the model
+
+        # Decide what variables to keep
+        if x == "div":
+            drop = "exp"
+        else:
+            drop = "div"
+
+        # Make predictors
+        p = (
+            make_predictors(exp, div, secondary)
+            .query(f"month_year=='{month}'")
+            .dropna(axis=0)
+        ).reset_index(drop=True)
+
+        # Add fixed effects
+        p_fe = pd.concat([p, pd.get_dummies(p["geo_cd"])], axis=1).drop(
+            columns=["geo_cd", "month_year"]
+        )
+
+        # Drop irrelevant predictors
+        p_fe = p_fe.loc[:, [drop not in x for x in p_fe.columns]]
+
+        predicted = pd.DataFrame(model.predict(p_fe), columns=["value"])
+
+        # Add metadata
+        predicted["geo_cd"] = p["geo_cd"]
+        predicted["output"] = y
+        predicted["variable"] = x
+
+        predictive_results_container.append(predicted)
+
+    predicted_df = pd.concat(predictive_results_container)
+    return predicted_df
+
+
+def combine_predicted_actual(pred, cl, cl_month="2020-12-01"):
+    """Compares predicted values for a month with the actuals for a month
+    Args:
+        pred (df): predicted_values
+        cl (df): claimant count data
+        month (str): comparison month in claimant counts
+
+    """
+    lad_lu = make_lad_lookup()
+
+    cl_actual = (
+        cl.copy()
+        .query(f"date=='{cl_month}'")
+        .reset_index(drop=True)
+        .drop(axis=1, labels=["date"])
+    )
+    cl_actual = cl_actual.rename(columns={"variable": "output"})
+
+    cl_actual["variable"] = "actual"
+
+    predicted_actual = (
+        pd.concat([pred, cl_actual])
+        .assign(geo_nm=lambda x: x["geo_cd"].map(lad_lu))
+        .assign(nuts1=lambda x: x["geo_cd"].apply(assign_nuts1_to_lad))
+        .query("nuts1!='Northern Ireland'")
+    )
+    return predicted_actual
+
+
+def plot_predictions(pred_actual, pred_month="Jan 2021", act_month="Dec 2020"):
+    """Plots predicted versus actual values
+    Args:
+        pred_actual (df): table with predicted and actual values by geography
+        pred_month (str): month we are predicting about
+        act_month (str): month where we have actual values
+    """
+
+    pred_actual_ = pred_actual.copy()
+    # List of sorted LADs
+    sort_lads = (
+        pred_actual_.query("variable!='actual'")
+        .query("output=='cl_count_norm'")
+        .groupby("geo_nm")["value"]
+        .mean()
+        .sort_values(ascending=False)
+        .index.tolist()
+    )
+
+    var_lookup = {
+        "actual": f"Actual {act_month}",
+        "div": [f"{pred_month} prediction", "(Low diversification)"],
+        "exp": [f"{pred_month} prediction", "(exposure)"],
+    }
+
+    output_lookup = {
+        "cl_count_norm": "Claimant count rate (Normalised)",
+        "cl_count": "Claimant count rate",
+    }
+
+    pred_actual_["variable"] = pred_actual_["variable"].map(var_lookup)
+    pred_actual_["output"] = pred_actual_["output"].map(output_lookup)
+
+    pred_ch = (
+        alt.Chart(pred_actual_)
+        .mark_point(filled=True, stroke="black", strokeWidth=0.3)
+        .encode(
+            x="value",
+            y=alt.Y("geo_nm", sort=sort_lads, title="Council zone"),
+            shape=alt.Shape('variable',scale=alt.Scale(range=['square',
+                                              'circle','circle'])),
+            color=alt.Color("variable", title="Output type"),
+            tooltip=["geo_nm", "variable", "value"],
+            column=alt.Column("output", sort="descending", title="Output"),
+        )
+    ).properties(width=500, height=400)
+
+    pred_ch = pred_ch.resolve_scale(x="independent")
+
+    return pred_ch

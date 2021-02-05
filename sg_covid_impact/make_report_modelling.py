@@ -19,6 +19,9 @@ from sg_covid_impact.modelling import (
     make_tidy_agg_table,
     plot_correlation_evolution,
     make_correlation_plot,
+    make_predicted_values,
+    plot_predictions,
+    combine_predicted_actual,
 )
 
 import sg_covid_impact
@@ -138,3 +141,13 @@ regression_plot = plot_model_coefficients(model_selected)
 # )
 
 save_altair(regression_plot, "modelling_results", driver=driver, path=FIG_PATH)
+
+# Conclude by exploring predictions based on current data
+
+predicted_actual = combine_predicted_actual(
+    make_predicted_values(mods, exp, div, secondary), cl
+)
+
+pred_ch = plot_predictions(predicted_actual.query("nuts1=='Scotland'"))
+
+save_altair(pred_ch, "predicted_outputs", driver=driver, path=FIG_PATH)
