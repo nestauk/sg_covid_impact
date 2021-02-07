@@ -32,7 +32,15 @@ The core dataset for our analysis has been obtained from [Glass](https://www.gla
 
 The main advantage of Glass data that makes it relevant for our project is that it includes business descriptions that can be used to understand their economic activities at a higher level of resolution than is possible using industrial taxonomies. The fact that businesses generally use their websites to promote goods and services to consumers mean that we would expect their terminology to be suitable for querying with Google Search Trends, the data source that we will use to proxy consumer interests for the goods and services provided by different industries and its evolution.
 
-In addition to business metadata, Glass also started collecting Covid-19 notices at the beginning of the pandemic.... [content to be inserted from notice_analysis.md in branch 17_notice_topic_model]
+In addition to business metadata, Glass also started collecting Covid-19 notices at the beginning of the pandemic by searching for passages of text in a business' website that reference terms such as "Covid", "Coronavirus", "Government recommendation", "lockdown" etc.
+This captures notices such as,
+
+> "COVID-19: In light of the COVID-19 pandemic, we're only doing one-to-one lessons via Zoom or Skype. Please see our prices or contact us for more information. All the best, Dave and the team."
+
+We have between 210K-220K such notices for each of May, June, and July 2020 which we have used to assess whether periodic collection of notices can help to assess the impact of Covid-19 in Scotland, by identifying sectors and regions which are posting notices that are indicative of exposure to Covid, such as only being able to conduct lessons online.
+
+The SIC code (sector) of a notice is obtained by linking Glass to Companies house [@sec:], and regions can be obtained either from the address data scraped from a business' website or from the trading address listed in Companies house.
+
 
 ### b. Google Search Trends
 
@@ -42,9 +50,26 @@ We collect search volume data for a set of keywords extracted from business webs
 
 ### c. Twitter
 
-<!---
-Alex adds info here
--->
+In order to collect the tweets of Scottish businesses - they are not provided by Glass - we have built our own prototype pipeline to scrape the websites of Scottish businesses, find references to twitter accounts, and scrape the tweets of these accounts.
+
+The scraper scrapes the main page of each business website,
+ finds additional internal links and applies a simple heuristic to choose which links are the best $n$ ($n=4$),
+ and then scrapes these links too.
+References to twitter handles or links to twitter are captured and the frequency of each counted aggregated for each website.
+Tweets that are not retweets are collected from January 2019 up to and including November 2020 (the date of data collection).
+The full history of a user's tweets would be prohibitively slow -
+ due to the Twitter API ratelimit .
+Furthermore, for many accounts the full history would not be available as the Twitter API only allows retrieveal of the 3,200 most recent tweets.
+Collection from January 2019 is a pragmatic balance between tweet availability; collection speed; and the utility of having a previous year's tweets to normalise activity against.
+Once tweets are collected, one must determine which of the twitter accounts mentioned on a businesses' website is the best match.
+Our matching heuristic for this is as follows:
+
+- Discard any twitter accounts mentioned more than 5 times across all websites
+- If there is only one match, consider that a match (high recall, low precision).
+- If one of the candidate twitter accounts has a string similarity score of over 70% then choose as a match.
+- If the twitter profile of one of the candidate twitter accounts, includes a link to the business website then choose as a match.
+
+An informal verification suggests that this heuristic performs well; however taking this analysis beyond the pilot stage would require improvement of the heuristic when there is only one match.
 
 ### d. Miscellaneous secondary sources
 
@@ -69,25 +94,38 @@ We have collected additional data from a number of secondary sources which we us
 
 ### e. Business registry sources
 
-<!---
-Alex explains why there were no suitable sources
--->
+Reliable data on business failures would allow
+ both validation of our exposure indicators
+ and the training of a predictive model which could identify businesses most at risk of failure in the future.
+The more timely and granular business failure data is, the better our indicators can be validated and used to predict businesses at risk of failure in the future.
+Granularity is important because it determines the level at which decisions can be made.
+Timeliness is important because it allows us to detect drift in the validity of indicators (as the pandemic and the response to it evolve) and increases the data available to validate and train models against.
+
+Whilst trying to identify sources of business failure data we faced two primary problems.
+Firstly, there is a sparsity of business failure datasets that are timely and/or granular.
+Secondly, and more problematic, business failures (across many measures) have been suppressed by policy interventions such as the furlough scheme, with the levels of business failures in 2020 being lower than 2019.
+Given these datasets do not act as a "ground truth" of business failures, we cannot use them in the way originally intentioned.
 
 ## 3. Data processing
 
 ### a. Matching Glass with Companies House
 
-In order to obtain SIC codes for business websites, and to a lesser extent to obtain a secondary source of address data, we match the Glass dataset to Companies house using the monthly data snapshots for May, June, and July 2020 - available at the time from the [Companies house website](http://download.companieshouse.gov.uk/en_output.html).
+In order to obtain SIC codes for business websites,
+ and to a lesser extent to obtain a secondary source of address data,
+ we match the Glass dataset to Companies house using the monthly data snapshots for
+ May, June, and July 2020 -
+ available at the time from the 
+ [Companies house website](http://download.companieshouse.gov.uk/en_output.html).
 
-<!-- 
-TODO:
-- Match on name
-- High number of combinations => cannot use straightforward approach
-- Combine cossine similarity and Jaccard similarity of k-shingles to trade-off token frequency with spelling mistakes/unique company made-up words to identify top candidates for each glass candidate
-- Then calculate an "exact" similarity measure for each of the top matches
-- Choose the best such that each glass org appears once but each CH company may appear multiple times
-- Falls short on things like libraries, museums etc. and multi company companies.
--->
+The matching methodology matches the names of companies in Companies House with the names extracted by Glass from business websites.
+Naively comparing the similarity of names is computationally infeasible.
+ We therefore use Locality Sensitive Hashing (with the Jaccard similarity of k-shingles) and the cossine similarity of tokens to identify the most likely matches for each Glass website which we then apply an exact similarity measure to and choose the best match.
+Each Glass organisation only appears once but each Companies House organisation may appear multiple times.
+This matching is not exact and problems do exist.
+For example, due to the nature of Companies House,
+ some matches may be to the wrong part of a conglomerate company
+ which may have a different SIC designation.
+We only consider matches with a similarity score of 70% or higher - which we empirically determined as a sensible threshold.
 
 ### b. Creating an industrial vocabulary
 
@@ -138,7 +176,35 @@ In order to estimate a sector's diversification options to reduce exposure to Co
 
 ### e. Topic modelling Covid notices
 
-[content to be inserted from notice_analysis.md in branch 17_notice_topic_model]
+#### Pre-processing
+
+To turn the notice text into data we can mathematically analyse, we process the notices into tri-grams performing filtering and lemmatising as we go.
+
+For example the following notice, 
+
+> "Leek Town Council has shown its support for a vital element in the town's response to the Covid 19 crisis by awarding a grant of £1000 to the Haregate Community Centre. Although the centre is now closed to its usual community groups, it has Read More..."
+
+Becomes the following set of tokens
+
+`['leek', 'town_council', 'has_shown', 'support', 'vital', 'element', 'town', 'response_to', 'covid_crisis', 'awarding', 'grant', 'community_centre', 'although', 'centre', 'closed', 'usual', 'community_groups', 'read_more']`
+
+#### Model
+
+By considering our documents (business notices) as being a mixture of topics -
+ a weighted mixture of words -
+  we can learn topics in an unsupervised manner
+  from the likelihood of word co-occurrences within our documents.
+This approach enables us to analyse
+ both the extent to which topics co-relate with factors such as the sector and location of notices,
+ and identify whether any topics correlate with measures of exposure.
+
+We train a TopSBM [@topSBM] topic model on our pre-processed collection of Covid notices
+ from Scottish business websites.
+This approach confers multiple advantages
+ over the more traditional LDA [@LDA]
+ such as automatically selecting the number of topics;
+ yielding a hierarchy of topics;
+ and permitting a more heterogeneous topic mixture than is permitted by LDA.
 
 ## 4. Descriptive analysis and validation
 
