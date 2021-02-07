@@ -192,7 +192,7 @@ Performing trend analysis with only three time-points is not an ideal exercise w
 
 Thinking that The section level of SIC was perhaps too coarse, we explored topic activity levels at the SIC division level; however this did not yield any clearer insight.
 
-We tested the correlation between topic activity in SIC sections and the google trends exposure score ([@sec:]) but no relation existed - correlations were generally small and appeared normally distributed around zero.
+We tested the correlation between topic activity in SIC sections and the google trends exposure score ([@sec:exposure]) but no relation existed - correlations were generally small and appeared normally distributed around zero.
 
 In light of the 3rd hierarchy level containing four dominant topics, we tested the 2nd hierarchy level to explore whether any useful finer structure would be revealed. 
 There were no longer four dominant topics and a few more common sense features appeared such as Public administration business websites talking about grants;
@@ -239,7 +239,7 @@ A further factor likely contributing to the poor outcomes from the topic modelli
 <!-- Histograms require too much data for interactives! -->
 <!-- <div class=altair s3_path="notice_length.json" static_path="notice_length.png" id="fig:notice_length">. -->
 <!-- </div> -->
-![Notice length distribution](../../figures/notice_length.png){#fig:notice_length_png}
+![Notice length distribution](../../figures/notice_length.png){#fig:notice_length}
 
 For example, the following notices are short and concise,
 

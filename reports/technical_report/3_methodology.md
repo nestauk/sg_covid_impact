@@ -39,7 +39,7 @@ This captures notices such as,
 
 We have between 210K-220K such notices for each of May, June, and July 2020 which we have used to assess whether periodic collection of notices can help to assess the impact of Covid-19 in Scotland, by identifying sectors and regions which are posting notices that are indicative of exposure to Covid, such as only being able to conduct lessons online.
 
-The SIC code (sector) of a notice is obtained by linking Glass to Companies house [@sec:], and regions can be obtained either from the address data scraped from a business' website or from the trading address listed in Companies house.
+The SIC code (sector) of a notice is obtained by linking Glass to Companies house [@sec:jacchammer], and regions can be obtained either from the address data scraped from a business' website or from the trading address listed in Companies house.
 
 
 ### b. Google Search Trends
@@ -108,7 +108,7 @@ Given these datasets do not act as a "ground truth" of business failures, we can
 
 ## 3. Data processing
 
-### a. Matching Glass with Companies House
+### a. Matching Glass with Companies House {#sec:jacchammer}
 
 In order to obtain SIC codes for business websites,
  and to a lesser extent to obtain a secondary source of address data,
@@ -147,7 +147,7 @@ Table \ref{@tbl:examples} presents examples of industrial vocabularies randomly 
 
 Table: Industrial vocabulary examples by SIC division \label{#tbl:examples}
 
-### c. Estimating sectoral exposure
+### c. Estimating sectoral exposure {#sec:exposure}
 
 We extract normalised search volumes for keywords in industry vocabularies from Google Search Trends and use the results to produce measures of industrial exposure to Covid-19. In order to do this we:
 
