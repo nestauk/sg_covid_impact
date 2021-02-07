@@ -1,6 +1,8 @@
 flows:
   companies_house:
     run_id: 978
+  glass_notice:
+    run_id: 842
   glass:
     run_id: 414
   google_search:
@@ -22,15 +24,39 @@ flows:
       years:
       - 2018
     run_id: 386
+  notice_tokens:
+    params:
+      n_gram: 3
+      test_mode: false
+    run_id: 907
+  notice_topics:
+    all:
+      params:
+        n_docs: -1
+        subsample_factor: 0.00167
+      run_id: 903
+    scotland:
+      params:
+        n_docs: -1
+      run_id: 924
+    section:
+      params:
+        match_threshold: 70
+        n_docs: 100000
+      run_id: 917
+  nspl:
+    run_id: 633
 fetch_urls:
   sic_taxonomy: https://www.ons.gov.uk/file?uri=/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007/sic2007summaryofstructurtcm6.xls
+params:
+  match_threshold: 67
 descriptive:
   nuts1: 'Scotland'
   months: ["2020-04-01","2020-09-01","2021-01-01"]
-  lads: ["Highland", "East Dunbartonshire", "Dumfries and Galloway"]
+  lads: ["Highland", "Aberdeen City", "Stirling"]
 diversification:
   nuts1: 'Scotland'
   months: ["2020-04-01","2020-09-01","2021-01-01"]
-  lads: ['East Lothian','Aberdeenshire','Stirling']
+  lads: ['City of Edinburgh','Highland','Aberdeenshire']
 modelling:
   nuts1: 'Scotland'

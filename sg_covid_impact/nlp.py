@@ -1,15 +1,17 @@
-"""Functions for Glass description processing and extraction of salient terms 
-by sector
-"""
+"""NLP utils & functions for Glass description processing and salient term extraction."""
+from itertools import combinations, chain
+from typing import Any, Dict, Iterable, List, Optional
 import re
 import string
-import pandas as pd
+
 import nltk
-from nltk.corpus import stopwords
-from itertools import combinations
+import pandas as pd
+import toolz.curried as t
 from gensim import models
 from Levenshtein import distance
+from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
+
 
 from sg_covid_impact.utils.list_utils import flatten_freq
 
@@ -20,15 +22,27 @@ _STOP_WORDS = set(
     stopwords.words("english") + list(string.punctuation) + ["\\n"] + ["quot"]
 )
 
+# WHAT IS _REGEX_STR?
+# Each failed match means it falls through to the next to catch
+# 0: URL's
+# 1: ???
+# 2: ???
+# 3: ???
+# 4: Twitter id like
+# 5: Enclosed in angle brackets
+# 6: Apostrophe
+# 7: Words (including underscores)
+# 8: Single non-whitespace character
 _REGEX_STR = [
     r"http[s]?://(?:[a-z]|[0-9]|[$-_@.&+]|" r"[!*\(\),](?:%[0-9a-f][0-9a-f]))+",
-    r"(?:\w+-\w+){2}",
-    r"(?:\w+-\w+)",
-    r"(?:\\\+n+)",
+    r"(?:\w+-\w+){2}",  # TODO: is this useful?
+    r"(?:\w+-\w+)",  # TODO: is this useful?
+    r"(?:\\\+n+)",  # TODO: is this useful?
     r"(?:@[\w_]+)",
     r"<[^>]+>",
     r"(?:\w+'\w)",
     r"(?:[\w_]+)",
+    r"(?:\S)",  # TODO: is this useful?
     r"(?:\S)",
 ]
 
@@ -64,12 +78,27 @@ def clean_and_tokenize(text, remove_stops):
     filtered_tokens = [
         token.replace("-", "_")
         for token in _tokens
+        # Conditions to be kept:
+        # - Longer than 2 characters if `remove_stops`
+        # - Not be a stop words if `remove_stops`
+        # - No digits in token
+        # - At least one ascii lowercase character
         if not (remove_stops and len(token) <= 2)
         and (not remove_stops or token not in _STOP_WORDS)
         and not any(x in token for x in string.digits)
         and any(x in token for x in string.ascii_lowercase)
     ]
     return filtered_tokens
+
+
+def tokenize(text: str, tokens_re: re.Pattern) -> Iterable[str]:
+    """Preprocess a raw string/sentence of text. """
+    return t.pipe(
+        text,
+        tokens_re.findall,
+        lambda tokens: chain.from_iterable(tokens) if tokens_re.groups > 1 else tokens,
+        t.filter(None),
+    )
 
 
 def make_ngram(tokenised_corpus, n_gram=2, threshold=10):
@@ -89,6 +118,48 @@ def make_ngram(tokenised_corpus, n_gram=2, threshold=10):
         bigram = models.phrases.Phraser(phrases)
         tokenised = bigram[tokenised]
         t += 1
+    return list(tokenised)
+
+
+def make_ngrams_v2(
+    documents: List[List[str]], n: int = 2, phrase_kws: Optional[Dict[str, Any]] = None
+) -> List[List[str]]:
+    """Create ngrams using Gensim's phrases.
+
+    Args:
+        documents: Tokenized documents.
+        n: The `n` in n-gram.
+        phrase_kws: Passed to `gensim.models.Phrases`.
+
+    Return:
+        N-grams
+
+    #UTILS
+    """
+    assert isinstance(n, int)
+    if n < 2:
+        raise ValueError("Pass n >= 2 to generate n-grams")
+
+    def_phrase_kws = {
+        "scoring": "npmi",
+        "threshold": 0.25,
+        "min_count": 2,
+        "delimiter": b"_",
+    }
+    if phrase_kws is None:
+        phrase_kws = def_phrase_kws
+    else:
+        def_phrase_kws.update(phrase_kws)
+        phrase_kws = def_phrase_kws
+
+    t = 1
+    while t < n:
+        phrases = models.Phrases(documents, **phrase_kws)
+        bigram = models.phrases.Phraser(phrases)
+        del phrases
+        tokenised = bigram[documents]
+        t += 1
+
     return list(tokenised)
 
 

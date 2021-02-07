@@ -25,12 +25,14 @@ dependencies:
   - pandas-profiling
   - statsmodels
   - filelock
+  - graph-tool
   - scikit-learn
 
   - pip:
     # Put any pip dependencies here (and no conda ones anywhere below)
     - ratelim
-    # - git+ssh://git@github.com/nestauk/jacc-hammer.git@legacy
+    - git+git://github.com/nestauk/jacc-hammer.git@legacy
+    - git+git://github.com/nestauk/research_daps.git@24_topsbm
     - pytrends
     - gtab
     - altair-saver
