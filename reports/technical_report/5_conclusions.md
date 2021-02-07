@@ -12,11 +12,22 @@ Our results support the idea that novel data sources can provide valuable inform
 
 Our macro analysis bypasses key limitations of business website data by using the SIC taxonomy as a "lookup" with official statistics, helping us to generate policy-relevant measures of employment and reducing concerns about geographical and industrial biases in the Glass data which our coverage analysis suggests are in any case moderate. This comes at the cost of substantial aggregation and reliance on the SIC taxonomy which presents important limitations in terms of its lagginess, presence of uninformative industrial codes ("Other activities not elsewhere classified") and risk of heterogeneity in exposure to Covid-19 within large codes. One option to address this issue would be to generate estimates of sectoral exposure at a finer level of sectoral granularity. This would require additional search data collection via the cloud computing infrastructure we have developed to overcome some restrictions in the rate for using Google Search Trends API and would likely bring some noise into our measures. The reason for this is that the industrial vocabulary for some industries would have to be based on smaller samples of businesses subject to higher misclassification rates.
 
-We have also explored various avenues to harness the granularity of the Glass data through an analysis of Covid-19 notices at the firm level, the collection of additional social media data from business websites, and by looking for ways to match the Glass data with business registers.
+We have also explored various avenues to harness the granularity of the Glass data through an analysis of Covid-19 notices at the firm level, the collection of additional social media data from business websites, and by looking for sources of business failure data which the Glass data could be matched to.
 
-<!---
-Alex add here about the opportunities of limitations of other sources
--->
+The exploration of Covid-19 notices using topic modelling failed to yield insights of note, highlighting data quality issues such as a large proportion of notices not being relevant to businesses' responses to Covid-19.
+Without the investment of significant time in improving the quality of the notice data, we do not believe this data source is capable of quantitatively mapping the economic impact of Covid in Scotland; however the data could find value in being developed into an exploratory tool to help policymakers find notices relevant to their specific question - be that focussing on a region, sector, or keyword.
+On the other hand, the ongoing costs incurred by having to license this data from a 3rd party and the reliance on their data pipeline makes this a high risk option.
+
+We have built a proof-of-concept pipeline to identify and collect the twitter accounts of businesses by scraping their websites and investigated the viability of using this data to assess the impact of Covid-19 on Scottish businesses with a twitter presence.
+Whilst available for a smaller number of businesses than the Glass notice data,
+ the twitter data does not require licensing data from a 3rd party on an ongoing basis;
+  is of a higher quality;
+   and is broader than Covid-19.
+In this pilot analysis we did not find robust evidence of an increased twitter presence due to Covid-19;
+ however the tweets of businesses already on twitter provide a timely and granular indicator about what businesses are doing.
+It is clear that this data could help policymakers assess understand how businesses are responding to an ongoing pandemic;
+ however the value of this data beyond the current set of restrictions whilst likely high is unclear.
+
 
 ## Implications
 
@@ -48,9 +59,26 @@ Finally, we would like to incorporate additional secondary data into our analysi
 
 ### Micro analysis
 
-<!---
-Alex adds stuff here
--->
+There are two principle significant investments required to improve the data quality of Covid-19 notices.
+Firstly, the data collected by Glass must be more reliable and complete: notices that are truncated must not be truncated; notices containing snippets from different sections of a businesses website must be separated; the time and date of collection must be provided rather than just a month.
+Unfortunately improved data collection would have to start again and would not be able to recover historic information, thus losing a key feature of the data.
+Secondly, better processing of the notices must be performed such that irrelevant notices are filtered out and relevant notices are classified into several categories such as "Business as usual", "Temporary closure", "Permanent closure", "Adaptation", "Partial closure" etc.
+This would likely require hand-annotation of the relevant sections of a subset of notices; training a model on these labels; extrapolating to the rest of the notices using the model; and performing a validation study on the results.
+[Recent analysis](https://datasciencecampus.ons.gov.uk/extracting-text-data-from-business-website-covid-19-notices/)
+ by the ONS has already piloted this hand labelling approach.
+While they find some promise in this approach; they are cautious about the biases of this approach.
+
+Given the myriad of issues with the Covid notice data, the fact that the ONS is also exploring similar lines of enquiry, and the ONS has a competitive edge with access to microdata:
+there is probably more value in investing effort into social-media data over notice data.
+A potential scale-up option for the twitter data would be to put the twitter dataset into Elasticsearch to generate a search engine for the tweets of Scottish businesses which could be queried by policymakers to obtain lists of tweets relating to the query and interactive visualisations communicating the trends across 
+ industry, space, and other factors;
+ however input from policymakers about what specifically they would like to find from this data would be required to correctly scope this.
+Regardless of the specific scale-up project for twitter data,
+ there are several improvements to the pipeline that would be necessary. 
+Chief among these would be: improving the ability of the scraping pipeline to detect and match twitter accounts,
+ collecting retweets,
+ and collecting tweets further back in time and for accounts with more than 3,200 tweets.
+This future collection would likely require access to Twitter's [Academic research product track](https://developer.twitter.com/en/solutions/academic-research) which provides a more permissive and complete API for researchers.
 
 ### Visualisation options
 
