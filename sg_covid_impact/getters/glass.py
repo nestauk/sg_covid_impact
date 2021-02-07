@@ -1,6 +1,7 @@
 # %%
 """Data getters for Glass business website data."""
 import logging
+from typing import Dict, List
 
 import pandas as pd
 from metaflow import namespace
@@ -22,6 +23,17 @@ def run_id() -> int:
 
 
 GETTER = flow_getter("GlassMergeMainDumpFlow", run_id=run_id())
+
+
+def notice_run_id() -> int:
+    """get `run_id` for flow
+
+    note: this is loaded from __init__.py not from file
+    """
+    return sg_covid_impact.config["flows"]["glass_notice"]["run_id"]
+
+
+NOTICE_GETTER = flow_getter("GlassMergeNoticesDumpFlow", run_id=notice_run_id())
 
 
 @cache_getter_fn
@@ -56,3 +68,23 @@ def get_organisation_description() -> pd.DataFrame:
 def get_organisation_metadata() -> pd.DataFrame:
     """Metadata for Glass businesses (longitudinal)."""
     return GETTER.organisationmetadata
+
+
+@cache_getter_fn
+def get_notice() -> pd.DataFrame:
+    """Covid notices for Glass businesses (longitudinal)."""
+    return NOTICE_GETTER.notices.rename(columns={"id_organisation": "org_id"})
+
+
+@cache_getter_fn
+def get_covid_term() -> pd.DataFrame:
+    """Covid notice terms for each notice for Glass businesses."""
+    return NOTICE_GETTER.term
+
+
+@cache_getter_fn
+def get_notice_tokens() -> Dict[str, List[str]]:
+    """Tokenised Covid notices."""
+
+    run_id = sg_covid_impact.config["flows"]["notice_tokens"]["run_id"]
+    return flow_getter("NoticeTokeniseFlow", run_id=run_id).docs

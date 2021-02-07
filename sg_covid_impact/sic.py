@@ -1,9 +1,17 @@
+"""SIC relevant functionality.
+
+TODO: refactor into scripts and modules
+"""
 import requests
 import os
 import logging
 import re
 import json
+from typing import Dict
+
+from toolz import keymap
 import pandas as pd
+
 import sg_covid_impact
 
 project_dir = sg_covid_impact.project_dir
@@ -42,6 +50,40 @@ def load_sic_taxonomy():
         _SIC_OUTPUT_FILE,
         skiprows=1,
         dtype={"Division": str, "Group": str, "Class": str, "Sub Class": str},
+    )
+
+
+def section_code_lookup() -> Dict[str, str]:
+    """Returns lookup from 2-digit SIC code to SIC section letter."""
+
+    def _dictrange(key_range, value) -> dict:
+        return {i: value for i in key_range}
+
+    return keymap(
+        lambda i: str(i).zfill(2),
+        {
+            **_dictrange([1, 2, 3], "A"),
+            **_dictrange(range(5, 10), "B"),
+            **_dictrange(range(10, 34), "C"),
+            35: "D",
+            **_dictrange(range(36, 40), "E"),
+            **_dictrange(range(41, 44), "F"),
+            **_dictrange(range(45, 48), "G"),
+            **_dictrange(range(49, 54), "H"),
+            **_dictrange([55, 56], "I"),
+            **_dictrange(range(58, 64), "J"),
+            **_dictrange([64, 65, 66], "K"),
+            68: "L",
+            **_dictrange(range(69, 76), "M"),
+            **_dictrange(range(77, 83), "N"),
+            84: "O",
+            85: "P",
+            **_dictrange([86, 87, 88], "Q"),
+            **_dictrange(range(90, 94), "R"),
+            **_dictrange([94, 95, 96], "S"),
+            **_dictrange([97, 98], "T"),
+            99: "U",
+        },
     )
 
 
