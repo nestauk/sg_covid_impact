@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd $(dirname $0)/../reports/technical_report
 # 1_introduction.md 2_literature.md 3_methodology.md\
-pandoc -s notice_analysis.md\
+pandoc -s twitter_analysis.md\
  -f markdown\
  -o report.tex\
  --bibliography 'technicalreport.bib'\
