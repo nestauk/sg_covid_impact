@@ -72,7 +72,7 @@ The figure illustrates some of the diversification opportunities / challenges fo
 
 In order to summarise a sector's diversification options away from Covid-19, we measure how far away it is, on average, from sectors with low levels of exposure to Covid-19. We present the results in Chart [@fig:div_option]  \([interactive version here](link here)). In that chart, the vertical axis represents SIC divisions sorted by their average distance to less exposed industries in January 2021, with industries farther apart from low levels of exposure at the top. The left panel captures the share of neihgbours with different levels of exposure and the right panel the total number of neighbours). The chart helps us to identify which are the industries that are most exposed to Covid-19 and potentially less able to diversify away from it. The workforces in those industries and the local economies that specialise on them will be specially exposed to Covid-19.
 
-![Scottish sector space](../../figures/scotland/png/sector_diversification_options.png){#fig:div_options}.
+![Scottish sector space](../../figures/scotland/png/sector_diversification_options.png){#fig:div_option}.
 
 Some of the sectors that are most exposed and least able to diversify away from Covid-19 include *Air transport*, *Activities of Households and other domestic personnel*, *Land transport*, *Creative arts and entertainment*, *Travel Agencies* and *Accommodation*. By contrast, other sectors that are relatively highly exposed to Covid-19 such as *Other professional activities not elsewhere classified*, *Services to Buildings and Landscaping activities* and *Architectural and Engineering activities* have a broader set of diversification options 
 
