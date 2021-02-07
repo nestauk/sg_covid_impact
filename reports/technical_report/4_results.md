@@ -139,3 +139,125 @@ We note that the estimates above are experimental and developed for illustrative
 
 ## 2. Firm-level results
 
+### Covid Notice analysis
+
+#### Descriptive 
+
+Before presenting the results of the topic modelling we first explore in what Scottish regions and in what sectors notices appear, and compare these to their frequency in the base Glass datasets of business descriptions.
+
+<div class=altair s3_path="notice_proportion_scottish_laua.json" static_path="notice_proportion_scottish_laua.png" id="fig:notice_proportion_laua">Proportion of notices in each Scottish council area compared to the baseline occurrence within the Glass dataset. Areas with a higher proportion of notices than baseline are more likely to have posted a notice than would be expected and vice versa.
+</div>
+
+Figure [@fig:notice_proportion_laua] shows that as well as being responsible for the source of a large proportion of both organisation descriptions and Covid-19 notices, business websites in Edinburgh and Glasgow were noticeably more likely to post notices than would be expected.
+
+<div class=altair s3_path="uk_vs_scotland_notices_by_section.json" static_path="uk_vs_scotland_notices_by_section.png" id="fig:notice_proportion_section">Proportion of notices by SIC section each month compared to the baseline proportion of organisations in the Glass dataset - split by both Scotland and the whole UK. Sections with a higher proportion of notices than baseline are more likely to have posted a notice than would be expected and vice versa.
+</div>
+
+Figure [@fig:notice_proportion_section] paints a more interesting picture.
+Construction business websites were much less likely to post notices than would be expected.
+Whilst this could be because construction companies were less likely to have been impacted by Covid from May, the more likely explanation is that construction company websites are not where clients of these companies go to get information - updates are likely to come through more channels.
+One surprising feature of this figure is that Wholesale and Retail Trade business websites were more likely to post notices than expected at the level of the UK; however Wholesale and Retail Trade business websites in Scotland were less likely.
+Similarly, business websites engaging in Professional, Scientific, and Technical activities were much less likely to post notices across the whole of the UK than those websites that were in Scotland.
+Another noticeable difference between Scotland and the UK is that Education business websites in Scotland did not post notices as frequently as across the whole of the UK, perhaps due to differing policies between Scotland and other home nations.
+
+#### Topic modelling
+
+In this section we present the results of performing topic modelling on the notices of Scottish businesses.
+
+[@tbl:topsbm_hierarchy] shows the topic hierarchy obtained. Topic level 3 was chosen as the initial level of analysis as the four topics yielded at level 4 are too broad and the 147 topics of level 2 are too fine.
+
+| Level | Number of topics | Number of clusters |
+| ----- | ---------------- | ------------------ |
+| 0     | 2136             | 1995               |
+| 1     | 805              | 753                |
+| 2     | 147              | 160                |
+| 3     | 30               | 28                 |
+| 4     | 4                | 8                  |
+| 5     | 1                | 1                  |
+: TopSBM model hierarchy. {#tbl:topsbm_hierarchy}
+
+
+Initially we focused on analysing the outputs of the topic model at the section level of the SIC taxonomy.
+
+
+<div class=altair s3_path="topic_trend_by_section.json" static_path="topic_trend_by_section.png" id="fig:topic_trend_by_section">
+Top: Activity in each topic by SIC section (y-axis) and month (colour).
+Bottom: Trends in the top 5 topics for each SIC section.
+</div>
+
+Figure [@fig:topic_trend_by_section] shows the topic activity in SIC sections over time, with the bottom of the plot showing the trends in the top 5 topics for each section.
+We see that four topics (0, 3, 6, 8) dominate the activity of most sections.
+Trends within sections are mostly non-existent apart from particularly evident temporal trends in Agriculture, Forestry And Fishing, and Manufacturing sections; however these trends are for the vague four dominant (and uninformative) topics. 
+Performing trend analysis with only three time-points is not an ideal exercise when we do not know when in the month the notices were collected - they could have all been collected at the beginning of a month or randomly distributed throughout.
+
+Thinking that The section level of SIC was perhaps too coarse, we explored topic activity levels at the SIC division level; however this did not yield any clearer insight.
+
+We tested the correlation between topic activity in SIC sections and the google trends exposure score ([@sec:]) but no relation existed - correlations were generally small and appeared normally distributed around zero.
+
+In light of the 3rd hierarchy level containing four dominant topics, we tested the 2nd hierarchy level to explore whether any useful finer structure would be revealed. 
+There were no longer four dominant topics and a few more common sense features appeared such as Public administration business websites talking about grants;
+ however this level of the hierarchy was diffuse and remained uninformative about the impacts of Covid-19 on businesses.
+Furthermore, one particularly troubling feature was revealed, the topic activity for Accomodation and Food Services was zero in topic 125 which contains the top words: "delivery", "order", "shop", "store", "collection", "item", "collect", "your_order", "card", "royal_mail".
+ The topic activity for topic 125 in Wholesale and Retail Trade businesses is only 0.02.
+We would expect both these sectors to be talking about this topic!
+
+This shortcoming raised fresh questions over whether the data was of sufficient quality and whether there were features in the data that led to data not being suitable for an analysis of this type.
+
+### Post-hoc manual labelling
+
+The lack of correlation with other exposure measures and the lack of insightful results coming out of analysing topic activity at the sector level led us to label a random sample of 200 Scottish notices.
+We chose to label these as "Relevant", "Irrelevant", or "Ambiguously relevant" to a businesses response to Covid-19.
+
+| Relevant | Irrelevant | Amiguous |
+| ---      | ---        | ---      |
+| 96       | 82         | 22       |
+: Results of hand-labelling a random sample of 200 notices from Scottish businesses with their relevance to the response of a business to Covid-19. {#tbl:notice-labels}
+
+[@tbl:notice-labels] shows the results of this hand-labelling. Approximately 40% of notices were irrelevant to a businesses response to Covid-19, with approximately a further 10% being of ambiguous relevance - this is a strikingly large fraction of notices to not be relevant and is likely a large contributing factor for the poor outcomes of the topic modelling approach.
+
+Notices labelled as irrelevant were typically either: 
+
+- Not related to covid at all
+- A generic statement referencing that covid is happening / repeating govt. guidance
+- A truncated snippet such as "COVID-19 update"
+
+Ambiguously relevant notices were notices that it was hard to definitively flag as relevant or not. Often these are discussing Covid-19 in the context of a business but tend to be either misssing important context; cryptic; or discussing activities of businesses such as GP's, pharmacies, cleaning businesses where the text is discussing regular activity of such businesses as much as it is discussing a response to the shocks of Covid-19.
+Examples of ambiguously relevant notices are shown below, 
+
+> A socially distanced photo shoot for Lauren and Duchess. What a lovely birthday gift from family
+
+> COVID-19 Please note that we've updated our opening hours - these are listed at the bottom of page. We will add further updates here as we know more.
+
+> Due to the outbreak of Coronavirus, you should NOT attend the Practice unless advised to by a Clinician. All prescriptions will be sent to a local pharmacy or posted to you, as will all fit notes and letters. For any enquiries you can email us on gg-uhb.gp49111clinical@nhs.net
+
+> 12 May 2020 Civic Amenity Booking System by dgfarmer | posted in: Uncategorised | 0 Modus helps Civic Amenity Sites re-open after lockdown. We have been working with various Civic Amenity Site operators to produce a booking system suitable for use to regulate traffic at sites as they re-open after l...
+
+
+A further factor likely contributing to the poor outcomes from the topic modelling is the distribution of notice lengths - a large number of notices are extremely short and a large number are extremely long! Figure [@fig:notice_length] shows the notice length distribution - note the logarithmic x-scale.
+
+
+<!-- Histograms require too much data for interactives! -->
+<!-- <div class=altair s3_path="notice_length.json" static_path="notice_length.png" id="fig:notice_length">. -->
+<!-- </div> -->
+![Notice length distribution](../../figures/notice_length.png){#fig:notice_length_png}
+
+For example, the following notices are short and concise,
+
+> COVID-19 Update: McDermid Controls are still operating during this time whilst following government guidelines. For any enquiries please contact us here
+
+> Due to the current coronavirus situation the clinic is closed until further notice.
+
+> The course is open. Please remember to adhere to the government social distancing 2 metre guidelines.
+
+Whereas the next notice is extremely long (and is also several months out of date),
+
+> COVID-19 – PRECAUTIONARY MEASURES WITHIN ICE FACTOR UPDATE 20/03/2020: We are closing temporarily We are closing temporarily at 10pm tonight (20th March 2020) as requested by the UK Government. We are continuing to comply with the guidelines they have issued and hope you will too. We apologise for the inconvenience this will cause. It is only temporary and we hope to see you later when we reopen on the other side of the outbreak. We would like to thank you for your continued custom and will be back before you know it. In the meantime, take care, stay well and look after yourself, your health and your loved ones. We will keep in touch and let you know when we are due to reopen but for now, here is some information on what to do if you have a booking and some helpful tips for isolation should it be of any help. what to do if you have made a booking + All bookings will be honoured. + We will get in touch as soon as we can to move your booking to a date that suits once we reopen. + As we will be closed we ask that you email us at info@ice-factor.co.uk if you need us. + Please only send one email, on one communication platform. We will respond to everyone as soon as we can. + When we reopen will have a backlog of emails to work through so we ask that you bear with us and be mindful of the pressure our team will be under to process everyone’s correspondence. Some helpful advice during these times We will keep this blog updated regularly to keep our customers advised and in accordance with the latest guidance issued by the Scottish Government / Health Protection Scotland. LESSONS AND ACTIVITY AREAS ICE WALL – CLOSED – CLOSED ROCK WALL – CLOSED – CLOSED AERIAL ADVENTURE COURSE – CLOSED – CLOSED CAFE – CLOSED – CLOSED CHILLERS BAR & GRILL – CLOSED WHAT WE’RE DOING In line with the latest guidance, Ice Factor has undertaken various steps to help safeguard staff and customers in the facility. On the premises, visitors will see signage reminding you to wash hands for a minimum of 20 seconds, using soap and water; particularly after coughing, sneezing and going to the bathroom. We are advised this simple practice is one of the most effective ways to help alleviate the spread of the virus. We have also installed hand sanitizer stations throughout the centre and we strongly advise our customers to use these. In addition, we have increased our Clean Team with additional focus placed on high traffic areas such as door handles, push plates and handrails. All of our staff are being kept up to date with government advice and guidelines. WHAT WE ASK YOU TO DO Everyone has a responsibility to ensure they are doing their bit to stop the spread of the virus and so, we ask all of our visitors to: Please wash your hands regularly using soap and water, the above guidelines are the official recommendations outlined by the NHS. Cover your mouth and nose with a tissue should you sneeze or cough and bin it right away. If you display symptoms of the virus or have come in to contact with someone who has the virus follow the latest guidelines issued by the NHS prior to visiting us (or any other public place). Consider the impact on yourself and others (particularly those who may be vulnerable) prior to leaving your home should you be displaying symptoms or have been in contact with someone who has symptoms/the virus/been advised to isolate. Importantly, we kindly ask those travelling from abroad or who may be most vulnerable to the risk of infection to follow the latest guidance fromHealth Protection Scotland. WE ASK YOU KINDLY BUT FIRMLY NOT TO VISIT ICE FACTOR IF YOU DISPLAY THE SYMPTOMS OUTLINED IN THE LATEST ADVICE (13 March 2020) BY HEALTH PROTECTION SCOTLAND – https://www.hps.scot.nhs.uk/ IF YOU HAVE SYMPTOMS Should you contract the virus or have been advised to self-isolate due to showing symptoms, we want to make it easy for you to move your booking with us. We are therefore happy to extend the validity of gift vouchers and waive our administration fee which is normally charged to help you take the time you need to recover. Our team can do this over the phone and will move your lesson or session to a future date that suits. Cancellations and refunds At this time we are not issuing cancellations or refunds for bookings as we are operating as normal and presently have received no advice to change this at the current time. Should this change we will update you on this page. We want to make it easier to move your booking with us. As such, we will not be able to issue a refund for any bookings made however we have waived the £5 administration fee and the 5 day notice period. Our team are here to help and will be happy to move your booking forward to a date that suits. IF YOU NEED US, WE’RE HERE Our team are available should you need to contact them on info@ice-factor.co.uk or 01855 831 100. We are experiencing a higher volume of calls at the moment so please bear with us while we respond to you as quickly as we can. Thank you The team at Ice Factor
+
+Furthermore, relevant notices are often missing important context or contain information we couldn't interpret such as lots of notices stating new opening hours,
+
+>  Covid-19 (Coronavirus) Opening hours: Monday to Friday 8am-5pm Saturday and Sunday - closed
+
+Such notices are hard to algorithmically disambiguate from general statements about a business still being open or having to close due to Covid-19.
+
+
+### Twitter analysis
