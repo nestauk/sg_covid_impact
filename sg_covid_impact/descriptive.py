@@ -10,6 +10,7 @@ import altair as alt
 import pandas as pd
 import numpy as np
 import geopandas as gp
+from functools import lru_cache
 from zipfile import ZipFile
 from io import BytesIO
 
@@ -133,6 +134,23 @@ def read_salience():
     return pd.concat(dfs).reset_index(drop=False).rename(columns={"index": "keyword"})
 
 
+def read_lad_nuts1_lookup():
+    """Read a lookup between local authorities and NUTS"""
+    lu_df = pd.read_csv(
+        "https://opendata.arcgis.com/datasets/3ba3daf9278f47daba0f561889c3521a_0.csv"
+    )
+    return lu_df.set_index("LAD19CD")["RGN19NM"].to_dict()
+
+
+@lru_cache
+def read_lad_name_lookup():
+    """Read a lookup of local authority names."""
+    df = pd.read_csv(
+        "https://geoportal.statistics.gov.uk/datasets/fe6bcee87d95476abc84e194fe088abb_0.csv"
+    )
+    return df.set_index("LAD20CD")["LAD20NM"].to_dict()
+
+
 def read_claimant_counts():
     """Read claimant ccount data and process it"""
     cl = pd.read_csv(f"{project_dir}/data/processed/claimant_counts.csv")
@@ -187,12 +205,10 @@ def read_official(source="bres", year=2019):
     return official
 
 
-def fetch_shape():
+def fetch_shape(shape_path):
     """Fetch shapefile data"""
 
     shape19_url = "https://opendata.arcgis.com/datasets/3a4fa2ce68f642e399b4de07643eeed3_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D"
-
-    shape_path = f"{project_dir}/data/shape/lad_shape_2019/"
 
     response = requests.get(shape19_url)
 
@@ -201,8 +217,7 @@ def fetch_shape():
     my_zip.extractall(shape_path)
 
 
-def read_shape():
-    shape_path = f"{project_dir}/data/shape/lad_shape_2019/"
+def read_shape(shape_path):
 
     shapef = (
         gp.read_file(

@@ -11,3 +11,5 @@ pandoc -s 1_introduction.md 2_literature.md 3_methodology.md\
  --filter ../../bin/altair_pandoc_filter.py\
  --metadata bucket="scotland-figures"\
  -C
+#  --template=clean_menu.html\
+#  --toc\
