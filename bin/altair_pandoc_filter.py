@@ -144,7 +144,7 @@ def altair_div(key, value, format, meta):
                                         s3_path=s3_path,
                                         options=json.dumps(options),
                                     )
-                                    + tooltip_div,
+                                    # + tooltip_div,
                                 ),
                             ]
                         ),
