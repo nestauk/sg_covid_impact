@@ -691,8 +691,12 @@ def plot_ranked_exposures(
         .mark_rect()
         .encode(
             x=alt.X("yearmonth(month_year):O", title="Month"),
-            y=alt.Y(f"{sector}:O", sort=sort_sectors, title=title,
-                    axis=alt.Axis(labelFontSize=8)),
+            y=alt.Y(
+                f"{sector}:O",
+                sort=sort_sectors,
+                title=title,
+                axis=alt.Axis(labelFontSize=8),
+            ),
             color=alt.Color(
                 "rank:Q",
                 sort="descending",
@@ -832,9 +836,9 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
     exp_df[f"is_{nuts1}"] = [x == nuts1 for x in exp_df["nuts1"]]
 
     exposure_sort = (
-        exposure_nuts.sort_values(
-            ["section", "share"], ascending=[True, False]
-        )["division"]
+        exposure_nuts.sort_values(["section", "share"], ascending=[True, False])[
+            "division"
+        ]
     ).tolist()
 
     exposure_barch = (
@@ -842,8 +846,7 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
         .mark_bar(stroke="black", strokeWidth=0.3)
         .encode(
             x=alt.X("share", title="Share of employment"),
-            y=alt.Y("division", sort=exposure_sort, 
-                    axis=alt.Axis(labelFontSize=8)),
+            y=alt.Y("division", sort=exposure_sort, axis=alt.Axis(labelFontSize=8)),
             color=alt.Color(
                 "rank",
                 title="Exposure rank",

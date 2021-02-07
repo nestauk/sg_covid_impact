@@ -172,7 +172,10 @@ ms = alt.hconcat(
 # Profiles
 profiles = [
     plot_area_composition(
-        exposure_lad_detailed, month=month, interactive=False, area=area,
+        exposure_lad_detailed,
+        month=month,
+        interactive=False,
+        area=area,
         legend_columns=5,
     ).properties(height=200, width=250)
     for area, month in zip(out_params["lads"], out_params["months"])

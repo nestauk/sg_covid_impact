@@ -656,14 +656,14 @@ def extract_model_results(model, name):
 def plot_model_coefficients(model_selected):
     """Plots model coefficients"""
 
-    clean_names = {'cl_count':'Claimant count rate',
-                    'cl_count_norm':'Claimant count rate (normalised)',
-                    'exp share':['high exposure sectors'],
-                    'low div share':['low diversification sectors']
-                    }
-    model_selected['indep'] = model_selected['indep'].map(clean_names)
-    model_selected['pred'] = model_selected['pred'].map(clean_names)
-
+    clean_names = {
+        "cl_count": "Claimant count rate",
+        "cl_count_norm": "Claimant count rate (normalised)",
+        "exp share": ["high exposure sectors"],
+        "low div share": ["low diversification sectors"],
+    }
+    model_selected["indep"] = model_selected["indep"].map(clean_names)
+    model_selected["pred"] = model_selected["pred"].map(clean_names)
 
     base = alt.Chart().encode(
         y=alt.Y("temporal", sort=["present", "lagged"], title=None)
@@ -683,9 +683,9 @@ def plot_model_coefficients(model_selected):
     reg_plot = alt.layer(ch, err, data=model_selected).facet(
         column=alt.Column("indep", title=None),
         row=alt.Row(
-            "pred", 
-            #sort=["exp", "diversification"], 
-            title=["Measure of exposure:","Employment share in"]
+            "pred",
+            # sort=["exp", "diversification"],
+            title=["Measure of exposure:", "Employment share in"],
         ),
     )
 
@@ -929,8 +929,9 @@ def plot_predictions(pred_actual, pred_month="Jan 2021", act_month="Dec 2020"):
         .encode(
             x="value",
             y=alt.Y("geo_nm", sort=sort_lads, title="Council area"),
-            shape=alt.Shape('variable',scale=alt.Scale(range=['square',
-                                              'circle','circle'])),
+            shape=alt.Shape(
+                "variable", scale=alt.Scale(range=["square", "circle", "circle"])
+            ),
             color=alt.Color("variable", title="Output type"),
             tooltip=["geo_nm", "variable", "value"],
             column=alt.Column("output", sort="descending", title="Output"),
