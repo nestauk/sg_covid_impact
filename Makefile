@@ -82,6 +82,7 @@ grep "\[not .*$(shell python -c 'import sys; print(sys.platform)').*\]" -v > /tm
 	$(call execute_in_env, pip install -e .)
 	$(call execute_in_env, jupyter contrib nbextension install --user)
 	$(call execute_in_env, jupyter-nbextensions_configurator enable --user)
+	$(call execute_in_env, sh bin/install_research_daps.sh)
 	@echo ">>> New conda env created. Activate with:\nconda activate $(PROJECT_NAME)"
 else
 	@echo ">>> Please install a conda distribution\n"
@@ -95,6 +96,7 @@ ifeq (True,$(HAS_CONDA))
 	cat conda_environment.yaml | \
 grep "\[not .*$(shell python -c 'import sys; print(sys.platform)').*\]" -v > /tmp/environment.yaml
 	conda env update -f /tmp/environment.yaml
+	$(call execute_in_env, pip install -e research_daps/)
 	@echo ">>> Updated conda env"
 else
 	@echo ">>> Please install a conda distribution\n"
