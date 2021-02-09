@@ -16,6 +16,7 @@ pandoc -s 0_exec_summary.md\
  --filter ../../bin/altair_pandoc_filter.py\
  --metadata bucket="scotland-figures"\
  --resource-path="../../figures/.:."\
- --self-contained\
  --toc\
  -C
+aws s3 cp ../../figures/ s3://scotland-figures/ --recursive --acl public-read
+aws s3 cp report.html s3://scotland-figures/report.html --acl public-read

@@ -41,6 +41,10 @@ report:
 report_html:
 	bash bin/make_report_html.sh
 
+## Build report (HTML on S3)
+report_s3:
+	bash bin/make_report_s3.sh
+
 ## Setup git for notebooks
 git:
 	chmod +x .githooks/{pre-push,pre-commit,post-merge,post-commit}
