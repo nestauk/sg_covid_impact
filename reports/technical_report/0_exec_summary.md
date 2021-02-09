@@ -28,7 +28,7 @@ Our starting point is a database with information about 1.8 million businesses i
 2. Using business descriptions in websites to generate a vocabulary of industry terms and analyse their popularity in Google Searches compared to a pre-pandemic baseline, helping us to estimate measures of sectoral exposure to Covid-19
 3. Generating measures of sector similarity based on descriptions in order to identify diversification opportunities
 4. Combining it with secondary official sources to measure shares of employment in sectors exposed to Covid-19 in different countries and council areas, and the link between exposure and diversification opportunities and local Covid-19 impacts proxied with claimant count data
-5. We use topic modelling to analyse XX Covid-19 notices posted in business websites in May and June 2020.
+5. We use topic modelling to analyse $400000$ Covid-19 notices posted in business websites in May and June 2020.
 6. We extract twitter ids from Scottish business websites and collect their tweets (subject to restrictions in Twitter API) since January 2019 with the goal of analysing levels of activity and participation and the presence of keywords related to pandemic (and brexit) related shocks.
 7. We explore potential data sources about business failure that could be correlated with our firm-level dataset in order to identify business behaviours that may be predictive of failure
 
@@ -47,7 +47,7 @@ Our starting point is a database with information about 1.8 million businesses i
 
 #### Covid-19 notices
 
-* Our analysis of Covid-19 notices in business websites reveal a host of quality issues that make them difficult to anayse. More specifically, some of the notices are unrelated to Covid-19, their text is ambiguous and their length is variable. Notwithstanding this noise, Covid-19 notices might be useful for policymakes interested in tracking firm-level responses to the pandemic if they were collected in real time and distributed through interactive and explorable tools.
+* Our analysis of Covid-19 notices in business websites reveal a host of quality issues that make them difficult to analyse. More specifically, some of the notices are unrelated to Covid-19, their text is ambiguous and their length is variable. Notwithstanding this noise, Covid-19 notices might be useful for policymakes interested in tracking firm-level responses to the pandemic if they were collected in real time and distributed through interactive and explorable tools.
 
 #### Twitter
 
@@ -57,7 +57,7 @@ Our starting point is a database with information about 1.8 million businesses i
 
 #### Firm-level outcomes
 
-* Our scoping of firm-level sources of information about business failure such as XXX fail to reveal any suitable options: for example, many of the sources are available at a high level of sectoral and geographical aggregation making them unsuitable for our purposes.
+* Our scoping of firm-level sources of information about business failure such as Companies House fail to reveal any suitable options: for example, many of the sources are available at a high level of sectoral and geographical aggregation making them unsuitable for our purposes.
 * Even more substantially, government policies to suppress business failure as a consequence of the pandemic, for example through the furlough scheme, have artificially kept business failure rates low, making it difficult to estimate Covid-19 impacts through that proxy.
 
 ## Implications and next steps
