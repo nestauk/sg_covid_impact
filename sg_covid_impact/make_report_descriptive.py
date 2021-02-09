@@ -30,6 +30,7 @@ from sg_covid_impact.utils.altair_save_utils import (
     google_chrome_driver_setup,
     save_altair,
 )
+from sg_covid_impact.utils.altair_s3 import export_chart
 from sg_covid_impact.make_sic_division import extract_sic_code_description
 
 import sg_covid_impact
@@ -68,9 +69,11 @@ claimant_nuts1 = plot_trend_point(
 )
 
 save_altair(claimant_nuts1, f"claimant_counts_{nuts1_focus}", driver, path=FIG_PATH)
+export_chart(claimant_nuts1, f"claimant_counts_{nuts1_focus}")
 
 cl_trend = plot_claimant_trend_all_nuts(cl_norm)
 save_altair(cl_trend, "claimant_counts_nuts1", driver, path=FIG_PATH)
+export_chart(cl_trend, "claimant_counts_nuts1")
 
 # Read, process and plot search trends
 d = read_search_trends()
@@ -80,6 +83,7 @@ trends_normalised = search_trend_norm(d)
 month_trends = plot_keyword_tends_chart(trends_normalised)
 
 save_altair(month_trends, "keyword_trends", driver=driver, path=FIG_PATH)
+export_chart(month_trends, "keyword_trends")
 
 # Calculate sector exposures
 
@@ -88,6 +92,7 @@ exposures_ranked, keyword_weights = calculate_sector_exposure()
 ranked_ch = plot_ranked_exposures(exposures_ranked)
 
 save_altair(ranked_ch, "sector_exposures", driver=driver, path=FIG_PATH)
+export_chart(ranked_ch, "sector_exposures")
 
 # Read official data
 bres = read_official()
@@ -109,6 +114,7 @@ exposure_levels_nat_comp["Country"] = [
 evol_chart = plot_national_comparison(exposure_levels_nat_comp, "Country")
 
 save_altair(evol_chart, "national_exposure_evolution", driver, FIG_PATH)
+export_chart(evol_chart, "national_exposure_evolution")
 
 nat_exp = plot_emp_shares_specialisation(
     exposure_levels_nat_comp, month="2021-01-01", nuts1=nuts1_focus
@@ -119,6 +125,10 @@ save_altair(
     f"exposure_shares_{nuts1_focus}",
     driver=driver,
     path=FIG_PATH,
+)
+export_chart(
+    nat_exp.properties(title=f"{nuts1_focus}, January 2021"),
+    f"exposure_shares_{nuts1_focus}",
 )
 
 # Exposure by LAD
@@ -151,6 +161,7 @@ exposure_trend = plot_trend_point(
 ).properties(width=550, height=150)
 
 save_altair(exposure_trend, "exposure_trend_lads", driver=driver, path=FIG_PATH)
+export_chart(exposure_trend, "exposure_trend_lads")
 
 # Maps
 shapef = read_shape()
@@ -186,3 +197,4 @@ profiles_series = alt.hconcat(*profiles).resolve_scale(color="shared")
 map_profiles = alt.vconcat(ms, profiles_series).configure_view(strokeWidth=0)
 
 save_altair(map_profiles, f"geo_profiles_{nuts1_focus}", driver=driver, path=FIG_PATH)
+export_chart(map_profiles, f"geo_profiles_{nuts1_focus}")
