@@ -1,3 +1,20 @@
+---
+title: "Mapping the impact of Covid-19 in Scotland"
+header-includes: |
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-lite@4.8.1"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-embed@6"></script>
+figPrefix:
+  - "figure"
+  - "figures"
+tblPrefix:
+  - "table"
+  - "tables"
+secPrefix:
+  - "section"
+  - "sections"
+---
+
 # Executive Summary
 
 

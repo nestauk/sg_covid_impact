@@ -14,7 +14,7 @@ As discussed in the methodology, we have combined information from business webs
 
 #### National exposure
 
-[@fig:nat_evol] presents the evolution and composition of employment in sectors highly exposed to Covid-19 (decile 8 and above of exposure) between March 2020 and January 2021.
+[@Fig:nat_evol] presents the evolution and composition of employment in sectors highly exposed to Covid-19 (decile 8 and above of exposure) between March 2020 and January 2021.
 
 * The top panel presents aggregate shares of employment in Scotland and in the rest of the UK. It shows similar patterns of economic exposure to Covid-19 in terms of levels and evolution. We see spikes of exposure around the three main Covid-19 waves and associated lockdowns / policy restriction (March, October and Christmas 2020).
 * The bottom panel presents the shares of employment in Scotland exposed to Covid-19 accounted for by different SIC sections (the [**interactive version**](https://scotland-figures.s3.eu-west-2.amazonaws.com/national_exposure_evolution.html) allows a more finely grained exploration at the SIC divisionslevel). The charts shows important changes in the composition of workforces exposed to the pandemic at different points: during the first lockdown a significant share of the exposed workforce was in *Health activities* (differently from subsequent lockdowns, specialist health services such as dentists etc. were forced to close over this period) and in *Construction*. In subsequent phases of the pandemic other sectors such as *Accommodation*, *Employment activities* and *Social work* as well as some professional services such as *Legal and accounting* account for a larger share of the workforce exposed to Covid-19.
@@ -148,12 +148,12 @@ We explore the tendency of businesses in different regions and sectors to post n
 Proportion of notices in each Scottish council area compared to the baseline occurrence within the Glass dataset. Areas with a higher proportion of notices than baseline are more likely to have posted a notice than would be expected and vice versa.
 </div>
 
-Figure [@fig:notice_proportion_laua] shows that as well as being responsible for the source of a large proportion of both organisation descriptions and Covid-19 notices, business websites in Edinburgh and Glasgow were noticeably more likely to post notices than would be expected.
+[@Fig:notice_proportion_laua] shows that as well as being responsible for the source of a large proportion of both organisation descriptions and Covid-19 notices, business websites in Edinburgh and Glasgow were noticeably more likely to post notices than would be expected.
 
 <div class=altair s3_path="uk_vs_scotland_notices_by_section.json" static_path="uk_vs_scotland_notices_by_section.png" id="fig:notice_proportion_section">Proportion of notices by SIC section each month compared to the baseline proportion of organisations in the Glass dataset - split by both Scotland and the whole UK. Sections with a higher proportion of notices than baseline are more likely to have posted a notice than would be expected and vice versa.
 </div>
 
-Figure [@fig:notice_proportion_section] paints a more interesting picture.
+[@Fig:notice_proportion_section] paints a more interesting picture.
 Construction business websites were much less likely to post notices than would be expected.
 Whilst this could be because construction companies were less likely to have been impacted by Covid from May, the more likely explanation is that construction company websites are not where clients of these companies go to get information - updates are likely to come through other channels such as word of mouth.
 One surprising feature of this figure is that *Wholesale and Retail Trade* business websites were more likely to post notices than expected at the level of the UK; however *Wholesale and Retail Trade* business websites in Scotland were less likely.
@@ -163,7 +163,7 @@ Another noticeable difference between Scotland and the UK is that *Education* bu
 
 #### Topic modelling
 
-[@tbl:topsbm_hierarchy] shows the topic hierarchy obtained from the model described in [@sec:topsbm] with lowers levels encompassing a larger number of more detailed topics.
+[@Tbl:topsbm_hierarchy] shows the topic hierarchy obtained from the model described in [@sec:topsbm] with lowers levels encompassing a larger number of more detailed topics.
 Topic level 3 was chosen as the initial level of analysis as the four topics yielded at level 4 are too broad and the 147 topics of level 2 are too fine.
 Initially we focused on analysing the outputs of the topic model at the section level of the SIC taxonomy.
 
@@ -182,7 +182,7 @@ Top: Activity in each topic by SIC section (y-axis) and month (colour).
 Bottom: Trends in the top 5 topics for each SIC section.
 </div>
 
-Figure [@fig:topic_trend_by_section] shows the topic activity in SIC sections over time, with the bottom of the plot showing the trends in the top 5 topics for each section.
+[@Fig:topic_trend_by_section] shows the topic activity in SIC sections over time, with the bottom of the plot showing the trends in the top 5 topics for each section.
 We see that four topics (0, 3, 6, 8) dominate the activity of most sections - [@tbl:topic_words] shows the top words in these topics.
 Trends within sections are mostly non-existent apart from particularly evident temporal trends in *Agriculture, Forestry And Fishing*, and *Manufacturing* sections; however these trends are for the four dominant, and uninformative, topics. 
 Performing trend analysis with only three time-points is not an ideal exercise when we do not know when in the month the notices were collected - they could have all been collected at the beginning of a month or randomly distributed throughout.
@@ -218,7 +218,7 @@ We chose to label these as "Relevant", "Irrelevant", or "Ambiguously relevant" t
 | 96       | 82         | 22       |
 : Results of hand-labelling a random sample of 200 notices from Scottish businesses with their relevance to the response of a business to Covid-19. {#tbl:notice-labels}
 
-[@tbl:notice-labels] shows the results of this hand-labelling. Approximately 40% of notices were irrelevant to a business' response to Covid-19, with approximately a further 10% being of ambiguous relevance - this is a strikingly large fraction of notices to not be relevant and is likely a large contributing factor for the poor outcomes of the topic modelling approach.
+[@Tbl:notice-labels] shows the results of this hand-labelling. Approximately 40% of notices were irrelevant to a business' response to Covid-19, with approximately a further 10% being of ambiguous relevance - this is a strikingly large fraction of notices to not be relevant and is likely a large contributing factor for the poor outcomes of the topic modelling approach.
 
 Notices labelled as irrelevant were typically either: 
  not related to covid at all;
@@ -281,7 +281,7 @@ In this section we explore
 <div class=altair s3_path="tweets_volume.json" static_path="tweets_volume.png" id="fig:tweets_volume">Weekly count of tweets over time
 </div>
 
-[@fig:tweets_volume] shows the weekly count of tweets over time.
+[@Fig:tweets_volume] shows the weekly count of tweets over time.
 Depending on the counting methodology used,
  there is either a large increase or a slight decrease in twitter activity over time. 
 This is due to the fact that the twitter API limits its users to the most recent 3,200 tweets over time
@@ -291,14 +291,14 @@ To reduce this bias we can count tweets from accounts that tweeted in both the f
 <div class=altair s3_path="tweets_volume_stack_section.json" static_path="tweets_volume_stack_section.png" id="fig:tweets_volume_stack_section">Left: Number of weekly tweets by SIC section. Right: Proportion of weekly tweets by SIC section
 </div>
 
-[@fig:tweets_volume_stack_section] shows the number and proportion of tweets by SIC section.
+[@Fig:tweets_volume_stack_section] shows the number and proportion of tweets by SIC section.
 This is shown for accounts tweeting in the first and last month of the dataset and accounts for which a SIC section could be obtained by matching its corresponding Glass organisation to companies house.
 There are no large temporal dynamics across SIC sections.
 
 <div class=altair s3_path="tweets_volume_stack_laua.json" static_path="tweets_volume_stack_laua.png" id="fig:tweets_volume_stack_laua"> Left: Number of weekly tweets by Council area. Right: Proportion of weekly tweets by Council area
 </div>
 
-[@fig:tweets_volume_stack_laua] shows the number and proportion of tweets by Council area.
+[@Fig:tweets_volume_stack_laua] shows the number and proportion of tweets by Council area.
 This is shown for accounts tweeting in the first and last month of the dataset and accounts for which a trading address could be obtained by matching its corresponding Glass organisation to companies house.
 There are no large temporal dynamics across SIC sections.
 
@@ -306,7 +306,7 @@ There are no large temporal dynamics across SIC sections.
 Right: Distribution of tweets per user for accounts tweeting in the first and last month of the dataset
 </div>
 
-[@fig:tweets_per_user] shows the distribution of tweets per user across two different counting methods - 
+[@Fig:tweets_per_user] shows the distribution of tweets per user across two different counting methods - 
 counting all tweets and only counting tweets from accounts tweeting at the beginning and end of the dataset.
 The distribution is significantly changed, with the latter appearing log-normally distributed. 
 While only a small number of users have the maxiumum number of tweets, 3200,
@@ -319,7 +319,7 @@ To avoid the intricacies inherent in counting volume of tweets, we opt to compar
 Right: New twitter users each quarter (since 2019 Q1) by SIC section
 </div>
 
-[@fig:tweets_new_users] shows the number of new users over time, extracted from the account creation date in the tweet's user metadata.
+[@Fig:tweets_new_users] shows the number of new users over time, extracted from the account creation date in the tweet's user metadata.
 We see that the majority of Scottish businesses in our dataset have been on Twitter for several years - 
  adoption rates peak in the early 2010's with the number of new users decreasing each given year.
 Whilst this constant decrease and the small numbers of new users since 2019 makes it hard to assess the extent to which businesses may have adapted to Covid-19 by adopting an online presence
@@ -330,7 +330,7 @@ However, the evidence for this is extremely weak as the magnitude of the spike i
 <div class=altair s3_path="tweets_last_tweet.json" static_path="tweets_last_tweet.png" id="fig:tweets_last_tweet">The date of the last tweet of each users account by SIC section
 </div>
 
-[@fig:tweets_last_tweet] shows that 64.2% of accounts tweeted in the last month of the dataset.
+[@Fig:tweets_last_tweet] shows that 64.2% of accounts tweeted in the last month of the dataset.
 There is a hint of a small spike in more users stopping tweeting in March and April of 2020 when Covid-19 first impacted businesses; however a similar spike happens in 2019 so this could just be a coincidence.
 
 
@@ -339,7 +339,7 @@ There is a hint of a small spike in more users stopping tweeting in March and Ap
 <div class=altair s3_path="tweets_open_close_norm.json" static_path="tweets_open_close_norm.png" id="fig:tweets_open_close_norm"> Relative frequency of "open" or "close" being contained in a tweet's text when compared to the same week in the previous year
 </div>
 
-[@fig:tweets_open_close_norm] shows a large, sharp spike in tweets containing "close" in the middle of March 2020 when the country first went into lockdown.
+[@Fig:tweets_open_close_norm] shows a large, sharp spike in tweets containing "close" in the middle of March 2020 when the country first went into lockdown.
 Half as many tweets mentioned "close" in the week of April 15 2020 when compared to the equivalent week in 2019; however this was due to an increase in tweets mentioning "close" in Easter 2019 which occurred within this week, therefore this effect should be ignored when interpreting the potential effects of Covid-19.
 There is a large but wider peak in tweets containing "open" in June and July 2020, when restrictions were due to be lifted.
 From October 2020, the number of tweets mentioning "close" rose again as more restrictions were imposed.
@@ -348,7 +348,7 @@ There is an anomalous peak in tweets mentioning "close" in mid-February that wou
 <div class=altair s3_path="tweet_section_stack_terms.json" static_path="tweet_section_stack_terms.png" id="fig:tweet_section_stack_terms" height="95%" >Proportion of a week's tweets (across all SIC sections) mentioning various terms, plotted by SIC section
 </div>
 
-[@fig:tweet_section_stack_terms] shows the proportion of a week's tweets mentioning various terms, plotted by SIC section.
+[@Fig:tweet_section_stack_terms] shows the proportion of a week's tweets mentioning various terms, plotted by SIC section.
 "Brexit" is included in these terms to check whether terms may be correlated with Brexit uncertainty and disruption.
 For example, *Transportation And Storage* businesses begin tweeting about delays in August 2020;
  however this could have been due to Covid-19 or Brexit.
@@ -364,7 +364,7 @@ For example, Section E begins tweeting about "supply" from August 2020; however 
 <div class=altair s3_path="tweet_terms_stack_section.json" static_path="tweet_terms_stack_section.png" id="fig:tweet_terms_stack_section">Proportion of a week's tweets mentioning a term by SIC section
 </div>
 
-[@fig:tweet_terms_stack_section] provides a complementary view to [@fig:tweet_section_stack_terms], grouping by term and then section rather than section then term.
+[@Fig:tweet_terms_stack_section] provides a complementary view to [@fig:tweet_section_stack_terms], grouping by term and then section rather than section then term.
 We see many of the same patterns such as *Accomodation and Food Services* talking about takeaway and *Transportation and Storage* companies tweeting about delays from August 2020; however we now see that whilst a high proportion of *Agriculture, Forestry, And Fishing* tweets mention "brexit", the number of such businesses is very small.
 
 
@@ -372,7 +372,7 @@ We see many of the same patterns such as *Accomodation and Food Services* talkin
 Proportion of a week's tweets (across all Council areas) mentioning various terms, plotted by Council area
 </div>
 
-[@fig:tweet_region_stack_terms] and [@fig:tweet_terms_stack_region] provide a similar view to [@fig:tweet_section_stack_terms] and [@fig:tweet_terms_stack_section] but by Council area rather than SIC section.
+[@Fig:tweet_region_stack_terms] and [@fig:tweet_terms_stack_region] provide a similar view to [@fig:tweet_section_stack_terms] and [@fig:tweet_terms_stack_section] but by Council area rather than SIC section.
 Due to the dominance of Glasgow and Edinburgh, the trends for smaller council areas is noisy. 
 Nonetheless we can pick out interesting aspects of regional heterogeneity,
  such as *Aberdeenshire* having a sharp peak in tweets mentioning "delay" around the first lockdown which then declines; and both *Edinburgh* and *Perth and Kinross* increasingly tweeting about "delay" from August 2020.

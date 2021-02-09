@@ -20,9 +20,9 @@ Our prior is that some of these limitations can be addressed by combining busine
 3. We can use the text in business websites to generate maps of "sectoral proximity" helping us to identify opportunities for industrial diversification away from markets that are highly exposed to Covid-19. We can use the results to rank the position of different sectors in terms of their ability to diversify away from Covid-19, and combine this with official data to measure the extent to which different local economies have large shares of their workforce employed in sectors that are highly exposed to Covid-19 and have limited opportunities to diversify away from it.
 4. We can combine business website information with the business registry in order to track business outcomes (such as business failure) and explore opportunities to "nowcast" them using their text and Covid-19 notices as predictors (the idea being that there may be some signal about a business' outcomes in the text that describes current behaviours in response to the pandemic). 
 
-[@fig:pipeline] summarises our approach.
+[@Fig:pipeline] summarises our approach.
 
-![Figure 1](pipeline_1.png){#fig:pipeline}
+![Summary of our approach.](pipeline_1.png){#fig:pipeline}
 
 ## 2. Data sources
 
@@ -148,7 +148,7 @@ We only consider matches with a similarity score of 70% or higher - which we emp
 
 In order to query Google Trends, we need a list of keywords related to the economic activities of different industries. We extract this "industry vocabulary" from Glass business descriptions. Our strategy is to aggregate the descriptions of all businesses in the same SIC division, tokenise then (extract individual works and commonly occurring combinations of words), count them and normalise these counts by the word distribution over the whole corpus. Having done this, we remove duplicate words (e.g. plurals) and focus, for each division on the top 25 / those that have a salience score above one (ie are overrepresented in the division) after removing tokens with less than 75 occurrences in each division to avoid low-frequency noisy terms.
 
-Table [@tbl:examples] presents examples of industrial vocabularies randomly extracted from our list of SIC divisions. It shows that in general the approach we have taken appears to work well and generates intuitive vocabularies for various divisions, although in some cases such as with division 21 (pharmaceuticals), it generates very few keywords, potentially reducing the robustness of our search analysis for those sectors.
+[@Tbl:examples] presents examples of industrial vocabularies randomly extracted from our list of SIC divisions. It shows that in general the approach we have taken appears to work well and generates intuitive vocabularies for various divisions, although in some cases such as with division 21 (pharmaceuticals), it generates very few keywords, potentially reducing the robustness of our search analysis for those sectors.
 
 <!---TODO: calculate % employment accounted by industries with short industry vocabularies - it will be low.
 --> 
@@ -169,7 +169,7 @@ Table: Industrial vocabulary examples by SIC division {#tbl:examples}
 We extract normalised search volumes for keywords in industry vocabularies from Google Search Trends and use the results to produce measures of industrial exposure to Covid-19. In order to do this we:
 
 1. Take weekly search volumes by keyword to generate monthly averages.
-2. Normalise the search volume of each keyword by its salience in a SIC division. This means that keywords that are more salient for the industry will have a stronger weight when estimating its exposure to Covid-19 than terms that are less salient (ie occur more frequently in other divisions). For example, in Division 25 in table \ref{@tbl:examples} `metal` will be more salient (and have more weight when estimating that division's exposure to Covid-19) than a generic term such as `components`.
+2. Normalise the search volume of each keyword by its salience in a SIC division. This means that keywords that are more salient for the industry will have a stronger weight when estimating its exposure to Covid-19 than terms that are less salient (ie occur more frequently in other divisions). For example, in Division 25 in [@tbl:examples] `metal` will be more salient (and have more weight when estimating that division's exposure to Covid-19) than a generic term such as `components`.
 3. Normalise search volumes by the total volume of searches in the industry vocabulary. This means that keywords that account for a larger proportion of all searches in an industry vocabulary will have a bigger weight in determining its exposure to Covid-19.
 4. Rescale 2020 and 2021 normalised keyword search volumes by the normalised search volumes in equivalent 2019 months in order to capture deviations from a pre-Covid-19 baseline and account for seasonality in searches (ie the fact that people are more likely to search for information about air transport when they are planning their holidays at the beginning of the year, or for information about sports when a tournament starts).
 5. Calculate the average of 2019-rescaled keyword search volumes in a division weighted by the share of division search accounted by that keyword. 
@@ -179,11 +179,11 @@ We extract normalised search volumes for keywords in industry vocabularies from 
 
 We use similarity between business website descriptions in order to calculate similarities between industries, which we interpret as a proxy for diversification opportunities: those sectors that are "close" to each other within the industry space that we build are more likely to be able to diversify into each other's activities (this idea is based on the "Principle of Relatedness" which economic geographers have shown shapes the evolution of local economies [@hidalgo2018principle]).
 
-In order to calculate similarities between industries we train a machine learning model that predicts the SIC divisions for companies in the Glass-Companies House matched dataset using their descriptions after standard pre-processing. We use grid-search to select the model type and parametres that yield the best predictive performance, which in this case is a regularised logistic regresssion. 
+In order to calculate similarities between industries we train a machine learning model that predicts the SIC divisions for companies in the Glass-Companies House matched dataset using their descriptions after standard pre-processing. We use grid-search to select the model type and parameters that yield the best predictive performance, which in this case is a regularised logistic regresssion. 
 
-![Figure Predictive model](../../figures/scotland/png/appendix_model_validation.png){#fig:model}
+![Predictive model](../../figures/scotland/png/appendix_model_validation.png){#fig:model}
 
-[@fig:model] summarises the predictive performance of the model for different SIC divisions. The model includes the actual label in the top five predictions it makes 72% of the times, and in the top ten 84%. This feels reasonable given the degree of noise in company descriptions and low level of informativeness in some SIC labels such as "Other activities not elsewhere classified" and the possibility that some companies are mislabelled in their sectors but there is still room for improvement in future work. 
+[@Fig:model] summarises the predictive performance of the model for different SIC divisions. The model includes the actual label in the top five predictions it makes 72% of the times, and in the top ten 84%. This feels reasonable given the degree of noise in company descriptions and low level of informativeness in some SIC labels such as "Other activities not elsewhere classified" and the possibility that some companies are mislabelled in their sectors but there is still room for improvement in future work. 
 
 Since our model has been trained using a one vs rest classification regime that generates a probability score for each business and SIC division, we can use the resulting vector to calculate "industry co-occurrences" in a company (ie companies that are predicted to belong to more than one sector based on the machine learning model). 
 
@@ -234,17 +234,17 @@ In this section we present some descriptive results that we have undertaken in o
 
 We have compared the industrial and geographic distribution of the Glass data with Companies House. In general we find a strong level of concordance between both: the pearson correlation coefficient $\rho$ between Glass and Companies House sectoral and geographical distributions for Scottish companies are 0.91 and 0.99 respectively. 
 
-In [@fig:sector_val] we present the differences between shares of sectoral activity accounted by SIC division in Glass and Companies House. Positive values capture situations where a division is overrepresented in Glass data  ([**interactive version here**](https://scotland-figures.s3.eu-west-2.amazonaws.com/glass_sector_validation.html).
+In [@fig:sector_val] we present the differences between shares of sectoral activity accounted by SIC division in Glass and Companies House. Positive values capture situations where a division is overrepresented in Glass data  ([**interactive version here**](https://scotland-figures.s3.eu-west-2.amazonaws.com/glass_sector_validation.html)).
 
 ![Comparison of Glass and Companies House sectoral coverage](../../figures/scotland/png/glass_sector_validation.png){#fig:sector_val}
 
 The figure shows that *Primary sectors* and *Transportation* tend to be underrepresented in the Glass data while *Manufacturing*, *Administrative services*, *Health*, the *Arts* and *Professional Activities* tend to be overrepresented. *Activities of Membership Organisations* is an outlier in terms of representation probably because of the presence of some charity data in Glass.
 
-In [@fig:place_val] we perform a similar analysis but comparing the geographical representation of different Local Authority Districts in Glass and Companies House ([**interactive version here**](https://scotland-figures.s3.eu-west-2.amazonaws.com/glass_place_validation.html). 
+In [@fig:place_val] we perform a similar analysis but comparing the geographical representation of different Local Authority Districts in Glass and Companies House ([**interactive version here**](https://scotland-figures.s3.eu-west-2.amazonaws.com/glass_place_validation.html)). 
 
 ![Comparison of Glass and Companies House geographical coverage](../../figures/scotland/png/glass_place_validation.png){#fig:place_val}
 
-We see that council areas in Highlands and Islands tend, in general, to be overrepresented in the Glass data while Local Authorities around Aberdeen and the central belt - in particular Glasgow City - are underrepresented. We dig further into the potential reasons for this in [@fig:sector_place_val], where we present, in the left panel, the over or underrepresentations of SIC divisions (horizontal axis) in each Local Authority District (vertical axis)  ([**interactive version here**](https://scotland-figures.s3.eu-west-2.amazonaws.com/glass_sector_place_validation.html). The left panel shows the correlation between the sectoral distribution of activity in Glass and Companies House by Local Authority. For example, in the case of Glasgow City, the low correlation between Glass and Companies House sectoral distributions seems to be driven by an underrepresentation of *Postal and Courier* activities in Glass and an overrepresentation of various *professional* and *administrative services*. One question that we do not consider here is to which extent are these divergences explained by limitations in Glass coverage or by geographical divergences in the levels of website adoption.
+We see that council areas in Highlands and Islands tend, in general, to be overrepresented in the Glass data while Local Authorities around Aberdeen and the central belt - in particular Glasgow City - are underrepresented. We dig further into the potential reasons for this in [@fig:sector_place_val], where we present, in the left panel, the over or underrepresentations of SIC divisions (horizontal axis) in each Local Authority District (vertical axis)  ([**interactive version here**](https://scotland-figures.s3.eu-west-2.amazonaws.com/glass_sector_place_validation.html)). The left panel shows the correlation between the sectoral distribution of activity in Glass and Companies House by Local Authority. For example, in the case of Glasgow City, the low correlation between Glass and Companies House sectoral distributions seems to be driven by an underrepresentation of *Postal and Courier* activities in Glass and an overrepresentation of various *professional* and *administrative services*. One question that we do not consider here is to which extent are these divergences explained by limitations in Glass coverage or by geographical divergences in the levels of website adoption.
 
 ![Comparison of Glass and Companies House geographical coverage](../../figures/scotland/png/glass_sector_place_validation.png){#fig:sector_place_val}
 
@@ -258,7 +258,7 @@ This has the goal of sense-checking whether the resulting trends are consistent 
 
 #### Keyword trends
 
-[@fig:keyword_trends] shows the evolution of normalised search volumes since January 2020 (we use a logarithmic scale in the Y axis to reduce the impact of outliers). The size of the points represents the volume of search and the color the SIC section they are related to (we note that we have not normalised keyword volumes by industry salience / overall volume of search in this chart). 
+[@Fig:keyword_trends] shows the evolution of normalised search volumes since January 2020 (we use a logarithmic scale in the Y axis to reduce the impact of outliers). The size of the points represents the volume of search and the color the SIC section they are related to (we note that we have not normalised keyword volumes by industry salience / overall volume of search in this chart). 
 
 ![Evolution in keyword search trends](../../figures/scotland/png/keyword_trends.png){#fig:keyword_trends}
 
@@ -266,7 +266,7 @@ The chart, which can be explored [**here**](https://scotland-figures.s3.eu-west-
 
 #### Sector exposure trends
 
-[@fig:sector_exposures] presents monthly changes in sectoral exposure to Covid-19. Every row in the Y axis is a SIC division (not all of them are labelled - the chart can be explored interactively [**here**](https://scotland-figures.s3.eu-west-2.amazonaws.com/sector_exposures.html)). The colour of each cell represents the position of a SIC division in the ranking of exposure to Covid-19. Red colours indicate high levels of exposure (ie low volumes of search for keywords about the industry in relation to the baseline) and blue colours indicate the opposite. 
+[@Fig:sector_exposures] presents monthly changes in sectoral exposure to Covid-19. Every row in the Y axis is a SIC division (not all of them are labelled - the chart can be explored interactively [**here**](https://scotland-figures.s3.eu-west-2.amazonaws.com/sector_exposures.html)). The colour of each cell represents the position of a SIC division in the ranking of exposure to Covid-19. Red colours indicate high levels of exposure (ie low volumes of search for keywords about the industry in relation to the baseline) and blue colours indicate the opposite. 
 
 ![Evolution in sectoral exposure](../../figures/scotland/png/sector_exposures.png){#fig:sector_exposures}
 
@@ -290,13 +290,13 @@ We have compared the industrial and geographic distribution of Tweets with Glass
 <!-- TODO: do this by user too -->
 </div>
 
-[@fig:tweets_laua_representivity] shows how under or over-represented a Council area's share of tweets are when compared to Glass.
+[@Fig:tweets_laua_representivity] shows how under or over-represented a Council area's share of tweets are when compared to Glass.
 We see that Edinburgh, Glasgow, and other urban areas are over-represented compared to rural areas which tend to be under-represented.
 
 <div class=altair s3_path="tweets_section_representivity.json" static_path="tweets_section_representivity.png" id="fig:tweets_section_representivity">Over-representation factor of each SIC section's share of tweets when compared to their presence in the Glass data
 <!-- TODO: do this by user too -->
 </div>
 
-[@fig:tweets_section_representivity] shows how under or over-represented a SIC section's share of tweets are when compared to Glass. 
+[@Fig:tweets_section_representivity] shows how under or over-represented a SIC section's share of tweets are when compared to Glass. 
 Perhaps as expected, *Accomodation and Food Services* are very over-represented.
 *Information and Communication*, and *Professional, Scientific, And Technical Activities* are under-represented likely due to their over-representation in the Glass dataset.
