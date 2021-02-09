@@ -53,7 +53,7 @@ Our starting point is a database with information about 1.8 million businesses i
 
 * We study the evolution in the levels of Twitter activity by Scottish companies in different sectors and locations paying special attention to tweets mentioning terms related to the pandemic and its aftershock such as "open", "closed", "delay" and "furlough". 
 * The trends revealed by this analysis seem to track the evolution of the pandemic (with for example spikes in tweets mentioning "closure" around the March lockdown) and responses by different sectors (eg transport companies talking about delays, accommodation and food service companies talking about delivery).
-* We also find a strong propensity to mention brexit in Tweets from Agriculture, Forestry and Fishing firms in 2019 and early 2020, and more mentions towards the end of 2020, perhaps pointing at some of its impacts from January 2021.
+* There is also the possibility to track the impact of other events such as Brexit.
 
 #### Firm-level outcomes
 
