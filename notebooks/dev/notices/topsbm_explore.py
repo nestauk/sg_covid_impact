@@ -176,6 +176,14 @@ topicdist = get_topicdist(model, titles, L)
 
 # %%
 
+# Top words of the four dominant topics - markdown table export
+dominant_topic_top_words = pd.DataFrame(
+    [(i, top_words[i]) for i in [0, 3, 6, 8]], columns=["Topic number", "Top 10 words"]
+).set_index("Topic number")
+print(dominant_topic_top_words.to_markdown())
+
+# %%
+
 # What sector hierarchy do we want? Glass / Section / Division...
 sector_labels = sector_labels_division.loc[lambda x: x.index.isin(titles)]
 

@@ -155,14 +155,16 @@ Figure [@fig:notice_proportion_laua] shows that as well as being responsible for
 
 Figure [@fig:notice_proportion_section] paints a more interesting picture.
 Construction business websites were much less likely to post notices than would be expected.
-Whilst this could be because construction companies were less likely to have been impacted by Covid from May, the more likely explanation is that construction company websites are not where clients of these companies go to get information - updates are likely to come through more channels.
+Whilst this could be because construction companies were less likely to have been impacted by Covid from May, the more likely explanation is that construction company websites are not where clients of these companies go to get information - updates are likely to come through other channels such as word of mouth.
 One surprising feature of this figure is that *Wholesale and Retail Trade* business websites were more likely to post notices than expected at the level of the UK; however *Wholesale and Retail Trade* business websites in Scotland were less likely.
 Similarly, business websites engaging in *Professional, Scientific, and Technical activities* were much less likely to post notices across the whole of the UK than those websites that were in Scotland.
+Perhaps these discrepancies could be explained by differences in the products and services being sold by Scottish companies - a hypothesis which could be explored further through an analysis of the business descriptions and the text of their notices in future research.
 Another noticeable difference between Scotland and the UK is that *Education* business websites in Scotland did not post notices as frequently as across the whole of the UK, perhaps due to differing policies between Scotland and other home nations.
 
 #### Topic modelling
 
-[@tbl:topsbm_hierarchy] shows the topic hierarchy obtained from the model described in [@sec:topsbm]. Topic level 3 was chosen as the initial level of analysis as the four topics yielded at level 4 are too broad and the 147 topics of level 2 are too fine.
+[@tbl:topsbm_hierarchy] shows the topic hierarchy obtained from the model described in [@sec:topsbm] with lowers levels encompassing a larger number of more detailed topics.
+Topic level 3 was chosen as the initial level of analysis as the four topics yielded at level 4 are too broad and the 147 topics of level 2 are too fine.
 Initially we focused on analysing the outputs of the topic model at the section level of the SIC taxonomy.
 
 | Level | Number of topics | Number of clusters |
@@ -181,9 +183,17 @@ Bottom: Trends in the top 5 topics for each SIC section.
 </div>
 
 Figure [@fig:topic_trend_by_section] shows the topic activity in SIC sections over time, with the bottom of the plot showing the trends in the top 5 topics for each section.
-We see that four topics (0, 3, 6, 8) dominate the activity of most sections.
+We see that four topics (0, 3, 6, 8) dominate the activity of most sections - [@tbl:topic_words] shows the top words in these topics.
 Trends within sections are mostly non-existent apart from particularly evident temporal trends in *Agriculture, Forestry And Fishing*, and *Manufacturing* sections; however these trends are for the four dominant, and uninformative, topics. 
 Performing trend analysis with only three time-points is not an ideal exercise when we do not know when in the month the notices were collected - they could have all been collected at the beginning of a month or randomly distributed throughout.
+
+|   Topic number | Top 10 words                                                                                                   |
+|---------------:|:---------------------------------------------------------------------------------------------------------------|
+|              0 | staff; advice; due_to; update; please; safe; coronavirus_covid_19; social_distancing; march; client            |
+|              3 | coronavirus; team; continue_to; new; contact; the_coronavirus; the_government; community; including; available |
+|              6 | covid_19; support; time; service; work; people; also; home; information; guidance                              |
+|              8 | online; date; way; provide; one; future; make; see; made; a_new                                                |
+: Top 10 words in the four dominant topics of topic model (level 3 of the hierarchy). {#tbl:topic_words}
 
 Thinking that the section level of SIC was perhaps too coarse, we explored topic activity levels at the SIC division level; however this did not yield any clearer insight.
 
@@ -227,7 +237,7 @@ Examples of ambiguously relevant notices are shown below,
 > 12 May 2020 Civic Amenity Booking System by dgfarmer | posted in: Uncategorised | 0 Modus helps Civic Amenity Sites re-open after lockdown. We have been working with various Civic Amenity Site operators to produce a booking system suitable for use to regulate traffic at sites as they re-open after l...
 
 
-A further factor contributing to the poor outcomes from the topic modelling is the distribution of notice lengths - a large number of notices are extremely short and a large number are extremely long! Figure [@fig:notice_length] shows the notice length distribution - note the logarithmic x-scale.
+A further factor contributing to the poor outcomes from the topic modelling is the distribution of notice lengths - a large number of notices are extremely short and a large number are extremely long. Figure [@fig:notice_length] shows the notice length distribution - note the logarithmic x-scale.
 
 <!-- Histograms require too much data for interactives! -->
 <!-- <div class=altair s3_path="notice_length.json" static_path="notice_length.png" id="fig:notice_length">. -->
@@ -244,9 +254,9 @@ For example, the following notices are short and concise,
 
 Whereas the next notice is extremely long (and is also several months out of date),
 
-> COVID-19 – PRECAUTIONARY MEASURES WITHIN ICE FACTOR UPDATE 20/03/2020: We are closing temporarily We are closing temporarily at 10pm tonight (20th March 2020) as requested by the UK Government. We are continuing to comply with the guidelines they have issued and hope you will too. We apologise for the inconvenience this will cause. It is only temporary and we hope to see you later when we reopen on the other side of the outbreak. We would like to thank you for your continued custom and will be back before you know it. In the meantime, take care, stay well and look after yourself, your health and your loved ones. We will keep in touch and let you know when we are due to reopen but for now, here is some information on what to do if you have a booking and some helpful tips for isolation should it be of any help. what to do if you have made a booking + All bookings will be honoured. + We will get in touch as soon as we can to move your booking to a date that suits once we reopen. + As we will be closed we ask that you email us at info@ice-factor.co.uk if you need us. + Please only send one email, on one communication platform. We will respond to everyone as soon as we can. + When we reopen will have a backlog of emails to work through so we ask that you bear with us and be mindful of the pressure our team will be under to process everyone’s correspondence. Some helpful advice during these times We will keep this blog updated regularly to keep our customers advised and in accordance with the latest guidance issued by the Scottish Government / Health Protection Scotland. LESSONS AND ACTIVITY AREAS ICE WALL – CLOSED – CLOSED ROCK WALL – CLOSED – CLOSED AERIAL ADVENTURE COURSE – CLOSED – CLOSED CAFE – CLOSED – CLOSED CHILLERS BAR & GRILL – CLOSED WHAT WE’RE DOING In line with the latest guidance, Ice Factor has undertaken various steps to help safeguard staff and customers in the facility. On the premises, visitors will see signage reminding you to wash hands for a minimum of 20 seconds, using soap and water; particularly after coughing, sneezing and going to the bathroom. We are advised this simple practice is one of the most effective ways to help alleviate the spread of the virus. We have also installed hand sanitizer stations throughout the centre and we strongly advise our customers to use these. In addition, we have increased our Clean Team with additional focus placed on high traffic areas such as door handles, push plates and handrails. All of our staff are being kept up to date with government advice and guidelines. WHAT WE ASK YOU TO DO Everyone has a responsibility to ensure they are doing their bit to stop the spread of the virus and so, we ask all of our visitors to: Please wash your hands regularly using soap and water, the above guidelines are the official recommendations outlined by the NHS. Cover your mouth and nose with a tissue should you sneeze or cough and bin it right away. If you display symptoms of the virus or have come in to contact with someone who has the virus follow the latest guidelines issued by the NHS prior to visiting us (or any other public place). Consider the impact on yourself and others (particularly those who may be vulnerable) prior to leaving your home should you be displaying symptoms or have been in contact with someone who has symptoms/the virus/been advised to isolate. Importantly, we kindly ask those travelling from abroad or who may be most vulnerable to the risk of infection to follow the latest guidance fromHealth Protection Scotland. WE ASK YOU KINDLY BUT FIRMLY NOT TO VISIT ICE FACTOR IF YOU DISPLAY THE SYMPTOMS OUTLINED IN THE LATEST ADVICE (13 March 2020) BY HEALTH PROTECTION SCOTLAND – https://www.hps.scot.nhs.uk/ IF YOU HAVE SYMPTOMS Should you contract the virus or have been advised to self-isolate due to showing symptoms, we want to make it easy for you to move your booking with us. We are therefore happy to extend the validity of gift vouchers and waive our administration fee which is normally charged to help you take the time you need to recover. Our team can do this over the phone and will move your lesson or session to a future date that suits. Cancellations and refunds At this time we are not issuing cancellations or refunds for bookings as we are operating as normal and presently have received no advice to change this at the current time. Should this change we will update you on this page. We want to make it easier to move your booking with us. As such, we will not be able to issue a refund for any bookings made however we have waived the £5 administration fee and the 5 day notice period. Our team are here to help and will be happy to move your booking forward to a date that suits. IF YOU NEED US, WE’RE HERE Our team are available should you need to contact them on info@ice-factor.co.uk or 01855 831 100. We are experiencing a higher volume of calls at the moment so please bear with us while we respond to you as quickly as we can. Thank you The team at Ice Factor
+> COVID-19 – PRECAUTIONARY MEASURES WITHIN ICE FACTOR UPDATE 20/03/2020: We are closing temporarily We are closing temporarily at 10pm tonight (20th March 2020) as requested by the UK Government. We are continuing to comply with the guidelines they have issued and hope you will too. We apologise for the inconvenience this will cause. It is only temporary and we hope to see you later when we reopen on the other side of the outbreak. We would like to thank you for your continued custom and will be back before you know it. In the meantime, take care, stay well and look after yourself, your health and your loved ones. We will keep in touch and let you know when we are due to reopen but for now, here is some information on what to do if you have a booking and some helpful tips for isolation should it be of any help. what to do if you have made a booking + All bookings will be honoured. + We will get in touch as soon as we can to move your booking to a date that suits once we reopen. + As we will be closed we ask that you email us at info@ice-factor.co.uk if you need us. + Please only send one email, on one communication platform. We will respond to everyone as soon as we can. + When we reopen will have a backlog of emails to work through so we ask that you bear with us and be mindful of the pressure our team will be under to process everyone’s correspondence. Some helpful advice during these times We will keep this blog updated regularly to keep our customers advised and in accordance with the latest guidance issued by the Scottish Government / Health Protection Scotland. LESSONS AND ACTIVITY AREAS ICE WALL – CLOSED – CLOSED ROCK WALL – CLOSED – CLO... **[NOTICE TRUNCATED AT 33% of its length]**
 
-Finally, relevant notices are often missing important context or contain information we couldn't interpret such as lots of notices stating new opening hours,
+Finally, relevant notices are often missing important context or contain information we couldn't interpret such as lots of notices stating new opening hours [notice ]
 
 >  Covid-19 (Coronavirus) Opening hours: Monday to Friday 8am-5pm Saturday and Sunday - closed
 
@@ -255,8 +265,18 @@ Such notices are hard to algorithmically disambiguate from general statements ab
 
 ### Twitter analysis
 
-Having successfully scraped $34000$ of $45000$ Scottish websites we identified $12000$ websites with at least one twitter account candidate.
-After filtering and matching we found twitter accounts for $9436$ Scottish business websites.
+Having successfully scraped $34000$ of $45000$ Scottish websites in the Glass data we identified $12000$ websites with at least one twitter account candidate.
+After filtering accounts not corresponding to businesses
+ and identifying the best account match for each website ([@sec:twitter_method])
+ we found twitter accounts for $9436$ Scottish business websites.
+
+In this section we explore
+ the evolution of twitter activity over time;
+ the entry and exit of Scottish businesses from twitter;
+ and the evolution of twitter activity by keyword.
+
+#### a. Evolution of Activity
+
 
 <div class=altair s3_path="tweets_volume.json" static_path="tweets_volume.png" id="fig:tweets_volume">Weekly count of tweets over time
 </div>
@@ -293,6 +313,8 @@ While only a small number of users have the maxiumum number of tweets, 3200,
 due to their frequent tweeting they may contribute a disproportionate number of tweets in the months for which their tweets are present.
 To avoid the intricacies inherent in counting volume of tweets, we opt to compare compare proportions of tweets within a given timeframe when stratifying by factors such as sector, region etc. 
 
+#### b. Entry and exit from Twitter
+
 <div class=altair s3_path="tweets_new_users.json" static_path="tweets_new_users.png" id="fig:tweets_new_users">Left: New twitter users each year by SIC section.
 Right: New twitter users each quarter (since 2019 Q1) by SIC section
 </div>
@@ -302,22 +324,7 @@ We see that the majority of Scottish businesses in our dataset have been on Twit
  adoption rates peak in the early 2010's with the number of new users decreasing each given year.
 Whilst this constant decrease and the small numbers of new users since 2019 makes it hard to assess the extent to which businesses may have adapted to Covid-19 by adopting an online presence
  there is a spike in the number of new users in April, May, and June 2020.
-However, the evidence for this is extremely weak as the magnitude of the speak is about 10-15 new users!
-
-<div class=altair s3_path="tweets_laua_representivity.json" static_path="tweets_laua_representivity.png" id="fig:tweets_laua_representivity">Over-representation factor of each Council area's share of tweets when compared to their presence in the Glass data
-<!-- TODO: do this by user too -->
-</div>
-
-[@fig:tweets_section_representivity] shows how under or over-represented a Council area's share of tweets are when compared to Glass.
-We see that Edinburgh, Glasgow, and other urban areas are over-represented compared to rural areas which tend to be under-represented.
-
-<div class=altair s3_path="tweets_section_representivity.json" static_path="tweets_section_representivity.png" id="fig:tweets_section_representivity">Over-representation factor of each SIC section's share of tweets when compared to their presence in the Glass data
-<!-- TODO: do this by user too -->
-</div>
-
-[@fig:tweets_section_representivity] shows how under or over-represented a SIC section's share of tweets are when compared to Glass. 
-Perhaps as expected, *Accomodation and Food Services* are very over-represented.
-*Information and Communication*, and *Professional, Scientific, And Technical Activities* are under-represented likely due to their over-representation in the Glass dataset.
+However, the evidence for this is extremely weak as the magnitude of the spike is about 10-15 new users over the course of three months.
 
 
 <div class=altair s3_path="tweets_last_tweet.json" static_path="tweets_last_tweet.png" id="fig:tweets_last_tweet">The date of the last tweet of each users account by SIC section
@@ -326,19 +333,22 @@ Perhaps as expected, *Accomodation and Food Services* are very over-represented.
 [@fig:tweets_last_tweet] shows that 64.2% of accounts tweeted in the last month of the dataset.
 There is a hint of a small spike in more users stopping tweeting in March and April of 2020 when Covid-19 first impacted businesses; however a similar spike happens in 2019 so this could just be a coincidence.
 
+
+#### c. Evolution of activity by keyword
+
 <div class=altair s3_path="tweets_open_close_norm.json" static_path="tweets_open_close_norm.png" id="fig:tweets_open_close_norm"> Relative frequency of "open" or "close" being contained in a tweet's text when compared to the same week in the previous year
 </div>
 
 [@fig:tweets_open_close_norm] shows a large, sharp spike in tweets containing "close" in the middle of March 2020 when the country first went into lockdown.
-Half as many tweets mentioned "close" in the week of April 15; however this was due to an increase in tweets mentioning "close" in Easter 2019, rather than an effect from April 2020.
+Half as many tweets mentioned "close" in the week of April 15 2020 when compared to the equivalent week in 2019; however this was due to an increase in tweets mentioning "close" in Easter 2019 which occurred within this week, therefore this effect should be ignored when interpreting the potential effects of Covid-19.
 There is a large but wider peak in tweets containing "open" in June and July 2020, when restrictions were due to be lifted.
 From October 2020, the number of tweets mentioning "close" rose again as more restrictions were imposed.
 There is an anomalous peak in tweets mentioning "close" in mid-February that would merit further investigation in future.
 
-<div class=altair s3_path="tweet_section_stack_terms.json" static_path="tweet_section_stack_terms.png" id="fig:tweet_section_stack_terms">Proportion of a weeks tweets (across all SIC sections) mentioning various terms, plotted by SIC section
+<div class=altair s3_path="tweet_section_stack_terms.json" static_path="tweet_section_stack_terms.png" id="fig:tweet_section_stack_terms" height="95%" >Proportion of a week's tweets (across all SIC sections) mentioning various terms, plotted by SIC section
 </div>
 
-[@fig:tweet_section_stack_terms] shows the proportion of a weeks tweets mentioning various terms, plotted by SIC section.
+[@fig:tweet_section_stack_terms] shows the proportion of a week's tweets mentioning various terms, plotted by SIC section.
 "Brexit" is included in these terms to check whether terms may be correlated with Brexit uncertainty and disruption.
 For example, *Transportation And Storage* businesses begin tweeting about delays in August 2020;
  however this could have been due to Covid-19 or Brexit.
@@ -351,7 +361,7 @@ This simplistic term search is not without its drawbacks,
 For example, Section E begins tweeting about "supply" from August 2020; however this section relates to Water Supply and is not likely to be talking about supply issues for a product/service.
 
 
-<div class=altair s3_path="tweet_terms_stack_section.json" static_path="tweet_terms_stack_section.png" id="fig:tweet_terms_stack_section">Proportion of a weeks tweets mentioning a term by SIC section
+<div class=altair s3_path="tweet_terms_stack_section.json" static_path="tweet_terms_stack_section.png" id="fig:tweet_terms_stack_section">Proportion of a week's tweets mentioning a term by SIC section
 </div>
 
 [@fig:tweet_terms_stack_section] provides a complementary view to [@fig:tweet_section_stack_terms], grouping by term and then section rather than section then term.
@@ -359,7 +369,7 @@ We see many of the same patterns such as *Accomodation and Food Services* talkin
 
 
 <div class=altair s3_path="tweet_region_stack_terms.json" static_path="tweet_region_stack_terms.png" id="fig:tweet_region_stack_terms">
-Proportion of a weeks tweets (across all Council areas) mentioning various terms, plotted by Council area
+Proportion of a week's tweets (across all Council areas) mentioning various terms, plotted by Council area
 </div>
 
 [@fig:tweet_region_stack_terms] and [@fig:tweet_terms_stack_region] provide a similar view to [@fig:tweet_section_stack_terms] and [@fig:tweet_terms_stack_section] but by Council area rather than SIC section.
@@ -369,5 +379,5 @@ Nonetheless we can pick out interesting aspects of regional heterogeneity,
 *Clackmannanshire* is the only Council area tweeting a lot about "open" during the first lockdown, though this is a small number of tweets.
 
 <div class=altair s3_path="tweet_terms_stack_region.json" static_path="tweet_terms_stack_region.png" id="fig:tweet_terms_stack_region">
-Proportion of a weeks tweets mentioning a term by Council area
+Proportion of a week's tweets mentioning a term by Council area
 </div>

@@ -48,7 +48,7 @@ Google Search Trends is a Google service that provides aggregate information abo
 
 We collect search volume data for a set of keywords extracted from business websites using the procedure described in Section 3.b. In order to query the Google Search API we rely on [GTAB](https://github.com/epfl-dlab/GoogleTrendsAnchorBank) (Google Search Trends Anchorbank), a Python package that generates, for a selected period, a "bank" of anchor terms with a range of popularities that is then used to calibrate search volumes for all keywords of interest subsequently queried according to a common scale [@west2020calibration]. We extract search trend data for UK searches in the period between 1 Jan 2019 and 1 February 2021 (we will use the 2019 data to normalise search volumes post-pandemic). 
 
-### c. Twitter
+### c. Twitter {#sec:twitter_method}
 
 The twitter accounts Scottish businesses are not provided by Glass,
  therefore we built a pipeline to scrape the websites of Scottish businesses,
@@ -70,7 +70,7 @@ Our matching heuristic for this is as follows:
 
 - Discard any twitter accounts mentioned more than 5 times across all websites
 - If there is only one match, consider that a match (high recall, low precision).
-- If one of the candidate twitter accounts has a string similarity score of over 70% then choose as a match.
+- If one of the candidate twitter accounts has a string similarity score to the company name of over 70% then choose as a match.
 - If the twitter profile of one of the candidate twitter accounts, includes a link to the business website then choose as a match.
 
 An informal verification suggests that this heuristic performs well; however taking this analysis beyond the pilot stage would require improvement of the heuristic when there is only one match.
@@ -106,7 +106,14 @@ The more timely and granular business failure data is, the better our indicators
 Granularity is important because it determines the level at which decisions can be made.
 Timeliness is important because it allows us to detect drift in the validity of indicators (as the pandemic and the response to it evolve) and increases the data available to validate and train models against.
 
-Whilst trying to identify sources of business failure data we faced two primary problems.
+We identified the following potential sources of business failure data:
+
+- Insolvency service - statistics on company and individual insolvencies
+- Business Impact of Coronavirus Survey (BICS) - a fortnightly survey of business on how their turnover, resilience etc. have been impacted
+- HMRC job retention data - data about the uptake of the job retention (furlough) scheme
+- Companies House business registry - containing data on actively trading companies and newly dissolved companies
+
+Our assessment of these data sources revealed two primary problems.
 Firstly, there is a sparsity of business failure datasets that are timely and/or granular.
 Secondly, and more problematic, business failures (across many measures) have been suppressed by policy interventions such as the furlough scheme, with the levels of business failures in 2020 being lower than 2019.
 Given these datasets do not act as a "ground truth" of business failures, we cannot use them in the way originally intentioned.
@@ -123,8 +130,13 @@ In order to obtain SIC codes for business websites,
  [Companies house website](http://download.companieshouse.gov.uk/en_output.html).
 
 The matching methodology matches the names of companies in Companies House with the names extracted by Glass from business websites.
-Naively comparing the similarity of names is computationally infeasible.
- We therefore use Locality Sensitive Hashing (with the Jaccard similarity of k-shingles) and the cossine similarity of tokens to identify the most likely matches for each Glass website which we then apply an exact similarity measure to and choose the best match.
+Naively comparing the similarity of all combinations of names is computationally infeasible.
+We therefore use a combination of two approximate methods that identify a subset of Companies House names that are sufficiently similar to each Glass company name.
+Firstly, we use Locality Sensitive Hashing (with the Jaccard similarity of k-shingles) -
+ a method originally used by search engines to detect near-duplicate web pages to improve their search results [@LSH] - this captures small spelling/grammatical variations.
+In addition, we use the cosine similarity of the TF-IDF score of names (which can be efficiently computed and queried for the top $n$ most similar terms).
+ This excels at capturing word ordering differences and information about the frequency of words across the corpus of company names.
+After identifying these sets of similar names we can apply the exact similarity measures that were computationally infeasible to naively apply across the whole dataset.
 Each Glass organisation only appears once but each Companies House organisation may appear multiple times.
 This matching is not exact and problems do exist.
 For example, due to the nature of Companies House,
@@ -183,7 +195,10 @@ In order to estimate a sector's diversification options to reduce exposure to Co
 
 #### Pre-processing
 
-To turn the notice text into data we can mathematically analyse, we process the notices into tri-grams performing filtering and lemmatising as we go.
+To turn the notice text into data we can mathematically analyse,
+ we process the notices into tri-grams (groups of up to three words)
+ performing filtering 
+ and lemmatising (grouping together inflected forms of a word) as we go.
 
 For example the following notice, 
 
@@ -206,7 +221,7 @@ This approach enables us to analyse
 We train a TopSBM [@topSBM] topic model on our pre-processed collection of Covid notices
  from Scottish business websites.
 This approach confers multiple advantages
- over the more traditional LDA method [@LDA]
+ over the more traditional Latent Dirichlet Allocation (LDA) [@LDA] frequently used in the literature
  such as automatically selecting the number of topics;
  yielding a hierarchy of topics;
  and permitting a more heterogeneous topic mixture than is permitted by LDA.
@@ -266,3 +281,22 @@ As an additional validation step, we have correlated time-series of search inter
 The chart shows that volumes of interest in sectors requiring high levels of physical proximity and social interaction such as *Construction*, *Arts and Entertainment*, *Transport* or *Real Estate* are negatively correlated with proxies for the impact of the severity of the pandemic (and allied social distancing and lock down measures). They are also negatively correlated with measures of consumer activity in residential areas based on mobility data (again a proxy for the lockdown) and positively correlated with measures of mobility in retail, workplace and transit areas. 
 
 The sign of these correlation are reversed for *Information and Communication* activities and *Manufacturing* where consumption is less dependent on physical proximity. 
+
+### d. Twitter coverage
+
+We have compared the industrial and geographic distribution of Tweets with Glass.
+
+<div class=altair s3_path="tweets_laua_representivity.json" static_path="tweets_laua_representivity.png" id="fig:tweets_laua_representivity">Over-representation factor of each Council area's share of tweets when compared to their presence in the Glass data
+<!-- TODO: do this by user too -->
+</div>
+
+[@fig:tweets_laua_representivity] shows how under or over-represented a Council area's share of tweets are when compared to Glass.
+We see that Edinburgh, Glasgow, and other urban areas are over-represented compared to rural areas which tend to be under-represented.
+
+<div class=altair s3_path="tweets_section_representivity.json" static_path="tweets_section_representivity.png" id="fig:tweets_section_representivity">Over-representation factor of each SIC section's share of tweets when compared to their presence in the Glass data
+<!-- TODO: do this by user too -->
+</div>
+
+[@fig:tweets_section_representivity] shows how under or over-represented a SIC section's share of tweets are when compared to Glass. 
+Perhaps as expected, *Accomodation and Food Services* are very over-represented.
+*Information and Communication*, and *Professional, Scientific, And Technical Activities* are under-represented likely due to their over-representation in the Glass dataset.

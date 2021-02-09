@@ -26,7 +26,8 @@ Whilst available for a smaller number of businesses than the Glass notice data,
 In this pilot analysis we did not find robust evidence of an increased twitter presence due to Covid-19;
  however the tweets of businesses already on twitter provide a timely and granular indicator about what businesses are doing.
 It is clear that this data could contribute to policymakers understanding of how businesses are responding to an ongoing pandemic;
- however the value of this data beyond the current set of restrictions, whilst likely high, is unclear.
+ however the value of this data beyond the current wave,
+ whilst likely high, is unclear.
 
 
 ## Implications
@@ -59,33 +60,45 @@ Finally, we would like to incorporate additional secondary data into our analysi
 
 ### Micro analysis
 
-There are two principle significant investments required to improve the data quality of Covid-19 notices.
+Starting with the Covid-19 notices, there are two principle significant investments required to improve data quality.
 Firstly, the data collected by Glass must be more reliable and complete: notices that are truncated must not be truncated; notices containing snippets from different sections of a businesses website must be separated; and the time and date of collection must be provided rather than just a month.
 Unfortunately improved data collection would have to start again and would not be able to recover historic information, thus losing a key feature of the data.
 Secondly, better processing of the notices must be performed such that irrelevant notices are filtered out and relevant notices are classified into several categories such as "Business as usual", "Temporary closure", "Permanent closure", "Adaptation", "Partial closure" etc.
 This would require hand-annotation of a subset of notices; training a model on these labels; extrapolating to the rest of the notices using the model; and performing a validation study on the results.
-[Recent analysis](https://datasciencecampus.ons.gov.uk/extracting-text-data-from-business-website-covid-19-notices/)
+[Recent analysis](https://datasciencecampus.ons.gov.uk/extracting-text-data-from-business-website-covid-19-notices/) [@ons_blog]
  by the ONS has already piloted this hand labelling approach.
-While they find some promise in this approach, they are cautious about the biases of this approach.
+While they find some promise, they are cautious about potential biases.
 
 There is probably more value in investing effort into social-media data over notice data given:
  the myriad of issues with the Covid notice data,
  the fact that the ONS is also exploring similar lines of enquiry,
- and the ONS has a competitive edge with its access to microdata.
-A potential scale-up option for the twitter data would be to put the twitter dataset into Elasticsearch to generate a search engine for the tweets of Scottish businesses which could be queried by policymakers to obtain lists of tweets relating to the query and interactive visualisations communicating the trends across 
- industry, space, and other factors;
- however input from policymakers about what specifically they would like to find from this data would be required to correctly scope this.
-Regardless of the specific scale-up project for twitter data,
- there are several improvements to the pipeline that would be necessary. 
+ and the ONS has a competitive edge with its access to trading statuses of businesses from BICS microdata.
+The most obvious next step would be to perform more sophisticated analysis of the text in tweets than the term occurrence analysis.
+Any hypothetical scale-up project for twitter data
+ requires improvements to the pipeline that would be necessary. 
 Chief among these would be: improving the ability of the scraping pipeline to detect and match twitter accounts,
  collecting retweets,
- and collecting tweets further back in time and for accounts with more than 3,200 tweets.
+ collecting tweets further back in time,
+ collecting tweets from accounts with more than 3,200 tweets,
+ and collecting tweets for UK businesses to compare with the situation in Scotland.
 This future collection would likely require access to Twitter's [Academic research product track](https://developer.twitter.com/en/solutions/academic-research) which provides a more permissive and complete API for researchers.
 
 ### Visualisation options
 
 In this project we have worked with datasets with a high degree of temporal, geographical and sectoral granularity. Although we have tried to showcase this richness through the interactive charts linked throughout the report, we believe that realising their potential requires the development of dedicated dashboards and interactive tools. These would display regularly updated information about the situation in Scotland and its local economies, opportunities for diversification and other contextual data. Combined with the subject expertise of policymakers and practitioners, this would make it possible to identify and harness economic challenges and opportunities quicker and more accurately than is possible with data as currently presented.
 
+Twitter data could be incorporated into such a dashboard
+ by putting the twitter data into Elasticsearch
+ to generate a 'search engine'
+ for the tweets of Scottish businesses.
+This 'search engine' could be queried by policymakers
+ to obtain lists of tweets relevant to their query
+ and interactive visualisations that communicate trends
+  across industry, space, and other factors.
+Input from policymakers
+ about what specifically they would like to find in this data
+ and how it can complement other data sources explored in this report 
+ would be required to correctly scope this application.
  
 
 
