@@ -19,6 +19,7 @@ from sg_covid_impact.utils.altair_save_utils import (
     google_chrome_driver_setup,
     save_altair,
 )
+from sg_covid_impact.utils.altair_s3 import export_chart
 
 from sg_covid_impact.sic import load_sic_taxonomy, extract_sic_code_description
 
@@ -191,12 +192,6 @@ def plot_model_performance(perf, sort_divisions):
     return perf_chart
 
 
-def load_predicted():
-    return pd.read_csv(
-        f"{project_dir}/data/processed/glass_companies_predicted_labels.csv"
-    )
-
-
 if __name__ == "__main__":
 
     train_test_size = 300000
@@ -236,6 +231,7 @@ if __name__ == "__main__":
     driver = google_chrome_driver_setup()
     perf_chart = plot_model_performance(perf, sort_divisions)
     save_altair(perf_chart, "appendix_model_validation", driver=driver)
+    export_chart(perf_chart, "appendix_model_validation")
 
     # Apply model to population of companies and save results
     X_all = count_vect.transform(gl_sector["description"])
