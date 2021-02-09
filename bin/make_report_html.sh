@@ -8,7 +8,7 @@ pandoc -s 0_exec_summary.md\
  3_methodology.md\
  4_results.md\
  5_conclusions.md\
- -M html_metadata.yaml\
+ --metadata-file html_metadata.yaml\
  -f markdown\
  -o report.html\
  -F pandoc-crossref\
