@@ -47,7 +47,7 @@ We see that the evolution of exposure to Covid-19 in council areas reflects the 
 <div class=altair s3_path="exposure_trend_lads.json" static_path="scotland/png/exposure_trend_lads.png" id="fig:ca_evol">Evolution and composition of exposure to Covid-19
 </div>
 
-In the top panel of [@fig:ca_map] we display the geography of exposure to Covid-19 in selected months (April and September 2020 and January 2021) with warmer shades representing higher levels of exposure and cooler shades lower levels. The bottom panel shows the industrial composition of three council areas with high levels of exposure to Covid-19 at different times. The vertical axis in each of those charts display the decile of exposure to Covid 19 (with higher values representing stronger exposure) and the horizontal axis the share of employment in that decile. The colours of the bars display industries (SIC sections) ([**more detailed SIC divisions can be explored in the interactive version**](https://scotland-figures.s3.eu-west-2.amazonaws.com/geo_profiles_scotland.html)).
+In the top panel of [@fig:ca_map] we display the geography of exposure to Covid-19 in selected months (April and September 2020 and January 2021) with warmer shades representing higher levels of exposure and cooler shades lower levels. The bottom panel shows the industrial composition of three council areas with high levels of exposure to Covid-19 at different times. The vertical axis in each of those charts display the decile of exposure to Covid 19 (with higher values representing stronger exposure) and the horizontal axis the share of employment in that decile. The colours of the bars display industries (SIC sections) ([**more detailed SIC divisions can be explored in the interactive version**](https://scotland-figures.s3.eu-west-2.amazonaws.com/geo_profiles_Scotland.html)).
 
 We see that:
 
@@ -58,7 +58,7 @@ We see that:
 This illustrates the important variation in the economic drivers of local exposure to Covid-19 at different point of the pandemic, and the heterogeneity of local economies that are exposed.
 
 <!-- ![Evolution and composition of exposure to Covid-19](scotland/png/geo_profiles_scotland.png){#fig:ca_map} -->
-<div class=altair s3_path="geo_profiles_scotland.json" static_path="scotland/png/geo_profiles_scotland.png" id="fig:ca_map">Evolution and composition of exposure to Covid-19
+<div class=altair s3_path="geo_profiles_Scotland.json" static_path="scotland/png/geo_profiles_Scotland.png" id="fig:ca_map">Evolution and composition of exposure to Covid-19
 </div>
 
 ### b. Diversification
