@@ -128,7 +128,7 @@ save_altair(
 )
 export_chart(
     nat_exp.properties(title=f"{nuts1_focus}, January 2021"),
-    f"exposure_shares_{nuts1_focus}"
+    f"exposure_shares_{nuts1_focus}",
 )
 
 # Exposure by LAD
