@@ -18,7 +18,6 @@ pandoc -s 0_exec_summary.md\
  --metadata figure_path="../../figures"\
  --natbib -F pandoc-crossref\
  --resource-path="../../figures/.:."\
- --variable fontfamily=arev\
  --variable urlcolor=blue
 pdflatex report.tex
 bibtex report || echo "Bibtex unsuccessful!"

@@ -22,7 +22,7 @@ Our prior is that some of these limitations can be addressed by combining busine
 
 [@Fig:pipeline] summarises our approach.
 
-![Summary of our approach.](scotland/pipeline_1.png){#fig:pipeline}
+![Summary of our approach.](pipeline_1.png){#fig:pipeline}
 
 ## 2. Data sources
 
