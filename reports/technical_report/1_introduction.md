@@ -5,7 +5,6 @@ header-includes: |
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-lite@4.8.1"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-embed@6"></script>
 ---
-
 # 1. Introduction
 
 Covid-19 has impacted economies across the world through a supply shock - lockdowns prevent some businesses from operating or greatly decrease their productive capacity - and a demand shock - economic actors have altered their consumption and investment behaviours in response to the pandemic. A firm's exposure to these shocks depend on the nature of its processes, products and services: Can its employees work from home? Can its products be sold online? Some firms may be able to diversify into economic activities that are less exposed to Covid-19, perhaps exploiting growing demand for products and services in adjacent markets. 

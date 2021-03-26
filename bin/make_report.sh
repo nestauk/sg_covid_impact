@@ -10,7 +10,7 @@ pandoc -s 0_exec_summary.md\
  3_methodology.md\
  4_results.md\
  5_conclusions.md\
- -M latex_metadata.yaml\
+ --metadata-file latex_metadata.yaml\
  -f markdown\
  -o report.tex\
  --bibliography 'technicalreport.bib'\

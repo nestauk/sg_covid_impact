@@ -159,7 +159,7 @@ def read_claimant_counts():
         cl["date"].apply(lambda x: getattr(x, p)) for p in ["month", "year"]
     ]
     cl["nuts1"] = cl["geography_code"].apply(
-        assign_nuts1_to_lad, lu=read_lad_nuts1_lookup(year=2020)
+        assign_nuts1_to_lad, lu=read_lad_nuts1_lookup()  # XXX: TODO: year=2020)
     )
     return cl
 
@@ -217,11 +217,11 @@ def fetch_shape(shape_path):
     my_zip.extractall(shape_path)
 
 
-def read_shape(shape_path):
+def read_shape():
 
     shapef = (
         gp.read_file(
-            f"{shape_path}/Local_Authority_Districts__December_2019__Boundaries_UK_BUC.shp"
+            f"{_SHAPE_PATH}/Local_Authority_Districts__December_2019__Boundaries_UK_BUC.shp"
         )
         .to_crs(epsg=4326)
         .assign(id=lambda x: x.index.astype(int))
