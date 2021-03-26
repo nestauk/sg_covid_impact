@@ -26,6 +26,7 @@ from sg_covid_impact.utils.altair_save_utils import (
     google_chrome_driver_setup,
     save_altair,
 )
+from sg_covid_impact.utils.altair_s3 import export_chart
 
 import sg_covid_impact
 
@@ -125,6 +126,8 @@ def make_shares_comparison(glass, ch, variable):
     return out
 
 
+fetch_nspl()
+
 # Lookups
 _DIV_NAME_LOOKUP = extract_sic_code_description(load_sic_taxonomy(), "Division")
 _SECTION_DIVISION_LOOKUP, _SECTION_NAME_LOOKUP = make_section_division_lookup()
@@ -132,7 +135,6 @@ _LAD_NUTS1_LOOKUP = read_lad_nuts1_lookup()
 _LAD_NAME_DICT = make_lad_lookup()
 
 # Read everything
-fetch_nspl()
 nspl = read_nspl()
 companies = make_companies()
 glass_meta = make_glass_meta(companies)
@@ -182,6 +184,7 @@ sector_comparison_chart
 save_altair(
     sector_comparison_chart, "glass_sector_validation", driver=driver, path=FIG_PATH
 )
+export_chart(sector_comparison_chart, "glass_sector_validation")
 
 # Chart comparing geo distributions
 sh = read_shape()
@@ -208,6 +211,7 @@ glass_validation = alt.hconcat(sector_comparison_chart, glass_share_map)
 glass_validation
 
 save_altair(glass_validation, "glass_place_validation", driver, path=FIG_PATH)
+export_chart(glass_validation, "glass_place_validation")
 
 # LAD by division coverage
 lad_sector_shares = (
@@ -284,3 +288,4 @@ lad_share_comparison = alt.hconcat(rep_chart, corr_chart, spacing=1).resolve_sca
 save_altair(
     lad_share_comparison, "glass_sector_place_validation", driver=driver, path=FIG_PATH
 )
+export_chart(lad_share_comparison, "glass_sector_place_validation")

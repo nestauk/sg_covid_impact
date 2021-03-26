@@ -192,7 +192,7 @@ chart = (
             title=["Proportion of tweets"],
         ),
         alt.Color("variable:N", scale=alt.Scale(scheme="category20")),
-        alt.Facet("laua:N", columns=2, title="Term contained in tweet"),
+        alt.Facet("laua:N", columns=3, title="Term contained in tweet"),
         tooltip=["created_at", "value", "proportion", "variable", "laua"],
     )
     .properties(width=300, height=100)

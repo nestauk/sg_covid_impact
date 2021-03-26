@@ -27,6 +27,8 @@ from sg_covid_impact.diversification import (
     make_local_network,
     make_national_network,
     month_string_from_datetime,
+    plot_divers_comparison,
+    estimate_div_shares_geo,
 )
 from sg_covid_impact.make_sic_division import extract_sic_code_description
 from sg_covid_impact.utils.altair_save_utils import (
@@ -34,6 +36,7 @@ from sg_covid_impact.utils.altair_save_utils import (
     save_altair,
     # make_fig_path,
 )
+from sg_covid_impact.utils.altair_s3 import export_chart
 
 import sg_covid_impact
 
@@ -94,6 +97,9 @@ bres = read_official()
 
 # Calculate exposure levels
 exposure_levels = exposures_ranked.merge(bres, left_on="division", right_on="division")
+exposure_levels["is_scot"] = [
+    "Scotland" if n == "Scotland" else "Not Scotland" for n in exposure_levels["nuts1"]
+]
 exposure_lad_detailed = make_exposure_shares_detailed(exposure_levels, "geo_nm")
 
 # Read shapefile
@@ -114,6 +120,7 @@ scot_space = make_national_network(
 )
 
 save_altair(scot_space, f"sector_space_{nuts1_focus}", driver=driver, path=FIG_PATH)
+export_chart(scot_space, f"sector_space_{nuts1_focus}")
 
 # # Calculate and plot diversification options
 neighb_shares = make_neighbor_shares(g, division_month_exposure_dict, "2021-01-01")
@@ -121,6 +128,7 @@ neighb_shares = make_neighbor_shares(g, division_month_exposure_dict, "2021-01-0
 neigh_shares = plot_exposure_neighbours(neighb_shares)
 
 save_altair(neigh_shares, "sector_diversification_options", driver, path=FIG_PATH)
+export_chart(neigh_shares, "sector_diversification_options")
 
 # Diversification shares per LAD
 monthly_diversification_rankings = pd.concat(
@@ -132,7 +140,10 @@ monthly_diversification_rankings = pd.concat(
             .sort_values("mean", ascending=False)
             .assign(
                 divers_ranking=lambda x: pd.qcut(
-                    -x["mean"], q=np.arange(0, 1.1, 0.25), labels=False
+                    # High values = high exposure with low diversification
+                    x["mean"],
+                    q=np.arange(0, 1.1, 0.25),
+                    labels=False,
                 )
             )
             .assign(month_year=m)
@@ -141,21 +152,20 @@ monthly_diversification_rankings = pd.concat(
     ]
 )
 
-# Merge with diversification information
-# Merge with diversification information
-diversification_lad_detailed = (
-    make_exposure_shares_detailed(exposure_levels, geo="geo_cd")
-    .assign(month_year=lambda x: x["month_year"].apply(month_string_from_datetime))
-    .merge(
-        monthly_diversification_rankings,
-        left_on=["division", "month_year"],
-        right_on=["division", "month_year"],
-        how="outer",
-    )
+# Plot Scottish trends for shares of employment in high exposure / low div sectors
+# Calculate shares
+diversification_scot = estimate_div_shares_geo(
+    exposure_levels, monthly_diversification_rankings, "is_scot"
 )
+div_trends = plot_divers_comparison(diversification_scot, 2)
 
-print(diversification_lad_detailed.head())
+save_altair(div_trends, "div_trends", driver=driver, path=FIG_PATH)
+export_chart(div_trends, "div_trends")
 
+# Plot LAD situation
+diversification_lad_detailed = estimate_div_shares_geo(
+    exposure_levels, monthly_diversification_rankings, "geo_cd"
+)
 
 diversification_lad_detailed["divers_ranking"] = diversification_lad_detailed[
     "divers_ranking"
@@ -175,7 +185,7 @@ div_map_strip = [
         shapef,
         diversification_nuts,
         m,
-        3,
+        2,
         scale_type="quantile",
         exposure_var="divers_ranking",
         name="low diversification",
@@ -200,3 +210,4 @@ div_composite = alt.vconcat(div_map_plot, space_networks_plot).configure_view(
 )
 
 save_altair(div_composite, "geo_diversification_profiles", driver=driver, path=FIG_PATH)
+export_chart(div_composite, "geo_diversification_profiles")

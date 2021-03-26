@@ -159,7 +159,7 @@ def read_claimant_counts():
         cl["date"].apply(lambda x: getattr(x, p)) for p in ["month", "year"]
     ]
     cl["nuts1"] = cl["geography_code"].apply(
-        assign_nuts1_to_lad, lu=read_lad_nuts1_lookup(year=2020)
+        assign_nuts1_to_lad, lu=read_lad_nuts1_lookup()  # XXX: TODO: year=2020)
     )
     return cl
 
@@ -217,11 +217,11 @@ def fetch_shape(shape_path):
     my_zip.extractall(shape_path)
 
 
-def read_shape(shape_path):
+def read_shape():
 
     shapef = (
         gp.read_file(
-            f"{shape_path}/Local_Authority_Districts__December_2019__Boundaries_UK_BUC.shp"
+            f"{_SHAPE_PATH}/Local_Authority_Districts__December_2019__Boundaries_UK_BUC.shp"
         )
         .to_crs(epsg=4326)
         .assign(id=lambda x: x.index.astype(int))
@@ -537,6 +537,8 @@ def plot_trend_point(
     y_axis="cl_norm",
     y_title="Claimant count normalised",
     color="mean_cl_count",
+    w=500,
+    h=150,
     **kwargs,
 ):
     """Plots a linechart decorated with points to enable selection
@@ -547,6 +549,8 @@ def plot_trend_point(
         y_axis (str): name of y variable
         y_title (str): clean Y title
         color (str): name of color variable
+        w (int): width in pixels
+        h (int): height in pixels
 
     """
 
@@ -583,7 +587,7 @@ def plot_trend_point(
         strokeWidth=alt.condition(selector, alt.value(1.75), alt.value(0.5)),
     )
 
-    chart = (point + line).add_selection(selector).properties(width=300, height=300)
+    chart = (point + line).add_selection(selector).properties(width=w, height=h)
 
     return chart
 
@@ -687,7 +691,12 @@ def plot_ranked_exposures(
         .mark_rect()
         .encode(
             x=alt.X("yearmonth(month_year):O", title="Month"),
-            y=alt.Y(f"{sector}:O", sort=sort_sectors, title=title),
+            y=alt.Y(
+                f"{sector}:O",
+                sort=sort_sectors,
+                title=title,
+                axis=alt.Axis(labelFontSize=8),
+            ),
             color=alt.Color(
                 "rank:Q",
                 sort="descending",
@@ -696,7 +705,7 @@ def plot_ranked_exposures(
             ),
             tooltip=[sector, f"{sector}_name", "month_year", "rank"],
         )
-        .properties(width=400, height=500)
+        .properties(width=400, height=700)
     )
     return hq
 
@@ -753,6 +762,63 @@ def plot_exposure_evol(exposure_levels, mode="single", geo=None, columns=None):
     return output
 
 
+def plot_national_comparison(df, geo, sel_geo="Scotland", rank=8, w=550, h=150):
+    """Composite chart comparing evolution and composition of exposures
+    Args:
+        df (df): df with levels of employment and exposure ranks
+        geo (df): geographical variable to compare
+        sel_ge0 (df): geography to focus on in the bottom of the chart
+        rank (int): threshold for including as 'high exposure'
+        w (int): width in pixels
+        h (int): height in pixels
+    """
+
+    exposure_levels_nat_detailed = make_exposure_shares_detailed(df, geo)
+
+    # Make plot of shares of employment by month and location
+    exposure_nat_high = exposure_levels_nat_detailed.query(f"rank>={rank}").query(
+        "month_year>'2020-02-01'"
+    )
+
+    # Evolution of shares of employment in high exposure sectors
+    share_agg_evol = (
+        exposure_nat_high.groupby(["month_year", geo])["share"]
+        .sum()
+        .reset_index(drop=False)
+    )
+
+    ch = (
+        alt.Chart(share_agg_evol)
+        .mark_line()
+        .encode(
+            x=alt.X("yearmonth(month_year)", title=None),
+            y=alt.Y("share", title=["Share of high exposed", "employment"]),
+            color=alt.Color(geo),
+        )
+        .properties(width=w, height=h)
+    )
+
+    # Evolution of composition of employment (detailed)
+    share_agg_detailed = exposure_nat_high.query(f"{geo}=='{sel_geo}'")
+    det_ch = (
+        alt.Chart(share_agg_detailed)
+        .mark_bar(stroke="white", strokeWidth=0.5)
+        .encode(
+            x=alt.X("yearmonth(month_year)", title=None),
+            y=alt.Y("share", title=["Share of high exposed", "employment"]),
+            color=alt.Color(
+                "section",
+                scale=alt.Scale(scheme="category20c"),
+                legend=alt.Legend(orient="bottom", columns=3),
+            ),
+            order=alt.Order("section", sort="ascending"),
+            tooltip=["division_name"],
+        )
+    ).properties(width=w, height=h)
+
+    return alt.vconcat(ch, det_ch).resolve_scale(color="independent")
+
+
 def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
     """Plots levels of employment and specialisation in sectors with
     different levels of exposure to Covid-19
@@ -770,9 +836,9 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
     exp_df[f"is_{nuts1}"] = [x == nuts1 for x in exp_df["nuts1"]]
 
     exposure_sort = (
-        exposure_nuts.sort_values(
-            ["section", "rank", "share"], ascending=[True, False, False]
-        )["division"]
+        exposure_nuts.sort_values(["section", "share"], ascending=[True, False])[
+            "division"
+        ]
     ).tolist()
 
     exposure_barch = (
@@ -780,7 +846,7 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
         .mark_bar(stroke="black", strokeWidth=0.3)
         .encode(
             x=alt.X("share", title="Share of employment"),
-            y=alt.Y("division", sort=exposure_sort, axis=alt.Axis(labels=False)),
+            y=alt.Y("division", sort=exposure_sort, axis=alt.Axis(labelFontSize=8)),
             color=alt.Color(
                 "rank",
                 title="Exposure rank",
@@ -790,7 +856,7 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
             ),
             tooltip=["division_name"],
         )
-    ).properties(height=500, width=250)
+    ).properties(height=700, width=350)
 
     specialisation_month = exp_df.query(f"month_year=='{month}'")
 
@@ -828,7 +894,7 @@ def plot_emp_shares_specialisation(exp_df, month, nuts1="Scotland"):
             ),
             tooltip=["division_name"],
         )
-    ).properties(height=500, width=250)
+    ).properties(height=700, width=200)
     specialisation_ruler = (
         alt.Chart(specialisation_nuts)
         .mark_rule(stroke="black", strokeDash=[2, 1])
@@ -906,7 +972,12 @@ def plot_exposure_comparison(exp_levels_comp, month="interactive"):
 
 
 def plot_area_composition(
-    exposures, month, area=False, interactive=False, legend_columns=1
+    exposures,
+    month,
+    area=False,
+    interactive=False,
+    legend_columns=1,
+    legend_orient="bottom",
 ):
     """Plot the compositon of an area
     Args:
@@ -928,10 +999,10 @@ def plot_area_composition(
                 tooltip=["division_name"],
                 color=alt.Color(
                     "section",
-                    legend=alt.Legend(columns=5, orient="bottom"),
-                    scale=alt.Scale(scheme="tableau20"),
+                    legend=alt.Legend(columns=legend_columns, orient=legend_orient),
+                    scale=alt.Scale(scheme="category20c"),
                 ),
-                order=alt.Order("share", sort="descending"),
+                order=alt.Order("section", sort="descending"),
             )
         ).properties(height=300)
         return local_profile
@@ -964,7 +1035,7 @@ def plot_area_composition(
                     legend=alt.Legend(columns=3, orient="bottom"),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
-                order=alt.Order("share", sort="descending"),
+                order=alt.Order("section", sort="ascending"),
             )
             .add_selection(select_place)
             .transform_filter(select_place)
@@ -999,7 +1070,7 @@ def plot_area_composition(
                     legend=alt.Legend(columns=1),
                     scale=alt.Scale(scheme="tableau20"),
                 ),
-                order=alt.Order("share", sort="descending"),
+                order=alt.Order("section", sort="ascending"),
             )
             .add_selection(select_month)
             .transform_filter(select_month)
