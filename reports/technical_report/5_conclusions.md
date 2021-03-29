@@ -10,7 +10,9 @@ In this section we revisit our initial goals for the project:
 
 Our results support the idea that novel data sources can provide valuable information about the impact of Covid-19. For example, business website data seems to be a useful source of text about industrial activities and the indicators of industrial exposure to Covid-19 based on the transformation of these industrial vocabularies into Google Search Trend data yield results that are consistent with qualitative and quantitative understandings of the impact of the pandemic based on official and novel sources such as the Google Footfall dataset. Our local indicators of exposure to Covid-19 and opportunities for diversification from it show an association with our proxies for Covid-19 impact based on claimant counts that suggests that they are capturing some signal about the vulnerability of different local economies to the shocks of Covid-19.
 
-Our macro analysis bypasses key limitations of business website data by using the SIC taxonomy as a "lookup" with official statistics, helping us to generate policy-relevant measures of employment and reducing concerns about geographical and industrial biases in the Glass data which our coverage analysis suggests are in any case moderate. This comes at the cost of substantial aggregation and reliance on the SIC taxonomy which presents important limitations in terms of its lagginess, presence of uninformative industrial codes ("Other activities not elsewhere classified") and risk of heterogeneity in exposure to Covid-19 within large codes. One option to address this issue would be to generate estimates of sectoral exposure at a finer level of sectoral granularity. This would require additional search trend collection with the cloud computing infrastructure we have developed to overcome some restrictions in the usage rates for the Google Search Trends API and would likely bring some noise into our measures. The reason for this is that the industrial vocabulary for some industries would have to be based on smaller samples of businesses subject to higher misclassification rates.
+Our macro analysis bypasses key limitations of business website data by using the SIC taxonomy as a "lookup" with official statistics, helping us to generate policy-relevant measures of employment and reducing concerns about geographical and industrial biases in the Glass data which our coverage analysis suggests are in any case moderate. This comes at the cost of substantial aggregation and reliance on the SIC taxonomy which presents important limitations in terms of its lagginess, presence of uninformative industrial codes (_"Other activities Not Elsewhere Classified"_) and risk of heterogeneity in exposure to Covid-19 within large codes. 
+
+One option to address this issue would be to generate estimates of sectoral exposure at a finer level of sectoral granularity. This would require additional search trend collection with the cloud computing infrastructure we have developed to overcome some restrictions in the usage rates for the Google Search Trends API and would likely bring some noise into our measures. The reason for this is that the industrial vocabulary for some industries would have to be based on smaller samples of firms subject to higher misclassification rates.
 
 We have also explored various avenues to harness the granularity of the Glass data through an analysis of Covid-19 notices at the firm level, the collection of additional social media data from business websites, and by looking for sources of business failure data which the Glass data could be matched to.
 
@@ -18,25 +20,22 @@ The exploration of Covid-19 notices using topic modelling failed to yield insigh
 Without the investment of significant time in improving the quality of the notice data, we do not believe this data source is capable of quantitatively mapping the economic impact of Covid in Scotland and informing policy; however the data could find value in being developed into an exploratory tool to help policymakers find notices relevant to their specific question - be that focussing on a region, sector, or keyword.
 On the other hand, the ongoing costs incurred by having to license this data from a 3rd party and the reliance on their data pipeline makes this a high risk option.
 
-We have built a proof-of-concept pipeline to identify and collect the twitter accounts of businesses by scraping their websites and used this to investigate the viability of using twitter data to assess the impact of Covid-19 on Scottish businesses with a twitter presence.
+We have built a proof-of-concept pipeline to identify and collect the twitter accounts of businesses by scraping their websites and used this to investigate the viability of using Twitter data to assess the impact of Covid-19 on Scottish businesses with a twitter presence.
 Whilst available for a smaller number of businesses than the Glass notice data,
  the twitter data does not require licensing data from a 3rd party on an ongoing basis;
   is of a higher quality;
    and is broader than Covid-19.
-In this pilot analysis we did not find robust evidence of an increased twitter presence due to Covid-19;
- however the tweets of businesses already on twitter provide a timely and granular indicator about what businesses are doing.
-It is clear that this data could contribute to policymakers understanding of how businesses are responding to an ongoing pandemic;
- however the value of this data beyond the current wave,
- whilst likely high, is unclear.
-
+In this pilot analysis we did not find robust evidence of an increased Twitter presence due to Covid-19;
+ however the tweets of businesses already on Twitter provide a timely and granular indicator about what businesses are doing.
+It is clear that this data could contribute to policymakers understanding of how businesses are responding to an ongoing pandemic as well as future crises and economic events.
 
 ## Implications
 
-Our analysis of exposure and diversification to Covid-19 in Scotland suggests that the industrial composition of the country makes it somewhat more succeptible to the economic impacts of Covid-19 than other parts of the UK: sectors related to tourism such as *Accommodation* and *Travel agencies* and cultural activities such as *Libraries and Museums* where Scotland has a relative specialisation are highly exposed to Covid-19 and have limited opportunities for diversification from it. 
+Our analysis of exposure and diversification to Covid-19 in Scotland suggests that the industrial composition of the country makes it somewhat more succeptible to the economic impacts of Covid-19 than other parts of the UK: sectors related to tourism such as *Accommodation* and *Travel agencies* and cultural activities such as *Libraries and Museums* where Scotland has a relative specialisation are highly exposed to Covid-19 and have limited opportunities to diversify from it. 
 
 We also see this in geographical variation in exposure to Covid-19. While council areas in the Highlands and Islands appear to be more exposed to Covid-19 because of the relative importance for their economies of industries such as those mentioned above, we also see council areas in other parts of Scotland showing high levels of exposure to the pandemic as a consequence of their industrial particularities. Two examples of this are City of Edinburgh at the onset of the pandemic because of its reliance on finance and professional services, and Aberdeen City and Aberdeenshire because of the importance of oil and energy industries that have, in some cases, limited opportunities for diversification. Council areas in the South and Southwest with more manufacturing activity appear, in general, less exposed to the pandemic.
 
-Our analysis of the evolution of normalised claimant counts at the council area level and their correlation with other secondary data suggests that wealthier local economies with better educated workforces have suffered a stronger shock from Covid-19 compared to pre-pandemic baseline rates. At the same time, these areas are likely to have access to the resources and capabilities to overcome this shock, not least the skills to diversify into industries that are less exposed to the pandemic. Many of the digitalised and knowledge intensive sectors that our analysis suggests are less exposed and more able to move into new markets are more important in those areas. Having said this, we note the risk that the shock experienced by these cities is likely to impact on less affluent groups with the ensuing risk of an increase in inequality [@del2020supply]).  
+Our analysis of the evolution of normalised claimant counts at the council area level and their correlation with other secondary data suggests that wealthier local economies with better educated workforces have suffered a stronger shock from Covid-19 compared to pre-pandemic baseline rates. At the same time, these areas are likely to have access to the resources and capabilities to overcome this shock, not least the skills to diversify into industries that are less exposed to the pandemic. Many of the digitalised and knowledge intensive sectors that our analysis suggests are less exposed and more able to move into new markets are more important in those areas. We also note the risk that the shock experienced by these cities will impact on less affluent groups with the potential to increase inequality [@del2020supply]).  
 
 An important challenge for policymakers will be to put in place interventions to support industries with less diversification opportunities withstand the shocks of the pandemic while, at the same time, boosting their ability to transition into new industries while mitigating potential increases in inequality (many of the industries that are highly exposed to the pandemic and have low diversification opportunities are low skill, low salary and low productivity). This will be important for boosting Scottish' local economies resilience to Covid-19 in the short term, and to other future shocks linked to Brexit, automation and the environmental transition that may be coming down the line. The analysis that we have undertaken here highlights the potential of novel, high granularity data sources for informing such policies.
 
@@ -60,7 +59,7 @@ Finally, we would like to incorporate additional secondary data into our analysi
 
 ### Micro analysis
 
-Starting with the Covid-19 notices, there are two principle significant investments required to improve data quality.
+Starting with the Covid-19 notices, there are two significant investments required to improve data quality.
 Firstly, the data collected by Glass must be more reliable and complete: notices that are truncated must not be truncated; notices containing snippets from different sections of a businesses website must be separated; and the time and date of collection must be provided rather than just a month.
 Unfortunately improved data collection would have to start again and would not be able to recover historic information, thus losing a key feature of the data.
 Secondly, better processing of the notices must be performed such that irrelevant notices are filtered out and relevant notices are classified into several categories such as "Business as usual", "Temporary closure", "Permanent closure", "Adaptation", "Partial closure" etc.
@@ -74,9 +73,9 @@ There is probably more value in investing effort into social-media data over not
  the fact that the ONS is also exploring similar lines of enquiry,
  and the ONS has a competitive edge with its access to trading statuses of businesses from BICS microdata.
 The most obvious next step would be to perform more sophisticated analysis of the text in tweets than the term occurrence analysis.
-Any hypothetical scale-up project for twitter data
+Any hypothetical scale-up project for Twitter data
  requires improvements to the pipeline that would be necessary. 
-Chief among these would be: improving the ability of the scraping pipeline to detect and match twitter accounts,
+Chief among these would be: improving the ability of the scraping pipeline to detect and match Twitter accounts,
  collecting retweets,
  collecting tweets further back in time,
  collecting tweets from accounts with more than 3,200 tweets,
@@ -88,7 +87,7 @@ This future collection would likely require access to Twitter's [Academic resear
 In this project we have worked with datasets with a high degree of temporal, geographical and sectoral granularity. Although we have tried to showcase this richness through the interactive charts linked throughout the report, we believe that realising their potential requires the development of dedicated dashboards and interactive tools. These would display regularly updated information about the situation in Scotland and its local economies, opportunities for diversification and other contextual data. Combined with the subject expertise of policymakers and practitioners, this would make it possible to identify and harness economic challenges and opportunities quicker and more accurately than is possible with data as currently presented.
 
 Twitter data could be incorporated into such a dashboard
- by putting the twitter data into Elasticsearch
+ by putting the twitter data into a searchable database such as Elasticsearch
  to generate a 'search engine'
  for the tweets of Scottish businesses.
 This 'search engine' could be queried by policymakers
