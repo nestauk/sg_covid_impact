@@ -100,7 +100,7 @@ tidy_agg_df = make_tidy_agg_table(
 )
 bivariate_scatters = plot_variable_correlations(tidy_agg_df)
 save_altair(bivariate_scatters, "bivariate_scatters", driver=driver, path=FIG_PATH)
-export_chart(bivariate_scatters, "bivariate_scatters")
+#export_chart(bivariate_scatters, "bivariate_scatters")
 
 correlation_evolution = plot_correlation_evolution(reg_table, nuts_focus=nuts1_focus)
 
@@ -109,7 +109,7 @@ scot_reg_table = reg_table.loc[[x[0] != "S" for x in reg_table["geo_cd"]]]
 
 corr_all = make_correlation_plot(scot_reg_table)
 save_altair(corr_all, "correlation_table", driver=driver, path=FIG_PATH)
-export_chart(corr_all, "correlation_table")
+#export_chart(corr_all, "correlation_table")
 
 # Regression
 mods = {}
@@ -144,7 +144,7 @@ regression_plot = plot_model_coefficients(model_selected)
 # )
 
 save_altair(regression_plot, "modelling_results", driver=driver, path=FIG_PATH)
-export_chart(regression_plot, "modelling_results")
+#export_chart(regression_plot, "modelling_results")
 
 # Conclude by exploring predictions based on current data
 
@@ -152,7 +152,9 @@ predicted_actual = combine_predicted_actual(
     make_predicted_values(mods, exp, div, secondary), cl
 )
 
+predicted_actual.to_csv(f"{project_dir}/data/processed/predicted_actual.csv")
+
 pred_ch = plot_predictions(predicted_actual.query("nuts1=='Scotland'"))
 
 save_altair(pred_ch, "predicted_outputs", driver=driver, path=FIG_PATH)
-export_chart(pred_ch, "predicted_outputs")
+#export_chart(pred_ch, "predicted_outputs")
