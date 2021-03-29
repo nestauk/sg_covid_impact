@@ -19,8 +19,8 @@ names_lookup = {
     "cl_count_norm": "Claimant count (normalised)",
     "div": "Low diversification share",
     "exp": "Low exposure share",
-    "feb_pred": "Predicted (February)",
-    "feb_value": "Actual (February)",
+    "jan_pred": "Predicted (January)",
+    "jan_value": "Actual (January)",
 }
 
 
@@ -31,7 +31,7 @@ def make_predicted_actual():
 
     actual = (
         pred.query("variable=='actual'")
-        .rename(columns={"value": "jan_value"})
+        .rename(columns={"value": "dec_value"})
         .drop(axis=1, labels=["variable", "nuts1"])
     )
 
@@ -41,9 +41,9 @@ def make_predicted_actual():
 def compare_pred_actual() -> pd.DataFrame:
     """Reads and processes data and compares actual / predicted results"""
 
-    pred, jan = make_predicted_actual()
-    feb = make_claimant_data()
-    comparison = make_comparison_table(pred, jan, feb)
+    pred, dec = make_predicted_actual()
+    jan = make_claimant_data()
+    comparison = make_comparison_table(pred, dec, jan)
 
     comp_stats = calculate_comparison_statistics(comparison)
     comp_stats.to_markdown(
@@ -56,22 +56,22 @@ def compare_pred_actual() -> pd.DataFrame:
 
 
 def make_comparison_table(
-    pred: pd.DataFrame, jan: pd.DataFrame, feb: pd.DataFrame
+    pred: pd.DataFrame, dec: pd.DataFrame, jan: pd.DataFrame
 ) -> pd.DataFrame:
-    """Combines predicted, january & february data
+    """Combines predicted, january & december data
     Args:
-        pred: predicted values for February
-        jan: actual values for january
-        feb: actual values for february
+        pred: predicted values for jan
+        dec: actual values for december
+        jan: actual values for jan
 
     """
     pred_act = (
         pred.query("variable!='actual'")
-        .rename(columns={"value": "feb_pred"})
+        .rename(columns={"value": "jan_pred"})
+        .merge(dec, on=["geo_cd", "geo_nm", "output"])
         .merge(jan, on=["geo_cd", "geo_nm", "output"])
-        .merge(feb, on=["geo_cd", "geo_nm", "output"])
-        .assign(real_diff=lambda df: df["feb_value"] - df["jan_value"])
-        .assign(pred_diff=lambda df: df["feb_pred"] - df["jan_value"])
+        .assign(real_diff=lambda df: df["jan_value"] - df["dec_value"])
+        .assign(pred_diff=lambda df: df["jan_pred"] - df["dec_value"])
         .query("nuts1=='Scotland'")
         .reset_index(drop=True)
         .assign(
@@ -86,16 +86,16 @@ def make_comparison_table(
 
 
 def get_comparison(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculaates some comparisons between feb (predicted & actual) & jan values"""
+    """Calculates some comparisons between january (predicted & actual) & dec values"""
 
-    val_corrs = df[["feb_pred", "feb_value"]].corr().values[0][1]
-    agree_share = df["agree"].mean()
+    val_corrs = df[["jan_pred", "jan_value"]].corr().values[0][1]
+    #agree_share = df["agree"].mean()
 
-    mse_val = np.sum((df["feb_pred"] - df["feb_value"]) ** 2)
+    mse_val = np.sum((df["jan_pred"] - df["jan_value"]) ** 2)
 
     out = pd.Series(
-        [val_corrs, agree_share, mse_val],
-        index=["Correlation", "Agreement share", "Mean Squared Error"],
+        [val_corrs, mse_val],
+        index=["Correlation", "Mean Squared Error"],
     )
     return out
 
@@ -139,7 +139,7 @@ def make_claimant_data():
             ]
         )
         .assign(norm=lambda df: df["obs_value"] / df["resc"])
-        .query("date=='2021-02-01'")
+        .query("date=='2021-01-01'")
         .rename(
             columns={
                 "geography_name": "geo_nm",
@@ -149,7 +149,7 @@ def make_claimant_data():
             }
         )
         .drop(axis=1, labels=["month", "measure_name", "date", "resc"])
-        .melt(id_vars=["geo_cd", "geo_nm"], var_name="output", value_name="feb_value")
+        .melt(id_vars=["geo_cd", "geo_nm"], var_name="output", value_name="jan_value")
     )
 
     return cl
@@ -159,7 +159,7 @@ def plot_comparisons(comp_table: pd.DataFrame) -> alt.Chart:
     """Plots comparison chart"""
 
     plot_table = (
-        comp_table[["geo_cd", "geo_nm", "feb_value", "feb_pred", "variable", "output"]]
+        comp_table[["geo_cd", "geo_nm", "jan_value", "jan_pred", "variable", "output"]]
         .melt(id_vars=["geo_cd", "geo_nm", "variable", "output"], var_name="pred_type")
         .assign(variable=lambda df: df["variable"].map(names_lookup))
         .assign(output=lambda df: df["output"].map(names_lookup))
@@ -167,7 +167,7 @@ def plot_comparisons(comp_table: pd.DataFrame) -> alt.Chart:
     )
 
     sort_lads = (
-        plot_table.query("pred_type=='Actual (February)'")
+        plot_table.query("pred_type=='Actual (January)'")
         .query("output=='Claimant count (normalised)'")
         .drop_duplicates("geo_nm")
         .sort_values("value", ascending=False)["geo_nm"]
