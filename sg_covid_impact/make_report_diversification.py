@@ -120,7 +120,7 @@ scot_space = make_national_network(
 )
 
 save_altair(scot_space, f"sector_space_{nuts1_focus}", driver=driver, path=FIG_PATH)
-export_chart(scot_space, f"sector_space_{nuts1_focus}")
+# export_chart(scot_space, f"sector_space_{nuts1_focus}")
 
 # # Calculate and plot diversification options
 neighb_shares = make_neighbor_shares(g, division_month_exposure_dict, "2021-01-01")
@@ -128,7 +128,7 @@ neighb_shares = make_neighbor_shares(g, division_month_exposure_dict, "2021-01-0
 neigh_shares = plot_exposure_neighbours(neighb_shares)
 
 save_altair(neigh_shares, "sector_diversification_options", driver, path=FIG_PATH)
-export_chart(neigh_shares, "sector_diversification_options")
+# export_chart(neigh_shares, "sector_diversification_options")
 
 # Diversification shares per LAD
 monthly_diversification_rankings = pd.concat(
@@ -160,7 +160,7 @@ diversification_scot = estimate_div_shares_geo(
 div_trends = plot_divers_comparison(diversification_scot, 2)
 
 save_altair(div_trends, "div_trends", driver=driver, path=FIG_PATH)
-export_chart(div_trends, "div_trends")
+# export_chart(div_trends, "div_trends")
 
 # Plot LAD situation
 diversification_lad_detailed = estimate_div_shares_geo(
@@ -210,4 +210,4 @@ div_composite = alt.vconcat(div_map_plot, space_networks_plot).configure_view(
 )
 
 save_altair(div_composite, "geo_diversification_profiles", driver=driver, path=FIG_PATH)
-export_chart(div_composite, "geo_diversification_profiles")
+# export_chart(div_composite, "geo_diversification_profiles")

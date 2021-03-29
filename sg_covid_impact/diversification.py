@@ -218,7 +218,7 @@ def plot_exposure_neighbours(neighb_shares):
     base = alt.Chart(neighb_shares_long).encode(
         y=alt.Y(
             "index",
-            sort=neighb_shares.index.tolist(),
+            #sort=neighb_shares.index.tolist(),
             axis=alt.Axis(labelFontSize=8),
             title="Division",
         )
