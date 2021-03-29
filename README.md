@@ -33,6 +33,8 @@ Run the following scripts to collect and process data:
 
 `python sg_covid_impact/make_report_modelling.py` to plot outputs from modelling relations between key variables
 
+`python sg_covid_impact/make_prediction_comparison.py` to compare actual and predicted claimant counts
+
 `python sg_covid_impact/make_glass_validation.py` to plot outputs of validation between Glass and Companies House
 
 The output charts are stored in `figures/scotland`.
