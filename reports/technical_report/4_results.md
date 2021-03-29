@@ -4,7 +4,7 @@ This section presents the results of our analysis split into two sections.
 
 Section 1 focuses on the aggregate indicators stream of analysis where we use business descriptions from Glass and Google Search trends to generate sector rankings of exposure and opportunities for diversification from Covid-19 which we subsequently combine with official data in order to generate local estimates of share of the workforce exposed to and able to diversify from Covid-19.
 
-Section 2 explores various avenues to generate firm-level measures of exposure / adaptation to Covid-19 through analyses of Covid-19 notices posted in business websites, by linking company websites to regularly updated social media feeds, and by looking for secondary sources of information about business outcomes (such as company dissolutions in Companies House) which could help us go from evidence about "exposure" to Covid-19 to objective measures of impact and its drivers.
+Section 2 explores various avenues to generate firm-level measures of exposure / adaptation to Covid-19 through analyses of Covid-19 notices posted in business websites and by linking company websites to regularly updated social media feeds (as already noted, we failed to find secondary sources of information about business outcomes - such as company dissolutions in Companies House -  which could help us go from evidence about "exposure" to Covid-19 to objective measures of impact and its drivers.)
 
 ## 1. Aggregate results
 
