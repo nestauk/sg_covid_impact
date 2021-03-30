@@ -5,7 +5,7 @@ header-includes: |
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-lite@4.8.1"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-embed@6"></script>
 ---
-# 1. Introduction
+# I. Introduction
 
 Covid-19 has impacted economies across the world through a supply shock - lockdowns prevent some businesses from operating or greatly decrease their productive capacity - and a demand shock - economic actors have altered their consumption and investment behaviours in response to the pandemic. A firm's exposure to these shocks depend on the nature of its processes, products and services: Can its employees work from home? Can its products be sold online? Some firms may be able to diversify into economic activities that are less exposed to Covid-19, perhaps exploiting growing demand for products and services in adjacent markets. 
 
@@ -21,12 +21,12 @@ Our goals are three-fold:
 
 The structure of the report is as follows:
 
-Section 2 contains a brief review of relevant studies about the economic impact of Covid-19 paying special attention to those that have used novel data sources like the ones we are working with here, and analyses of the economic impact of Covid-19 in Scotland on which we will be building with the evidence that we create through our analysis.
+Section II contains a brief review of relevant studies about the economic impact of Covid-19 paying special attention to those that have used novel data sources like the ones we are working with here, and analyses of the economic impact of Covid-19 in Scotland on which we will be building with the evidence that we create through our analysis.
 
-Section 3 outlines our data sources and methodology for data collection and processing.[^1] It also contains some descriptive results and triangulation with other resources that speak to the strenghts and limitations of our sources.
+Section III outlines our data sources and methodology for data collection and processing.[^1] It also contains some descriptive results and triangulation with other resources that speak to the strenghts and limitations of our sources.
 
 [^1]: All the code that we have developed in the project is available from [this GitHub repository](https://github.com/nestauk/sg_covid_impact).
 
-Section 4 presents our findings structured in two sub-sections that respectively focus on evidence about exposure and opportunities to diversify from Covid-19 at the aggregate level (considering sectors and local economies) and at the firm-level. 
+Section IV presents our findings structured in two sub-sections that respectively focus on evidence about exposure and opportunities to diversify from Covid-19 at the aggregate level (considering sectors and local economies) and at the firm-level. 
 
-Section 4 concludes with a discussion of the implications of our analysis and next steps.
+Section V concludes with a discussion of the implications of our analysis and next steps.

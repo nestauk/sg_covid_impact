@@ -1,4 +1,4 @@
-# 2. Literature
+# II. Literature
 
 A large body of literature about the economic impact of Covid-19 has accumulated since the beginning of the pandemic. Here, we focus on a few generally UK-based exemplars that illustrate the range of data sources that economists are deploying to measure Covid-19's impact.
 

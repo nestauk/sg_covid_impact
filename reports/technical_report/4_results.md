@@ -1,10 +1,11 @@
-# 3. Results
+
+# IV. Results
 
 This section presents the results of our analysis split into two sections. 
 
-Section 1 focuses on the aggregate indicators stream of analysis where we use business descriptions from Glass and Google Search trends to generate sector rankings of exposure and opportunities for diversification from Covid-19 which we subsequently combine with official data in order to generate local estimates of share of the workforce exposed to and able to diversify from Covid-19.
+Sub-section 1 focuses on the aggregate indicators stream of analysis where we use business descriptions from Glass and Google Search trends to generate sector rankings of exposure and opportunities for diversification from Covid-19 which we subsequently combine with official data in order to generate local estimates of share of the workforce exposed to and able to diversify from Covid-19.
 
-Section 2 explores various avenues to generate firm-level measures of exposure / adaptation to Covid-19 through analyses of Covid-19 notices posted in business websites and by linking company websites to regularly updated social media feeds (as already noted, we failed to find secondary sources of information about business outcomes - such as company dissolutions in Companies House -  which could help us go from evidence about "exposure" to Covid-19 to objective measures of impact and its drivers.)
+Sub-section 2 explores various avenues to generate firm-level measures of exposure / adaptation to Covid-19 through analyses of Covid-19 notices posted in business websites and by linking company websites to regularly updated social media feeds (as already noted, we failed to find secondary sources of information about business outcomes - such as company dissolutions in Companies House -  which could help us go from evidence about "exposure" to Covid-19 to objective measures of impact and its drivers.)
 
 ## 1. Aggregate results
 
@@ -34,8 +35,7 @@ In chart [@fig:nat_comp] we consider the industrial composition of the Scottish 
   * In Services, Scotland is specialised in three sectors with high levels of exposure to Covid-19 - they are *Libraries and museums*, *Accommodation* and *Architectural and Engineering Activities*. 
 
 <!-- ![Evolution and composition of exposure to Covid-19](scotland/png/exposure_shares_Scotland.png){#fig:nat_comp} -->
-<div class=altair s3_path="exposure_shares_Scotland.json" static_path="scotland/png/exposure_shares_Scotland.png" id="fig:nat_comp">Evolution and composition of exposure to Covid-19
-</div>
+<div class=altair s3_path="exposure_shares_Scotland.json" static_path="scotland/png/exposure_shares_Scotland.png" id="fig:nat_comp">Shares of employment (left chart) and relative specialisation (right chart) in SIC Divisions with different levels of Covid exposure </div>
 
 #### Local exposure
 
@@ -60,16 +60,16 @@ We see that:
 This illustrates the important variation in the economic drivers of local exposure to Covid-19 at different point of the pandemic, and the heterogeneity of local economies that are exposed.
 
 <!-- ![Evolution and composition of exposure to Covid-19](scotland/png/geo_profiles_scotland.png){#fig:ca_map} -->
-<div class=altair s3_path="geo_profiles_Scotland.json" static_path="scotland/png/geo_profiles_Scotland.png" id="fig:ca_map">Geography of exposur to Covid-19 in Scotland (top row) and industrial composition of some council areas highly exposed to Covid-19 (bottom row).
+<div class=altair s3_path="geo_profiles_Scotland.json" static_path="scotland/png/geo_profiles_Scotland.png" id="fig:ca_map">Geography of exposure to Covid-19 in Scotland (top row) and industrial composition of some council areas highly exposed to Covid-19 (bottom row).
 </div>
 
 ### b. Diversification
 
 #### Industry space and sector exposures
 
-Having considered exposure to Covid-19 in Scotland and its local economies, we move on to consider opportunities for diversification from the pandemic based in our machine learning analysis of company descriptions. As described in Section 3, we can use similarities between industries based on the language they use (which we consider a proxy for opportunities for diversification between them) to draw an "industry space" where industries that are closer to each other are better able to diversify away from Covid-19. 
+Having considered exposure to Covid-19 in Scotland and its local economies, we move on to consider opportunities for diversification from the pandemic based in our machine learning analysis of company descriptions. As described in Section III, we have measured similarities between industries based on their propensity to be present in the same business descriptions and considered this similarity a proxy for opportunities for diversification between industries. We use this information to draw an "industry space" where firms in an industry are able to diversify into those that are closer to them (and potentially away from Covid-19). 
 
-We present this industry space in [@fig:sector_space], where each node represents an industry, the size of the nodes captures their level of employment in Scotland according to BRES and their colour the level of exposure to Covid-19 in January 2021. [**The interactive version of the chart**](https://scotland-figures.s3.eu-west-2.amazonaws.com/sector_space_Scotland.html) can be used to explore the structure of the network (the industry that each node refers to and who are its neighbours - the industries that it is connected with and might be able to diversify into).
+We present this industry space in [@fig:sector_space], where each node represents an industry, the size of the nodes captures their level of employment in Scotland according to BRES and their colour the level of exposure to Covid-19 in January 2021. As we pointed out in Section III, this chaart only includes the strongest connections between sectors in order to simplify the visualisation. [**The interactive version of the chart**](https://scotland-figures.s3.eu-west-2.amazonaws.com/sector_space_Scotland.html) can be used to explore the structure of the network (the industry that each node refers to and who are its neighbours - the industries that it is connected with and might be able to diversify into).
 
 The figure illustrates some of the diversification opportunities / challenges for sectors that are highly exposed to Covid-19:
 
@@ -133,7 +133,7 @@ This observation is further confirmed by the correlation matrix in [@fig:corr_ta
 * We note that the direction of the correlation coefficients between our secondary variables and a non-normalised claimant count rate capturing the rate of the workforce claiming unemployment benefits *irrespective of the situation before the pandemic* go in the opposite direction and are more weakly correlated with measures of exposure to Covid-19. 
 
 <!-- ![Scottish sector space](scotland/png/correlation_table.png){#fig:corr_tab} -->
-<div class=altair s3_path="correlation_table.json" static_path="scotland/png/correlation_table.png" id="fig:corr_tab">Correlation matrix includinf claimant count rates, secondary data and measures of exposure to Covid-19 based on our analysis.
+<div class=altair s3_path="correlation_table.json" static_path="scotland/png/correlation_table.png" id="fig:corr_tab">Correlation matrix including claimant count rates, secondary data and measures of exposure to Covid-19 based on our analysis.
 </div>
 
 The analysis above has highlighted the complexity of the interrelationships between our variables: wealthy and more educated council areas have experienced bigger increases in claimant counts compared to a pre-pandemic baseline. They appear to be somewhat more exposed to Covid-19 but in sectors that may be able to diversify into other industries less exposed to the pandemic. We incorporate all this information into a linear model where we regress our outcome variables (claimant counts and normalised claimant counts any given month) on our measures of exposure to Covid-19 (both in the present month and lagged using the average of variables in the previous month), other variables capturing local economic conditions such as employment rate, share of population with tertiary education, economic complexity and council area fixed effects to capture unobserved sources of heterogeneity. In [@fig:regression] we present the regression coefficients between outcomes and measures of exposure after adjusting for covariates as together with their confidence intervals.
@@ -158,7 +158,9 @@ We note that the estimates above are experimental and developed for illustrative
 
 This caveat is underscored by a comparison between predicted values for claimant count rates (with and without pre-Covid-19 normalisation) and actuals released by ONS after we performed our initial analysis. [@fig:predict_comparison] compares predicted and actual values by claimant count measure and predictor, showing that although actuals and predicted value fluctuate in the same direction, our model tends to underestimate normalised claimant count rates in January 2021, perhaps as a consequence of seasonal effects & the Christmas lockdown. It is worth noting that it might be possible to incorporate some of those variables in future analyses in order to improve the accuracy of their predictions.
 
-![Comparison between predicted and actual claimant count statistics focusing on claimant count rates (left chart) and normalised claimant count rates (right chart)](scotland/png//prediction_comparison.png){#fig:predict_comparison]
+<div class=altair static_path="scotland/png//prediction_comparison.png" id="@fig:predict_comparison">Comparison between predicted and actual claimant count statistics focusing on claimant count rates (left chart) and normalised claimant count rates (right chart)
+</div>
+
 
 ## 2. Firm-level results
 

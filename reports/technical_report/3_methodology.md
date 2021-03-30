@@ -1,4 +1,4 @@
-# 3. Data sources and methodology
+# III. Data sources and methodology
 
 This section describes the data we have collected and the methods we have deployed in its analysis in order to answer the following questions:
 
@@ -15,13 +15,28 @@ At the same time, business websites are hard to use for longitudinal analyses be
 
 Our prior is that some of these limitations can be addressed by combining business website data with other sources:
 
-1. We can use Google Search trend data queried with the names of products and services that businesses sell (extracted from their business descriptions) to build a longitudinal picture of exposure to Covid-19. We can also extract social media (Twitter) profiles from business websites and use them to collect their social media feeds in order to generate more regularly updated measures of their activity. 
-2. We can combine measures of sectoral exposure to Covid-19 based on the text from business websites with official data to estimate the share of workorce in local economies that is exposed to Covid-19. This is similar to the approach in [@del2020supply, @mcintyre2020vulnerability, @enenkel2020cities] but with the advantage of relying on data-driven measures of sectoral exposure to Covid-19 derived from search trends, instead of ex-ante expert assessments or irregularly, low-granularity sector exposure data.
-3. We can use the text in business websites to generate maps of "sectoral proximity" helping us to identify opportunities for industrial diversification into markets that are less exposed to Covid-19. We can use the results to rank the position of different sectors in terms of their ability to diversify away from Covid-19, and combine this with official data to measure the extent to which different local economies have large shares of their workforce employed in sectors that are highly exposed to Covid-19 and have limited opportunities to diversify away from it.
-4. We can combine business website information with the business registry in order to track business outcomes (such as business failure) and explore opportunities to "nowcast" them using their text and Covid-19 notices as predictors (the idea being that there may be some signal about a business' outcomes in the text that describes current behaviours in response to the pandemic). 
+1. We can use Google Search trend data queried with the names of products and services that businesses sell (extracted from their business descriptions) to build a longitudinal picture of economic exposure to Covid-19. Our assumption here is that the evolution of search interest acts as a proxy for demand, and that if a good or service sees a strong drop in demand compared to a pre-pandemic baseline, this indicates that it is economically exposed to Covid-19.
+2. We can also extract social media (Twitter) profiles from business websites and use them to collect their social media feeds in order to generate more regularly updated measures of their activity. 
+3. We can combine measures of sectoral exposure to Covid-19 based on the text from business websites with official data to estimate the share of workorce in local economies that is exposed to Covid-19. This is similar to the approach in [@del2020supply, @mcintyre2020vulnerability, @enenkel2020cities] but with the advantage of relying on data-driven measures of sectoral exposure to Covid-19 derived from search trends, instead of ex-ante expert assessments or irregularly, low-granularity sector exposure data.
+4. We can use the text in business websites to generate maps of "sectoral proximity" helping us to identify opportunities for industrial diversification into markets that are less exposed to Covid-19. We can use the results to rank the position of different sectors in terms of their ability to diversify away from Covid-19, and combine this with official data to measure the extent to which different local economies have large shares of their workforce employed in sectors that are highly exposed to Covid-19 and have limited opportunities to diversify away from it.
+5. We can combine business website information with the business registry in order to track business outcomes (such as business failure) and explore opportunities to "nowcast" them using their text and Covid-19 notices as predictors (the idea being that there may be some signal about a business' outcomes in the text that describes current behaviours in response to the pandemic). 
 
-[@Fig:pipeline] summarises our approach.
+[@Fig:pipeline] summarises our approach and [@tbl:data_sources] the data sources we have used.
 
+|Data source     | Provider | Function                    |
+|----------------|-----------|-----------------------------|
+|Business website descriptions| Glass.ai | Build industry vocabularies and extract Twitter ids from them; Measure industry semantic similarities|
+| Covid-19 notices | Glass.ai | Analyse business responses to Covid-19 |
+| Google Search trends | Google | Proxy demand for products and services |
+| Business tweeting activity | Twitter | Measure business communications about Covid 19|
+| Business Register Employment Survey | ONS | Measure shares of local employment in sectors exposed to Covid-19 and calculate Economic Complexity Index |
+| Claimant count data | ONS | Build proxies for economic impact of Covid-19 |
+| Annual Survey of Hours and Earnings | ONS | Create local contextual indicators (annual gross median salary) |
+| Annual Population Survey | ONS | Create local contextual indicators (employment and activity rate, levels of education in the workforce)|
+| Google Mobility data | Google | Create external validation indicator (Mobility in different types of area)  |
+| Covid-19 incidence data | data.gov.uk | Create external validation indicator (severity of Covid-19)|
+: Summary of data sources. {#tbl:data_sources}
+ 
 ![Summary of our approach.](pipeline_1.png){#fig:pipeline}
 
 ## 2. Data sources
@@ -46,7 +61,7 @@ The SIC code (sector) of a notice is obtained by linking Glass to Companies hous
 
 Google Search Trends is a Google service that provides aggregate information about the level of Google Search user interest in different search terms, which could be understood as a proxy for the subjects (including products and services) that those terms refer to. Google Search Trends has been extensively used in scholarly research. Some notable examples include its use to nowcast economic indicators [@choi2012predicting], to measure the impact of racial animus in US presidential elections [@stephens2014cost] and to forecast the incidence of influenza in the USA [@dugas2013influenza] \(this application also demonstrated its flaws as a data source when changes in user behaviour degraded the performance of searching for flu-related terms as a predictor of flu [@lazer2014parable]). More recently, journalists have used Google Search Trends to [measure Covid-19 impact on consumer lifestyle](https://www.economist.com/graphic-detail/2020/08/08/covid-19-seems-to-have-changed-lifestyles-for-good).
 
-We collect search volume data for a set of keywords extracted from business websites using the procedure described in Section 3.b. In order to query the Google Search API we rely on [GTAB](https://github.com/epfl-dlab/GoogleTrendsAnchorBank) (Google Search Trends Anchorbank), a Python package that generates, for a selected period, a "bank" of anchor terms with a range of popularities that is then used to calibrate search volumes for all keywords of interest subsequently queried according to a common scale [@west2020calibration]. We extract search trend data for UK searches in the period between 1 Jan 2019 and 1 February 2021 (we will use the 2019 data to normalise search volumes against a pre-pandemic benchmark). 
+We collect search volume data for a set of keywords extracted from business websites using the procedure described below. In order to query the Google Search API we rely on [GTAB](https://github.com/epfl-dlab/GoogleTrendsAnchorBank) (Google Search Trends Anchorbank), a Python package that generates, for a selected period, a "bank" of anchor terms with a range of popularities that is then used to calibrate search volumes for all keywords of interest subsequently queried according to a common scale [@west2020calibration]. We extract search trend data for UK searches in the period between 1 Jan 2019 and 1 February 2021 (we will use the 2019 data to normalise search volumes against a pre-pandemic benchmark). 
 
 ### c. Twitter {#sec:twitter_method}
 
@@ -175,6 +190,8 @@ We extract normalised search volumes for keywords in industry vocabularies from 
 4. Rescale 2020 and 2021 normalised keyword search volumes by the normalised search volumes in equivalent 2019 months in order to capture deviations from a pre-Covid-19 baseline and account for seasonality in searches (i.e. the fact that people are more likely to search for information about air transport when they are planning their holidays at the beginning of the year, or for information about sports when a tournament starts).
 5. Calculate the average of 2019-rescaled keyword search volumes in a Division weighted by the share of Division's searches accounted by that keyword. 
 6. The procedure above yields a single monthly score for each SIC division capturing the extent to which search trends about keywords related to it are higher or lower than the pre-Covid 19 average. We change the sign of the score and quantize this series into deciles: we label sectors in the highest deciles as "highly exposed to Covid-19" (i.e. the weighted search volumes for their queries are much lower than the pre-Covid-19 baseline) and generally focus on them through our analysis.
+
+It is important to highlight that the evolution of search volumes for a term may not always reflect changes in demand for related products and services, but a change in interest for example if the item has become newsworthy. By creating industry vocabularies including multiple terms that we average into indicators of exposure to Covid-19, we aim to increase the robustness of our results to such outliers. 
 
 ### d. Calculating sectoral diversification options
 

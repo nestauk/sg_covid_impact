@@ -6,6 +6,7 @@ author:
 	- "Juan Mateos-Garcia"
 date:
 	- 9 February 2021
+fontfamily: times
 figPrefix:
   - "figure"
   - "figures"
